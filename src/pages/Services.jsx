@@ -174,7 +174,7 @@ const ServiceManagementCard = ({ service, index, onView }) => (
 
 export default function Services() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('card');
+  const [viewMode, setViewMode] = useState('table');
   const [selectedService, setSelectedService] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
