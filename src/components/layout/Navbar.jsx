@@ -1,0 +1,141 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Menu, 
+  X, 
+  User, 
+  ChevronDown, 
+  Settings, 
+  LogOut,
+} from 'lucide-react';
+
+const Navbar = ({
+  toggleSidebar,
+  isMobile,
+  sidebarOpen,
+  isDesktopSidebarExpanded,
+}) => {
+  const [openDropdown, setOpenDropdown] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    navigate('/login');
+  };
+
+  const isSidebarOpen = isMobile ? sidebarOpen : isDesktopSidebarExpanded;
+
+  return (
+    <>
+      <nav className="sticky top-0 z-40 h-16 bg-white shadow-md border-b border-gray-200">
+        <div className="px-4 h-full">
+          <div className="flex items-center justify-between h-full">
+
+            {/* Left section */}
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={toggleSidebar}
+                className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 focus:outline-none flex-shrink-0
+                  ${isSidebarOpen ? 'text-gray-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+                aria-label="Toggle menu"
+              >
+                {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate('/dashboard')}
+                className="flex items-center gap-2 rounded-lg transition-opacity duration-200 hover:opacity-90 focus:outline-none"
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md">
+                  <span className="text-white font-bold text-sm">FF</span>
+                </div>
+                <div>
+                  <span className="text-xl font-bold text-gray-800 tracking-tight">
+                    FinFiler<span className="font-light text-gray-600">Admin</span>
+                  </span>
+                </div>
+              </button>
+            </div>
+
+            {/* Right section - User Menu */}
+            <div className="relative">
+              <button
+                onClick={() => setOpenDropdown(!openDropdown)}
+                className="flex items-center space-x-3 p-1.5 pr-3 rounded-lg hover:bg-gray-100 transition-all duration-200 group"
+              >
+                {/* Avatar */}
+                <div className="relative">
+                  <div className="w-9 h-9 rounded-lg overflow-hidden flex items-center justify-center shadow-md bg-gradient-to-br from-blue-500 to-indigo-600">
+                    <span className="text-white font-bold text-sm">A</span>
+                  </div>
+                  {/* Online dot */}
+                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-white rounded-full"></div>
+                </div>
+
+                <div className="hidden md:block text-left">
+                  <p className="text-sm font-semibold text-gray-800">
+                    Admin User
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Administrator
+                  </p>
+                </div>
+
+                <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors hidden md:block" />
+              </button>
+
+              {/* Dropdown Menu */}
+              {openDropdown && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setOpenDropdown(false)} />
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50">
+                    {/* Mobile user info */}
+                    <div className="md:hidden p-4 border-b border-gray-200 bg-gray-50 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                        <span className="text-white font-bold">A</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800">Admin User</p>
+                        <p className="text-xs text-gray-500">Administrator</p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => { setOpenDropdown(false); navigate('/profile'); }}
+                      className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-3"
+                    >
+                      <User className="w-4 h-4 text-gray-500" />
+                      My Profile
+                    </button>
+
+                    <button
+                      onClick={() => { setOpenDropdown(false); navigate('/settings'); }}
+                      className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-3"
+                    >
+                      <Settings className="w-4 h-4 text-gray-500" />
+                      Settings
+                    </button>
+
+                    <div className="border-t border-gray-200 my-1"></div>
+
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+    </>
+  );
+};
+
+export default Navbar;
