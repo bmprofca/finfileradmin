@@ -1,7 +1,6 @@
 // src/contexts/ToastContext.jsx
 import React, { createContext, useContext, useRef } from 'react';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import toast, { Toaster } from 'react-hot-toast';
 
 const ToastContext = createContext();
 
@@ -14,73 +13,35 @@ export const useToast = () => {
 };
 
 export const ToastProvider = ({ children }) => {
-  const toastIdRef = useRef(null);
-
   const showToast = {
     success: (message, options = {}) => {
-      toast.success(message, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        ...options,
-      });
+      toast.success(message, options);
     },
     
     error: (message, options = {}) => {
-      toast.error(message, {
-        position: "top-right",
-        autoClose: 4000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        ...options,
-      });
+      toast.error(message, options);
     },
     
     info: (message, options = {}) => {
-      toast.info(message, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        ...options,
-      });
+      toast(message, { icon: 'ℹ️', ...options });
     },
     
     warning: (message, options = {}) => {
-      toast.warning(message, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        ...options,
-      });
+      toast(message, { icon: '⚠️', ...options });
     },
 
     loading: (message, options = {}) => {
-      toastIdRef.current = toast.loading(message, {
-        position: "top-right",
-        ...options,
-      });
-      return toastIdRef.current;
+      return toast.loading(message, options);
     },
 
     update: (toastId, type, message, options = {}) => {
-      toast.update(toastId, {
-        render: message,
-        type: type,
-        isLoading: false,
-        autoClose: 3000,
-        ...options,
-      });
+      if (type === 'success') {
+        toast.success(message, { id: toastId, ...options });
+      } else if (type === 'error') {
+        toast.error(message, { id: toastId, ...options });
+      } else {
+        toast(message, { id: toastId, ...options });
+      }
     },
 
     dismiss: (toastId) => {
@@ -91,18 +52,12 @@ export const ToastProvider = ({ children }) => {
   return (
     <ToastContext.Provider value={showToast}>
       {children}
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        style={{ zIndex: 9999 }}
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          duration: 3000,
+          style: { zIndex: 9999 },
+        }} 
       />
     </ToastContext.Provider>
   );

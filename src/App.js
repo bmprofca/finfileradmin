@@ -2,8 +2,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
-import { ToastContainer } from 'react-toastify'; 
-import 'react-toastify/dist/ReactToastify.css';
+
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
@@ -22,19 +21,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <ToastProvider>
-          {/* Add ToastContainer for react-toastify */}
-          <ToastContainer 
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-          />
+
           
           <Routes>
             {/* Public Routes */}
