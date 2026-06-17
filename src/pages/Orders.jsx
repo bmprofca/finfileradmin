@@ -73,15 +73,15 @@ const StaffCheckboxList = ({ allStaff, selectedUsernames, onChange }) => (
   </div>
 );
 
-/* ─── Detail Row ─── */
-const DetailRow = ({ icon: Icon, label, value }) => (
-  <div className="flex items-start gap-3 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
-    <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
-      <Icon size={16} className="text-indigo-500 dark:text-indigo-400" />
+/* ─── Info Item ─── */
+const InfoItem = ({ icon: Icon, label, value }) => (
+  <div className="flex items-start gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
+    <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600">
+      <Icon size={14} className="text-indigo-500 dark:text-indigo-400" />
     </div>
     <div className="min-w-0 flex-1">
-      <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{label}</p>
-      <div className="text-sm font-medium text-gray-800 dark:text-gray-200 mt-0.5 break-words">{value}</div>
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 leading-none mb-1">{label}</div>
+      <div className="text-sm font-medium text-gray-800 dark:text-gray-100 leading-snug break-words">{value || 'N/A'}</div>
     </div>
   </div>
 );
@@ -92,91 +92,101 @@ const ViewOrderModal = ({ order, onClose, onAssign, onEditStaff, onRemoveStaff }
     isOpen={true}
     onClose={onClose}
     title="Order Details"
-    icon={Eye}
-    size="lg"
+    icon={Briefcase}
+    size="2xl"
+    contentClassName="p-5 space-y-4"
     footer={
       <div className="flex items-center justify-between w-full">
-        {/* Staff actions */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => onAssign(order)}
-            className="px-4 py-2 rounded-xl border border-indigo-200 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/20 text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-all flex items-center gap-2"
-          >
-            <UserPlus size={14} /> Assign
-          </button>
-          <button
-            onClick={() => onEditStaff(order)}
-            className="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center gap-2"
-          >
-            <Users size={14} /> Edit Staff
-          </button>
-          {order.assigned_staff && order.assigned_staff.length > 0 && (
-            <button
-              onClick={() => onRemoveStaff(order)}
-              className="px-4 py-2 rounded-xl border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2"
-            >
-              <UserMinus size={14} /> Remove
-            </button>
-          )}
-        </div>
         <button
           onClick={onClose}
           className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all"
         >
           Close
         </button>
+        {/* Staff actions */}
+        <div className="flex items-center gap-2">
+          {order.assigned_staff && order.assigned_staff.length > 0 && (
+            <button
+              onClick={() => onRemoveStaff(order)}
+              className="px-4 py-2.5 rounded-xl border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2"
+            >
+              <UserMinus size={14} /> Remove
+            </button>
+          )}
+          <button
+            onClick={() => onEditStaff(order)}
+            className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center gap-2"
+          >
+            <Users size={14} /> Edit Staff
+          </button>
+          <button
+            onClick={() => onAssign(order)}
+            className="px-4 py-2.5 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-sm font-semibold text-white hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2"
+          >
+            <UserPlus size={14} /> Assign Staff
+          </button>
+        </div>
       </div>
     }
   >
-    <div className="space-y-1">
-      {/* Header */}
-      <div className="flex items-center gap-4 pb-4 mb-2 border-b dark:border-gray-700">
-        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shrink-0">
-          <Briefcase size={24} />
-        </div>
-        <div>
-          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">{order.name}</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{order.service_name}</p>
-          <div className="mt-1.5 flex items-center gap-2">
-            <StatusBadge status={order.status} />
-            <span className="text-[10px] text-gray-400 dark:text-gray-500 font-mono">ID: {order.order_id}</span>
-          </div>
+    {/* Icon + Name */}
+    <div className="flex items-center gap-4 pb-4 border-b dark:border-gray-700">
+      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-indigo-500/30">
+        <Briefcase size={28} />
+      </div>
+      <div>
+        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{order.name}</h3>
+        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-0.5">{order.service_name}</p>
+        <div className="mt-2 flex gap-2 items-center">
+          <StatusBadge status={order.status} />
+          <span className="text-xs text-gray-500 dark:text-gray-400 font-mono text-[10px]">ID: {order.order_id}</span>
         </div>
       </div>
+    </div>
 
-      <DetailRow icon={Hash}         label="Order ID"   value={order.order_id} />
-      <DetailRow icon={FileText}     label="Order Name" value={order.name} />
-      <DetailRow icon={Tag}          label="Service"    value={order.service_name} />
-      <DetailRow icon={User}         label="Client"     value={order.client_name || order.client_username} />
-      <DetailRow icon={IndianRupee}  label="Fees"       value={`₹${Number(order.fees).toLocaleString()}`} />
-      <DetailRow icon={Briefcase}    label="Status"     value={<StatusBadge status={order.status} />} />
-      <DetailRow icon={Calendar}     label="Created"    value={new Date(order.create_date).toLocaleString()} />
-      <DetailRow
-        icon={Users}
-        label="Assigned Staff"
-        value={
-          order.assigned_staff && order.assigned_staff.length > 0
-            ? (
-              <div className="flex flex-wrap gap-2 mt-1">
-                {order.assigned_staff.map(s => (
-                  <span
-                    key={s.username}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700"
-                  >
-                    <User size={10} /> {s.name}
-                  </span>
-                ))}
-              </div>
-            )
-            : <span className="text-gray-400 dark:text-gray-500 italic">No staff assigned</span>
-        }
-      />
+    {/* Info Grid */}
+    <div>
+      <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+        <FileText className="text-indigo-500 dark:text-indigo-400" size={15} /> General & Financial Details
+      </h4>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <InfoItem icon={Hash}         label="Order ID"   value={order.order_id} />
+        <InfoItem icon={FileText}     label="Order Name" value={order.name} />
+        <InfoItem icon={Tag}          label="Service"    value={order.service_name} />
+        <InfoItem icon={User}         label="Client"     value={order.client_name || order.client_username} />
+        <InfoItem icon={IndianRupee}  label="Fees"       value={`₹${Number(order.fees).toLocaleString()}`} />
+        <InfoItem icon={Briefcase}    label="Status"     value={<StatusBadge status={order.status} />} />
+        <InfoItem icon={Calendar}     label="Created"    value={new Date(order.create_date).toLocaleString()} />
+      </div>
+    </div>
+
+    {/* Staff Grid */}
+    <div>
+      <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+        <Users className="text-indigo-500 dark:text-indigo-400" size={15} /> Assigned Staff
+      </h4>
+      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-3">
+        {order.assigned_staff && order.assigned_staff.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {order.assigned_staff.map(s => (
+              <span
+                key={s.username}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white text-indigo-700 border border-gray-200 shadow-sm dark:bg-gray-800 dark:text-indigo-300 dark:border-gray-700"
+              >
+                <User size={12} className="text-indigo-500" /> {s.name}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <span className="text-sm text-gray-500 dark:text-gray-400 italic">No staff currently assigned to this order.</span>
+        )}
+      </div>
     </div>
   </Modal>
 );
 
 /* ─── Order Card ─── */
-const OrderCard = ({ order, index, getActions, activeMenuId, setActiveMenuId, onClick }) => (
+const OrderCard = ({ order, index, getActions, onClick }) => (
   <ManagementCard
     delay={index * 0.05}
     accent="indigo"
@@ -192,8 +202,6 @@ const OrderCard = ({ order, index, getActions, activeMenuId, setActiveMenuId, on
     badge={<StatusBadge status={order.status} />}
     menuId={`order-card-${order.order_id}`}
     actions={getActions ? getActions(order) : undefined}
-    activeId={activeMenuId}
-    onToggle={setActiveMenuId}
     footer={
       <div className="flex items-center justify-between w-full text-xs text-gray-500 dark:text-gray-400">
         <span className="flex items-center gap-1">
@@ -231,7 +239,6 @@ export default function Orders() {
   const [viewMode, setViewMode]       = useState('table');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
-  const [activeMenuId, setActiveMenuId] = useState(null);
 
   // Staff
   const [allStaff, setAllStaff] = useState([]);
@@ -288,7 +295,6 @@ export default function Orders() {
   const openDetailModal = (order) => {
     setSelectedOrder(order);
     setDetailModalOpen(true);
-    setActiveMenuId(null);
   };
 
   const openAssignModal = (order) => {
@@ -296,7 +302,6 @@ export default function Orders() {
     setSelectedStaffUsernames([]);
     setDetailModalOpen(false);
     setAssignModalOpen(true);
-    setActiveMenuId(null);
   };
 
   const openEditStaffModal = (order) => {
@@ -304,7 +309,6 @@ export default function Orders() {
     setSelectedStaffUsernames(order.assigned_staff ? order.assigned_staff.map(s => s.username) : []);
     setDetailModalOpen(false);
     setEditStaffModalOpen(true);
-    setActiveMenuId(null);
   };
 
   const openRemoveStaffModal = (order) => {
@@ -312,7 +316,6 @@ export default function Orders() {
     setSelectedStaffUsernames([]);
     setDetailModalOpen(false);
     setRemoveStaffModalOpen(true);
-    setActiveMenuId(null);
   };
 
   /* ─── API Handlers ─── */
@@ -533,8 +536,6 @@ export default function Orders() {
                     rowKey="order_id"
                     accent="indigo"
                     getActions={getActions}
-                    activeId={activeMenuId}
-                    onToggleAction={setActiveMenuId}
                     onRowClick={(row) => openDetailModal(row)}
                   />
                 )}
@@ -549,8 +550,6 @@ export default function Orders() {
                           order={order}
                           index={index}
                           getActions={getActions}
-                          activeMenuId={activeMenuId}
-                          setActiveMenuId={setActiveMenuId}
                           onClick={openDetailModal}
                         />
                       ))}
