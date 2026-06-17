@@ -1,7 +1,21 @@
 import { useEffect } from 'react';
 import Button from './Button';
+import { X } from 'lucide-react';
 
-const Modal = ({ isOpen, onClose, title, children, onConfirm, confirmText = 'Confirm' }) => {
+
+const Modal = ({ isOpen, onClose, title, icon: Icon, children, onConfirm, confirmText = 'Confirm', footer, size = 'md', className = '', contentClassName = 'p-4' }) => {
+  const sizeClasses = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+    '2xl': 'max-w-2xl',
+    '3xl': 'max-w-3xl',
+    '4xl': 'max-w-4xl',
+    '5xl': 'max-w-5xl',
+    full: 'max-w-full',
+  };
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -17,22 +31,34 @@ const Modal = ({ isOpen, onClose, title, children, onConfirm, confirmText = 'Con
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
-      <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 z-10 animate-fade-in">
-        <div className="flex justify-between items-center p-4 border-b">
-          <h3 className="text-xl font-semibold">{title}</h3>
+      <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
+      <div className={`relative bg-white rounded-lg shadow-xl w-full mx-4 z-10 animate-fade-in flex flex-col max-h-[90vh] ${sizeClasses[size] || sizeClasses.md} ${className}`}>
+        {/* Fixed Header */}
+        <div className="flex justify-between items-center p-4 border-b border-gray-100 shrink-0 bg-white rounded-t-lg">
+          <h3 className="text-lg font-bold flex items-center gap-2 text-slate-800">
+            {Icon && <Icon size={20} className="text-emerald-700" />}
+            {title}
+          </h3>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-2xl"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
           >
-            ×
+            <X size={20} />
           </button>
         </div>
-        <div className="p-4">
+        
+        {/* Scrollable Body */}
+        <div className={`overflow-y-auto flex-1 custom-scrollbar ${contentClassName}`}>
           {children}
         </div>
-        {onConfirm && (
-          <div className="flex justify-end gap-2 p-4 border-t">
+
+        {/* Fixed Footer */}
+        {footer ? (
+          <div className="p-4 border-t border-gray-100 shrink-0 bg-gray-50 rounded-b-lg">
+            {footer}
+          </div>
+        ) : onConfirm ? (
+          <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-100 shrink-0 bg-gray-50 rounded-b-lg">
             <Button variant="secondary" onClick={onClose}>
               Cancel
             </Button>
@@ -40,7 +66,7 @@ const Modal = ({ isOpen, onClose, title, children, onConfirm, confirmText = 'Con
               {confirmText}
             </Button>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

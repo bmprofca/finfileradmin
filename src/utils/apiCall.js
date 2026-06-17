@@ -27,9 +27,9 @@ export const apiCall = async (endpoint, method = 'GET', body = null) => {
     headers['Content-Type'] = 'application/json';
   }
 
-  // Changed: Send token as header (not Bearer)
+  // Send token as Authorization Bearer header
   if (token) {
-    headers['token'] = token;
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
   if (username) {

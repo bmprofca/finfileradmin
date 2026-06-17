@@ -1,26 +1,19 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Briefcase, Plus, FileText, CheckCircle, XCircle,
-  Search, X, Eye, DollarSign, Users,
+  Search, X, Eye, DollarSign, Users, Trash2, Edit
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementCard from '../components/common/ManagementCard';
 import ManagementGrid from '../components/common/ManagementGrid';
 import ManagementTable from '../components/common/ManagementTable';
 import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
 import Button from '../components/common/Button';
-import ModalScrollLock from '../components/common/ModalScrollLock';
-
-// ─── Dummy Data ───────────────────────────────────────────────────────────────
-
-const dummyServices = [
-  { id: 1, name: 'Personal Tax Filing', description: 'Standard 1040 preparation and electronic filing.', rate: '$150', clients: 120, status: 'Active', category: 'Individual', turnaround: '3–5 business days' },
-  { id: 2, name: 'Corporate Tax Return', description: 'Form 1120/1120S for C-Corps and S-Corps.', rate: '$800', clients: 45, status: 'Active', category: 'Business', turnaround: '7–10 business days' },
-  { id: 3, name: 'Audit Defense', description: 'Representation and support during IRS audits.', rate: '$250/hr', clients: 8, status: 'Active', category: 'Individual', turnaround: 'Ongoing' },
-  { id: 4, name: 'Bookkeeping', description: 'Monthly reconciliation and financial reporting.', rate: '$300/mo', clients: 60, status: 'Inactive', category: 'Business', turnaround: 'Monthly' },
-  { id: 5, name: 'Tax Consultation', description: '1-on-1 strategy sessions for tax planning.', rate: '$100/hr', clients: 32, status: 'Active', category: 'Individual', turnaround: '1 business day' },
-];
+import Modal from '../components/common/Modal';
+import ServiceFormModal from '../components/common/ServiceFormModal';
+import { apiCall } from '../utils/apiCall';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -36,18 +29,21 @@ const backdropVariants = {
   exit: { opacity: 0 },
 };
 
-const ServiceStatusBadge = ({ status }) => (
-  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${status === 'Active'
-      ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-      : 'bg-gray-100 text-gray-600 border-gray-200'
-    }`}>
-    {status === 'Active'
-      ? <CheckCircle size={10} />
-      : <XCircle size={10} />
-    }
-    {status}
-  </span>
-);
+const ServiceStatusBadge = ({ status }) => {
+  const isActive = status === 1 || status === 'Active';
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${isActive
+        ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+        : 'bg-gray-100 text-gray-600 border-gray-200'
+      }`}>
+      {isActive
+        ? <CheckCircle size={10} />
+        : <XCircle size={10} />
+      }
+      {isActive ? 'Active' : 'Inactive'}
+    </span>
+  );
+};
 
 const InfoItem = ({ icon: Icon, label, value }) => (
   <div className="flex items-start gap-2 rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100 px-3 py-2">
@@ -64,82 +60,111 @@ const InfoItem = ({ icon: Icon, label, value }) => (
 // ─── View Service Modal ───────────────────────────────────────────────────────
 
 const ViewServiceModal = ({ service, onClose }) => (
-  <motion.div
-    variants={backdropVariants} initial="hidden" animate="visible" exit="exit"
-    className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-    onClick={onClose}
-  >
-    <ModalScrollLock />
-    <motion.div
-      variants={modalVariants} initial="hidden" animate="visible" exit="exit"
-      className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden"
-      onClick={(e) => e.stopPropagation()}
-    >
-      {/* Header */}
-      <div className="shrink-0 flex justify-between items-center p-5 border-b bg-white rounded-t-xl">
-        <h2 className="text-lg font-bold flex items-center gap-2 text-slate-800">
-          <Briefcase className="text-emerald-500" size={20} /> Service Details
-        </h2>
-        <button onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition-all shadow-sm hover:shadow-md bg-white/50 border border-slate-100">
-          <X size={18} />
-        </button>
-      </div>
-
-      {/* Body */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
-        {/* Icon + Name */}
-        <div className="flex items-center gap-4 pb-4 border-b">
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shrink-0">
-            <Briefcase size={28} />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-gray-800">{service.name}</h3>
-            <p className="text-sm text-gray-500 mt-0.5">{service.category}</p>
-            <div className="mt-1.5">
-              <ServiceStatusBadge status={service.status} />
-            </div>
-          </div>
-        </div>
-
-        {/* Description */}
-        <div className="p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-100">
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Description</p>
-          <p className="text-sm text-gray-700">{service.description}</p>
-        </div>
-
-        {/* Info Grid */}
-        <div>
-          <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <FileText className="text-emerald-500" size={15} /> Service Information
-          </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <InfoItem icon={Briefcase} label="Service Name" value={service.name} />
-            <InfoItem icon={DollarSign} label="Rate" value={service.rate} />
-            <InfoItem icon={Users} label="Active Clients" value={`${service.clients} clients`} />
-            <InfoItem icon={CheckCircle} label="Status" value={service.status} />
-            <InfoItem icon={FileText} label="Category" value={service.category} />
-            <InfoItem icon={FileText} label="Turnaround" value={service.turnaround} />
-          </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div className="flex items-center justify-end gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4 shrink-0">
+  <Modal 
+    isOpen={true} 
+    onClose={onClose} 
+    title="Service Details"
+    icon={Briefcase}
+    size="2xl"
+    contentClassName="p-5 space-y-4"
+    footer={
+      <div className="flex items-center justify-end">
         <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all">
           Close
         </button>
       </div>
-    </motion.div>
-  </motion.div>
+    }
+  >
+    {/* Icon + Name */}
+    <div className="flex items-center gap-4 pb-4 border-b">
+      {service.image ? (
+        <img src={service.image} alt={service.name} className="w-16 h-16 rounded-xl object-cover" />
+      ) : (
+        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shrink-0">
+          <Briefcase size={28} />
+        </div>
+      )}
+      <div>
+        <h3 className="text-lg font-bold text-gray-800">{service.name}</h3>
+        <p className="text-sm text-gray-500 mt-0.5">{service.type}</p>
+        <div className="mt-1.5 flex gap-2 items-center">
+          <ServiceStatusBadge status={service.status} />
+          <span className="text-xs text-gray-500 font-mono text-[10px]">ID: {service.service_id}</span>
+        </div>
+      </div>
+    </div>
+
+    {/* Description */}
+    <div className="p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-100">
+      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Description</p>
+      <p className="text-sm text-gray-700">{service.description || "No description provided."}</p>
+    </div>
+
+    {/* Info Grid */}
+    <div>
+      <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+        <FileText className="text-emerald-500" size={15} /> Financial & General Details
+      </h4>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <InfoItem icon={Briefcase} label="Service Name" value={service.name} />
+        <InfoItem icon={DollarSign} label="Base Price" value={`₹${service.base_price}`} />
+        <InfoItem icon={DollarSign} label="Tax Rate / Value" value={`${service.tax_rate}% / ₹${service.tax_value}`} />
+        <InfoItem icon={DollarSign} label="Total Fees" value={`₹${service.total_fees}`} />
+        <InfoItem icon={DollarSign} label="Discount" value={`${service.discount_value} (${service.discount_percentage}% ${service.discount_type})`} />
+        <InfoItem icon={DollarSign} label="Final Fees" value={`₹${service.fees}`} />
+        <InfoItem icon={FileText} label="Category" value={service.type} />
+        <InfoItem icon={FileText} label="Delivery Time" value={service.delivery_time} />
+      </div>
+    </div>
+
+    {/* Fields and Documents */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <CheckCircle className="text-emerald-500" size={15} /> Fields Requirement
+        </h4>
+        <div className="bg-gray-50 rounded-xl border border-gray-200 p-3 flex flex-wrap gap-2">
+          {service.fields && Object.keys(service.fields).length > 0 ? (
+            Object.entries(service.fields).map(([key, val]) => (
+              <span key={key} className="text-xs px-2 py-1 bg-white border border-gray-200 rounded-md text-gray-600">
+                {key}: <span className={val ? 'text-emerald-600' : 'text-red-600'}>{val ? 'Yes' : 'No'}</span>
+              </span>
+            ))
+          ) : (
+            <span className="text-xs text-gray-500">No specific fields</span>
+          )}
+        </div>
+      </div>
+      <div>
+        <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <FileText className="text-emerald-500" size={15} /> Required Documents
+        </h4>
+        <div className="bg-gray-50 rounded-xl border border-gray-200 p-3 space-y-2">
+          {service.documents && service.documents.length > 0 ? (
+            service.documents.map((doc, idx) => (
+              <div key={idx} className="text-xs bg-white border border-gray-200 rounded-md p-2">
+                <div className="font-semibold text-gray-700">{doc.name} {doc.is_required && <span className="text-red-500">*</span>}</div>
+                <div className="text-gray-500 mt-1">Accepts: {doc.accept_extensions?.join(', ')}</div>
+                {doc.description && <div className="text-gray-400 mt-0.5">{doc.description}</div>}
+              </div>
+            ))
+          ) : (
+            <span className="text-xs text-gray-500">No documents required</span>
+          )}
+        </div>
+      </div>
+    </div>
+
+  </Modal>
 );
 
 // ─── Service Card (Card View) ─────────────────────────────────────────────────
 
-const ServiceManagementCard = ({ service, index, onView }) => (
+const ServiceManagementCard = ({ service, index, onView, onEdit, onDelete }) => (
   <ManagementCard
-    key={service.id}
+    key={service.service_id}
     title={service.name}
-    subtitle={service.rate}
+    subtitle={`₹${service.fees}`}
     icon={<Briefcase className="w-4 h-4" />}
     accent="emerald"
     delay={index * 0.1}
@@ -148,23 +173,21 @@ const ServiceManagementCard = ({ service, index, onView }) => (
     hoverable
     actions={[
       { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(service), className: 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50' },
-      { label: service.status === 'Active' ? 'Deactivate' : 'Activate', onClick: () => { }, className: 'text-gray-600 hover:text-gray-700 hover:bg-gray-50' },
+      { label: 'Edit Service', icon: <Edit size={12} />, onClick: () => onEdit(service), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50' },
+      { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => onDelete(service), className: 'text-red-600 hover:text-red-700 hover:bg-red-50' },
     ]}
-    menuId={`service-card-${service.id}`}
+    menuId={`service-card-${service.service_id}`}
   >
     <div className="py-1.5">
-      <p className="text-sm text-gray-600">{service.description}</p>
+      <p className="text-sm text-gray-600 line-clamp-2">{service.description || "No description."}</p>
     </div>
     <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
       <div className="flex items-center gap-1.5 text-xs text-gray-500">
         <FileText className="w-3.5 h-3.5" />
-        <span>{service.clients} Active Clients</span>
+        <span className="truncate max-w-[120px]">{service.type}</span>
       </div>
       <div className="flex items-center gap-1.5 text-xs">
-        {service.status === 'Active'
-          ? <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
-          : <XCircle className="w-3.5 h-3.5 text-gray-400" />
-        }
+        <span className="text-gray-500">{service.delivery_time}</span>
       </div>
     </div>
   </ManagementCard>
@@ -173,46 +196,121 @@ const ServiceManagementCard = ({ service, index, onView }) => (
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Services() {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('table');
   const [selectedService, setSelectedService] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [editingService, setEditingService] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch Services
+  const fetchServices = async () => {
+    setLoading(true);
+    try {
+      // Pass pagination params if needed, for now just fetch large limit to handle search locally
+      const response = await apiCall('/api/admin/services/list?page_no=1&limit=100');
+      const json = await response.json();
+      if (json.success) {
+        setServices(json.data.services || []);
+      } else {
+        toast.error('Failed to fetch services.');
+      }
+    } catch (error) {
+      toast.error('Error connecting to server.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
 
   const filtered = useMemo(() =>
-    dummyServices.filter((s) =>
-      [s.name, s.category, s.status].some((v) => v?.toLowerCase().includes(searchTerm.toLowerCase()))
+    services.filter((s) =>
+      [s.name, s.type, s.status === 1 ? 'Active' : 'Inactive'].some((v) => v?.toLowerCase().includes(searchTerm.toLowerCase()))
     ),
-    [searchTerm]
+    [services, searchTerm]
   );
 
   const handleView = (service) => {
     setSelectedService(service);
-    setModalOpen(true);
+    setIsViewModalOpen(true);
+  };
+
+  const handleEdit = (service) => {
+    setEditingService(service);
+    setIsFormModalOpen(true);
+  };
+
+  const handleCreateNew = () => {
+    setEditingService(null);
+    setIsFormModalOpen(true);
+  };
+
+  const handleDelete = async (service) => {
+    if (window.confirm(`Are you sure you want to delete ${service.name}?`)) {
+      try {
+        const response = await apiCall('/api/admin/services/delete', 'POST', { service_id: service.service_id });
+        const json = await response.json();
+        if (json.success) {
+          toast.success('Service deleted successfully.');
+          fetchServices();
+        } else {
+          toast.error(json.message || 'Failed to delete service.');
+        }
+      } catch (error) {
+        toast.error('Error connecting to server.');
+      }
+    }
+  };
+
+  const handleFormSubmit = async (formData) => {
+    setIsSubmitting(true);
+    try {
+      const endpoint = editingService ? '/api/admin/services/update' : '/api/admin/services/create';
+      const method = 'POST'; // Assuming POST for both create and update based on prompt payload
+      
+      const response = await apiCall(endpoint, method, formData);
+      const json = await response.json();
+      
+      if (json.success) {
+        toast.success(editingService ? 'Service updated successfully!' : 'Service created successfully!');
+        setIsFormModalOpen(false);
+        fetchServices();
+      } else {
+        toast.error(json.message || 'Operation failed.');
+      }
+    } catch (error) {
+      toast.error('An error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const tableColumns = [
     {
       key: 'name', label: 'Service Name', render: (row) => (
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shrink-0">
-            <Briefcase size={16} />
-          </div>
+          {row.image ? (
+            <img src={row.image} alt="" className="w-9 h-9 rounded-xl object-cover shrink-0" />
+          ) : (
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shrink-0">
+              <Briefcase size={16} />
+            </div>
+          )}
           <div>
             <div className="font-semibold text-gray-800 text-sm">{row.name}</div>
-            <div className="text-xs text-gray-500">{row.category}</div>
+            <div className="text-xs text-gray-500">{row.type}</div>
           </div>
         </div>
       ),
     },
-    { key: 'rate', label: 'Rate' },
-    {
-      key: 'clients', label: 'Active Clients', render: (row) => (
-        <span className="flex items-center gap-1 text-sm text-gray-700">
-          <Users size={12} className="text-emerald-500" /> {row.clients}
-        </span>
-      ),
-    },
-    { key: 'turnaround', label: 'Turnaround' },
+    { key: 'fees', label: 'Final Fees', render: (row) => `₹${row.fees}` },
+    { key: 'delivery_time', label: 'Delivery Time' },
     {
       key: 'status', label: 'Status', render: (row) => <ServiceStatusBadge status={row.status} />,
     },
@@ -220,11 +318,11 @@ export default function Services() {
 
   return (
     <ManagementHub
-      title="Tax Services"
+      title="Services Management"
       description="Manage the services and packages offered to your clients."
       accent="emerald"
       actions={
-        <Button variant="primary" className="flex items-center gap-2 text-sm py-1.5 bg-emerald-600 hover:bg-emerald-700">
+        <Button onClick={handleCreateNew} variant="primary" className="flex items-center gap-2 text-sm py-1.5 bg-emerald-600 hover:bg-emerald-700">
           <Plus size={16} /> Add Service
         </Button>
       }
@@ -264,8 +362,15 @@ export default function Services() {
           </div>
         </motion.div>
 
+        {/* Loading state */}
+        {loading && (
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600"></div>
+          </div>
+        )}
+
         {/* Empty state */}
-        {filtered.length === 0 && (
+        {!loading && filtered.length === 0 && (
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white rounded-xl shadow-xl">
             <Briefcase className="text-gray-300 mx-auto mb-4" size={64} />
             <p className="text-xl text-gray-500">No services found</p>
@@ -274,14 +379,21 @@ export default function Services() {
         )}
 
         {/* Content */}
-        {filtered.length > 0 && (
+        {!loading && filtered.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl bg-white shadow-xl">
             {/* Card View (default) */}
             {viewMode === 'card' && (
               <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4">
                 <AnimatePresence>
                   {filtered.map((service, index) => (
-                    <ServiceManagementCard key={service.id} service={service} index={index} onView={handleView} />
+                    <ServiceManagementCard 
+                      key={service.service_id} 
+                      service={service} 
+                      index={index} 
+                      onView={handleView} 
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                    />
                   ))}
                 </AnimatePresence>
               </ManagementGrid>
@@ -292,11 +404,12 @@ export default function Services() {
               <ManagementTable
                 columns={tableColumns}
                 rows={filtered}
-                rowKey="id"
+                rowKey="service_id"
                 onRowClick={(row) => handleView(row)}
                 getActions={(row) => [
                   { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50' },
-                  { label: row.status === 'Active' ? 'Deactivate' : 'Activate', onClick: () => { }, className: 'text-gray-600 hover:text-gray-700 hover:bg-gray-50' },
+                  { label: 'Edit Service', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50' },
+                  { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDelete(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50' },
                 ]}
                 accent="emerald"
               />
@@ -307,10 +420,22 @@ export default function Services() {
 
       {/* View Service Modal */}
       <AnimatePresence>
-        {modalOpen && selectedService && (
+        {isViewModalOpen && selectedService && (
           <ViewServiceModal
             service={selectedService}
-            onClose={() => { setModalOpen(false); setSelectedService(null); }}
+            onClose={() => { setIsViewModalOpen(false); setSelectedService(null); }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Create/Edit Form Modal */}
+      <AnimatePresence>
+        {isFormModalOpen && (
+          <ServiceFormModal 
+            service={editingService}
+            onClose={() => setIsFormModalOpen(false)}
+            onSubmit={handleFormSubmit}
+            isSubmitting={isSubmitting}
           />
         )}
       </AnimatePresence>
