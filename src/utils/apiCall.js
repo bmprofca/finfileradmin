@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8373";
+const API_BASE = process.env.NODE_ENV === 'production' ? "https://server.finfiler.com" : "http://localhost:8373";
 
 /**
  * Unified API calling utility
