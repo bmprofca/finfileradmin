@@ -10,6 +10,7 @@ import ManagementCard from '../components/common/ManagementCard';
 import ManagementGrid from '../components/common/ManagementGrid';
 import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
 import PaginationComponent from '../components/common/PaginationComponent';
+import Modal from '../components/common/Modal';
 import apiCall from '../utils/apiCall';
 
 const STATUS_COLORS = {
@@ -34,7 +35,7 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const OrderCard = ({ order, index }) => (
+const OrderCard = ({ order, index, getActions, activeMenuId, setActiveMenuId }) => (
   <ManagementCard
     delay={index * 0.05}
     accent="indigo"
@@ -48,6 +49,9 @@ const OrderCard = ({ order, index }) => (
     }
     badge={<StatusBadge status={order.status} />}
     menuId={`order-card-${order.order_id}`}
+    actions={getActions ? getActions(order) : undefined}
+    activeId={activeMenuId}
+    onToggle={setActiveMenuId}
     footer={
       <div className="flex items-center justify-between w-full text-xs text-gray-500 dark:text-gray-400">
         <span className="flex items-center gap-1"><Hash size={10} className="text-indigo-400 dark:text-indigo-500" /> {order.order_id}</span>
@@ -79,7 +83,31 @@ export default function Orders() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
 
+  // Assignment Modal States
+  const [allStaff, setAllStaff] = useState([]);
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedStaffUsernames, setSelectedStaffUsernames] = useState([]);
+  const [savingAssign, setSavingAssign] = useState(false);
+  const [activeMenuId, setActiveMenuId] = useState(null);
+
   const itemsPerPage = 10;
+
+  const fetchAllStaff = async () => {
+    try {
+      const res = await apiCall('/api/admin/staff/list', 'GET');
+      const data = await res.json();
+      if (data.success) {
+        setAllStaff(data.data.staffs);
+      }
+    } catch (error) {
+      console.error('Failed to fetch staff', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllStaff();
+  }, []);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -117,6 +145,39 @@ export default function Orders() {
     { key: 'status', label: 'Status', render: (row) => <StatusBadge status={row.status} /> },
     { key: 'create_date', label: 'Date', render: (row) => new Date(row.create_date).toLocaleDateString() },
   ];
+
+  const getActions = (order) => [
+    {
+      label: 'Manage Staff',
+      icon: Users,
+      onClick: () => {
+        setSelectedOrder(order);
+        setSelectedStaffUsernames(order.assigned_staff ? order.assigned_staff.map(s => s.username) : []);
+        setAssignModalOpen(true);
+        setActiveMenuId(null);
+      }
+    }
+  ];
+
+  const handleAssignSubmit = async () => {
+    if (!selectedOrder) return;
+    setSavingAssign(true);
+    try {
+      const res = await apiCall('/api/admin/orders/assign/update', 'PUT', {
+        order_id: selectedOrder.order_id,
+        staff_usernames: selectedStaffUsernames
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAssignModalOpen(false);
+        fetchOrders();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSavingAssign(false);
+    }
+  };
 
   return (
     <ManagementHub
@@ -189,6 +250,9 @@ export default function Orders() {
                     rows={orders}
                     rowKey="order_id"
                     accent="indigo"
+                    getActions={getActions}
+                    activeId={activeMenuId}
+                    onToggleAction={setActiveMenuId}
                   />
                 )}
 
@@ -197,7 +261,14 @@ export default function Orders() {
                   <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4">
                     <AnimatePresence>
                       {orders.map((order, index) => (
-                        <OrderCard key={order.order_id} order={order} index={index} />
+                        <OrderCard 
+                          key={order.order_id} 
+                          order={order} 
+                          index={index} 
+                          getActions={getActions}
+                          activeMenuId={activeMenuId}
+                          setActiveMenuId={setActiveMenuId}
+                        />
                       ))}
                     </AnimatePresence>
                   </ManagementGrid>
@@ -216,6 +287,43 @@ export default function Orders() {
           )}
         </div>
       </div>
+
+      <Modal
+        isOpen={assignModalOpen}
+        onClose={() => setAssignModalOpen(false)}
+        title={`Assign Staff: ${selectedOrder?.name || selectedOrder?.order_id}`}
+        icon={Users}
+        onConfirm={handleAssignSubmit}
+        confirmText={savingAssign ? "Saving..." : "Save Assignments"}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-500 dark:text-gray-400">Select staff members to assign to this order.</p>
+          <div className="max-h-60 overflow-y-auto space-y-2 border border-gray-100 dark:border-gray-700 rounded-lg p-2 bg-gray-50 dark:bg-gray-900/50">
+            {allStaff.map(staff => (
+              <label key={staff.username} className="flex items-center gap-3 p-3 hover:bg-white dark:hover:bg-gray-800 rounded-lg cursor-pointer transition-colors shadow-sm border border-transparent dark:border-gray-700">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                  checked={selectedStaffUsernames.includes(staff.username)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedStaffUsernames(prev => [...prev, staff.username]);
+                    } else {
+                      setSelectedStaffUsernames(prev => prev.filter(u => u !== staff.username));
+                    }
+                  }}
+                />
+                <div>
+                  <p className="font-medium text-sm text-gray-800 dark:text-gray-200">{staff.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{staff.username} • {staff.email}</p>
+                </div>
+              </label>
+            ))}
+            {allStaff.length === 0 && <p className="text-sm text-gray-500 p-2">No staff members found.</p>}
+          </div>
+        </div>
+      </Modal>
+
     </ManagementHub>
   );
 }

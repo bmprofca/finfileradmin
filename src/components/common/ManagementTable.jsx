@@ -90,8 +90,8 @@ export default function ManagementTable({
       animate={{ opacity: 1, y: 0 }}
       className={joinClasses('overflow-hidden rounded-xl bg-white dark:bg-gray-800 w-full', cardClass, containerClassName, className)}
     >
-      <div className={joinClasses('w-full overflow-x-auto', tableClassName)}>
-        <table className="w-full text-left text-sm text-gray-700 dark:text-gray-300">
+      <div className={joinClasses('w-full', tableClassName)}>
+        <table className="w-full table-fixed text-left text-sm text-gray-700 dark:text-gray-300">
           {showHeader && (
             <thead className={joinClasses('hidden sm:table-header-group bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700/50 dark:to-gray-800/50 text-xs uppercase text-gray-600 dark:text-gray-400', headerClassName)}>
               <tr>
