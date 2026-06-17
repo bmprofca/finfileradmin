@@ -40,10 +40,7 @@ const AdminLogin = () => {
 
   const sendOtp = async (e) => {
     e.preventDefault();
-    if (!mobile) {
-      toast.error("Please enter your mobile number");
-      return;
-    }
+    if (!mobile) { toast.error("Please enter your mobile number"); return; }
     try {
       setLoading(true);
       await auth.sendOtp({ mobile });
@@ -72,10 +69,7 @@ const AdminLogin = () => {
   const verifyLogin = async (e) => {
     e.preventDefault();
     const code = otp.join("");
-    if (code.length < 6) {
-      toast.error("Enter all 6 digits");
-      return;
-    }
+    if (code.length < 6) { toast.error("Enter all 6 digits"); return; }
     try {
       setLoading(true);
       await auth.login({ mobile, otp: code });
@@ -92,377 +86,282 @@ const AdminLogin = () => {
   const step = success ? 3 : otpSent ? 2 : 1;
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
+    <>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes float1 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+        @keyframes float2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+        @keyframes float3 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-16px)} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        
+        .al-input:focus { border-color: #7c3aed !important; background: #fff !important; }
+        .al-otp-digit:focus { border-color: #7c3aed !important; background: #fff !important; }
+        .al-ghost-btn:hover { background: #f9fafb !important; }
+        .al-submit-btn:hover { opacity: 0.92; }
+        .al-submit-btn:active { transform: scale(0.99); }
+        
+        @media (max-width: 768px) {
+          .al-otp-digit { width: 40px !important; height: 48px !important; font-size: 18px !important; }
+          .al-left-panel { min-height: 350px !important; padding: 30px 24px !important; }
+          .al-right-panel { min-height: 450px !important; padding: 30px 24px !important; }
+        }
+        
+        @media (max-width: 640px) {
+          .al-left-panel { display: none !important; }
+          .al-right-panel { min-height: 100vh !important; padding: 32px 24px !important; flex: 1 1 100% !important; }
+          .al-card { border-radius: 16px !important; max-width: 100% !important; }
+          .al-otp-digit { width: 38px !important; height: 46px !important; font-size: 17px !important; }
+          .al-form-title { font-size: 19px !important; }
+        }
+        
+        @media (max-width: 400px) {
+          .al-otp-digit { width: 32px !important; height: 40px !important; font-size: 15px !important; }
+          .al-right-panel { padding: 24px 16px !important; }
+        }
+      `}</style>
 
-        {/* ── Left panel ── */}
-        <div style={styles.left}>
-          <div style={styles.orb1} />
-          <div style={styles.orb2} />
-          <div style={styles.orb3} />
-          <div style={styles.brand}>
-            <div style={styles.logoBadge}>
-              <div style={styles.logoHex}>FF</div>
-              <span style={styles.logoText}>FinFilerAdmin</span>
-            </div>
-            <h1 style={styles.brandH1}>Tax management,<br />reimagined.</h1>
-            <p style={styles.brandP}>
-              A secure control center for compliance, analytics, and financial oversight.
-            </p>
-          </div>
-          <div style={styles.statsGrid}>
-            {[
-              { icon: "$", val: "$42.8K", lbl: "Tax collected" },
-              { icon: "👥", val: "2,847",  lbl: "Active users" },
-              { icon: "📈", val: "98.4%",  lbl: "Compliance rate" },
-              { icon: "📄", val: "12.3K",  lbl: "Filings processed" },
-            ].map((s) => (
-              <div key={s.lbl} style={styles.statCard}>
-                <div style={styles.statIcon}>{s.icon}</div>
-                <div style={styles.statVal}>{s.val}</div>
-                <div style={styles.statLbl}>{s.lbl}</div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-50/90 via-indigo-50/80 to-sky-50/90 px-4 py-6 font-sans">
+        <div className="al-card flex w-full max-w-[1000px] rounded-2xl overflow-hidden shadow-2xl shadow-purple-500/10">
+          
+          {/* ── Left panel ── */}
+          <div className="al-left-panel relative flex-1 overflow-hidden flex flex-col justify-center items-center p-12 min-h-[560px] bg-gradient-to-br from-purple-600 via-indigo-600 to-sky-500">
+            {/* Decorative circles */}
+            <div className="absolute w-[300px] h-[300px] -top-24 -left-24 rounded-full bg-white/10" />
+            <div className="absolute w-[200px] h-[200px] -bottom-16 -right-16 rounded-full bg-white/10" />
+            <div className="absolute w-[100px] h-[100px] bottom-32 left-8 rounded-full bg-white/5" />
+            <div className="absolute w-[80px] h-[80px] top-32 right-8 rounded-full bg-white/5" />
+
+            <div className="relative z-10 flex flex-col items-center text-center w-full max-w-xs">
+              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-2xl font-extrabold text-white mb-4 shadow-lg">
+                FF
               </div>
-            ))}
-          </div>
-          <div style={styles.features}>
-            {[
-              { color: "#7c3aed", text: "Government-grade security & encryption" },
-              { color: "#06b6d4", text: "Real-time tax analytics dashboard" },
-              { color: "#ec4899", text: "Automated compliance reporting" },
-            ].map((f) => (
-              <div key={f.text} style={styles.featRow}>
-                <div style={{ ...styles.featDot, background: f.color }} />
-                <span style={styles.featText}>{f.text}</span>
-              </div>
-            ))}
-            <div style={styles.trustRow}>
-              <div style={styles.avatarStack}>
-                {[
-                  { bg: "#ddd6fe", color: "#5b21b6", initials: "AK" },
-                  { bg: "#fce7f3", color: "#9d174d", initials: "RS" },
-                  { bg: "#cffafe", color: "#0e7490", initials: "MT" },
-                ].map((a, i) => (
-                  <div
-                    key={a.initials}
-                    style={{ ...styles.avatar, background: a.bg, color: a.color, marginLeft: i === 0 ? 0 : -6 }}
-                  >
-                    {a.initials}
+              <h1 className="al-brand-name text-2xl font-bold text-white tracking-tight mb-1.5">
+                FinFiler<span className="font-light">Admin</span>
+              </h1>
+              <p className="al-brand-tagline text-sm text-white/80 mb-10">
+                Tax management, reimagined.
+              </p>
+
+              {/* Illustration */}
+              <div className="relative w-full flex flex-col items-center">
+                {/* Main card */}
+                <div className="w-full max-w-[240px] bg-white/15 backdrop-blur-sm border border-white/25 rounded-2xl p-4 animate-[float2_4s_ease-in-out_infinite]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-white/25 flex items-center justify-center shrink-0 text-lg">
+                      👤
+                    </div>
+                    <div className="flex-1 flex flex-col gap-1.5">
+                      <div className="h-2 rounded-full bg-white/25 w-[85%]" />
+                      <div className="h-2 rounded-full bg-white/25 w-[55%]" />
+                    </div>
                   </div>
-                ))}
+                  <div className="flex gap-1.5 mt-3">
+                    <div className="w-2.5 h-2.5 rounded-full bg-white/90" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-white/90" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-white/35" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-white/35" />
+                  </div>
+                </div>
+
+                {/* Mini cards */}
+                <div className="grid grid-cols-2 gap-2 w-full max-w-[240px] mt-3">
+                  {[
+                    { icon: "📊", label: "Analytics" },
+                    { icon: "✅", label: "Compliance" },
+                    { icon: "🛡️", label: "Security" },
+                    { icon: "📈", label: "Growth" },
+                  ].map((item, i) => (
+                    <div key={i} className="bg-white/12 backdrop-blur-sm border border-white/20 rounded-xl p-3 flex flex-col gap-1.5">
+                      <div className="w-7 h-7 rounded-lg bg-white/25 flex items-center justify-center text-sm">
+                        {item.icon}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <div className="h-1.5 rounded-full bg-white/20 w-full" />
+                        <div className={`h-1.5 rounded-full bg-white/20 ${i % 2 === 0 ? 'w-[60%]' : 'w-[40%]'}`} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Floating badges */}
+                <div className="absolute -top-2 -right-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-3.5 py-2 flex items-center gap-2 animate-[float1_3.5s_ease-in-out_infinite] shadow-lg">
+                  <span className="text-sm">✓</span>
+                  <span className="text-xs text-white font-medium">Compliant</span>
+                </div>
+                <div className="absolute -bottom-2 -left-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-3.5 py-2 flex items-center gap-2 animate-[float3_4s_ease-in-out_infinite_0.5s] shadow-lg">
+                  <span className="text-sm">🔒</span>
+                  <span className="text-xs text-white font-medium">SSL secured</span>
+                </div>
+                <div className="absolute top-20 -right-5 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-3.5 py-2 flex items-center gap-2 animate-[float2_3s_ease-in-out_infinite_1s] shadow-lg">
+                  <span className="text-sm">🔔</span>
+                  <span className="text-xs text-white font-medium">Live alerts</span>
+                </div>
               </div>
-              <span style={styles.trustText}>Trusted by 500+ tax professionals</span>
             </div>
           </div>
-        </div>
 
-        {/* ── Right panel ── */}
-        <div style={styles.right}>
-          <div style={styles.formHeader}>
-            <div style={styles.iconRing}>🛡️</div>
-            <h2 style={styles.formTitle}>
-              {success ? "Access granted" : otpSent ? "Two-factor auth" : "Admin sign in"}
-            </h2>
-            <p style={styles.formSub}>
-              {success
-                ? `Welcome back, ${mobile}`
-                : otpSent
-                ? "Enter the code sent to your phone"
-                : "Secure access to your tax dashboard"}
-            </p>
-          </div>
+          {/* ── Right panel ── */}
+          <div className="al-right-panel flex-1 bg-white flex flex-col p-12 min-h-[560px]">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg shadow-purple-500/20">
+                🛡️
+              </div>
+              <h2 className="al-form-title text-2xl font-bold text-gray-900 mb-1.5">
+                {success ? "Access granted" : otpSent ? "Two-factor auth" : "Admin sign in"}
+              </h2>
+              <p className="text-sm text-gray-500">
+                {success
+                  ? `Welcome back, ${mobile}`
+                  : otpSent
+                    ? "Enter the code sent to your phone"
+                    : "Secure access to your tax dashboard"}
+              </p>
+            </div>
 
-          <div style={styles.pillRow}>
-            {[1, 2, 3].map((n) => (
-              <div key={n} style={{ ...styles.pill, ...(n <= step ? styles.pillActive : {}) }} />
-            ))}
-          </div>
-
-          {/* Step 1 */}
-          {step === 1 && (
-            <form onSubmit={sendOtp} style={styles.form}>
-              <Field icon="📱" label="Mobile number">
-                <input
-                  id="login-mobile"
-                  type="tel"
-                  placeholder="Enter your mobile number"
-                  value={mobile}
-                  onChange={(e) => setMobile(e.target.value.replace(/[^\d+\-\s()]/g, ""))}
-                  required
-                  style={styles.input}
+            {/* Progress pills */}
+            <div className="flex gap-2 justify-center mb-8">
+              {[1, 2, 3].map((n) => (
+                <div
+                  key={n}
+                  className={`h-1.5 rounded-full transition-all duration-500 ${
+                    n <= step ? "bg-gradient-to-r from-purple-600 to-indigo-600 w-12" : "bg-gray-200 w-8"
+                  }`}
                 />
-              </Field>
-              <button type="submit" disabled={loading} style={styles.submitBtn}>
-                {loading ? <Spinner /> : <>Request OTP →</>}
-              </button>
-              <Divider />
-              <p style={styles.secureNote}>🔒 SSL secured · 👁 Access logged</p>
-            </form>
-          )}
-
-          {/* Step 2 */}
-          {step === 2 && (
-            <form onSubmit={verifyLogin} style={styles.form}>
-              <div style={styles.emailChipWrap}>
-                <div style={styles.emailChip}>📱 {mobile}</div>
-                <p style={styles.otpHint}>Enter the 6-digit code we sent you</p>
-              </div>
-              <div style={styles.otpRow}>
-                {otp.map((val, i) => (
-                  <input
-                    key={i}
-                    id={`otp-${i}`}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={val}
-                    onChange={(e) => handleOtpChange(i, e.target.value)}
-                    onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                    onPaste={i === 0 ? handleOtpPaste : undefined}
-                    autoFocus={i === 0}
-                    style={styles.otpDigit}
-                  />
-                ))}
-              </div>
-              <button type="submit" disabled={loading} style={{ ...styles.submitBtn, marginTop: 12 }}>
-                {loading ? <Spinner /> : "Verify & Login"}
-              </button>
-              <div style={styles.backRow}>
-                <button type="button" style={styles.ghostBtn} disabled={loading} onClick={resendOtp}>
-                  ↺ Resend code
-                </button>
-                <button
-                  type="button"
-                  style={styles.ghostBtn}
-                  onClick={() => { setOtpSent(false); setOtp(["", "", "", "", "", ""]); }}
-                >
-                  ← Back
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* Step 3 */}
-          {step === 3 && (
-            <div style={styles.successPanel}>
-              <div style={styles.checkCircle}>
-                <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-                  <circle cx="18" cy="18" r="17" stroke="#d1c9f0" strokeWidth="1" />
-                  <path d="M11 18l5 5 9-10" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-              <h3 style={styles.successTitle}>Verified!</h3>
-              <p style={styles.successSub}>Redirecting to the dashboard...</p>
-              <div style={styles.loadingRow}>
-                <div style={styles.spinnerPurple} /> Loading workspace
-              </div>
+              ))}
             </div>
-          )}
 
-          <div style={styles.securityNote}>🛡️ Secure admin area · All access is monitored</div>
+            {/* Step 1 */}
+            {step === 1 && (
+              <form onSubmit={sendOtp} className="flex flex-col flex-1">
+                <div className="relative mb-4">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base pointer-events-none">📱</span>
+                  <input
+                    className="al-input w-full py-3.5 px-4 pl-12 border-2 border-gray-200 rounded-xl text-sm text-gray-900 bg-gray-50/80 outline-none transition-all duration-200 focus:bg-white focus:border-purple-500"
+                    type="tel"
+                    placeholder="Enter your mobile number"
+                    value={mobile}
+                    onChange={(e) => setMobile(e.target.value.replace(/[^\d+\-\s()]/g, ""))}
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="al-submit-btn w-full py-3.5 rounded-xl border-none cursor-pointer text-sm font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 text-white flex items-center justify-center gap-2 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/25 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {loading ? <Spinner /> : <>📤 Request OTP</>}
+                </button>
+                
+                <div className="flex items-center gap-3 my-4">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <span className="text-xs text-gray-400 whitespace-nowrap">or continue securely</span>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+                
+                <div className="flex items-center justify-center gap-4 text-xs text-gray-400 mt-1">
+                  <span>🔒 SSL secured</span>
+                  <span>·</span>
+                  <span>👁 Access logged</span>
+                </div>
+              </form>
+            )}
+
+            {/* Step 2 */}
+            {step === 2 && (
+              <form onSubmit={verifyLogin} className="flex flex-col flex-1">
+                <div className="text-center mb-5">
+                  <div className="inline-flex items-center gap-2 bg-purple-50 border border-purple-200 rounded-full px-4 py-1.5 text-sm text-indigo-700 font-medium">
+                    📱 {mobile}
+                  </div>
+                  <p className="text-sm text-gray-500 mt-2">Enter the 6-digit code we sent you</p>
+                </div>
+                
+                <div className="flex gap-3 justify-center mb-4">
+                  {otp.map((val, i) => (
+                    <input
+                      key={i}
+                      id={`otp-${i}`}
+                      className="al-otp-digit w-12 h-14 border-2 border-gray-200 rounded-xl text-2xl font-bold text-center bg-gray-50/80 text-gray-900 font-mono outline-none transition-all duration-200 focus:bg-white focus:border-purple-500"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={val}
+                      onChange={(e) => handleOtpChange(i, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                      onPaste={i === 0 ? handleOtpPaste : undefined}
+                      autoFocus={i === 0}
+                    />
+                  ))}
+                </div>
+                
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="al-submit-btn w-full py-3.5 rounded-xl border-none cursor-pointer text-sm font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 text-white flex items-center justify-center gap-2 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/25 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {loading ? <Spinner /> : "✓ Verify & Login"}
+                </button>
+                
+                <div className="flex gap-3 mt-3">
+                  <button
+                    type="button"
+                    className="al-ghost-btn flex-1 py-2.5 border-2 border-gray-200 rounded-xl bg-transparent cursor-pointer text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-gray-50 hover:border-gray-300"
+                    disabled={loading}
+                    onClick={resendOtp}
+                  >
+                    ↺ Resend
+                  </button>
+                  <button
+                    type="button"
+                    className="al-ghost-btn flex-1 py-2.5 border-2 border-gray-200 rounded-xl bg-transparent cursor-pointer text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-gray-50 hover:border-gray-300"
+                    onClick={() => { setOtpSent(false); setOtp(["", "", "", "", "", ""]); }}
+                  >
+                    ← Back
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Step 3 */}
+            {step === 3 && (
+              <div className="flex flex-col items-center justify-center flex-1 gap-4 animate-[fadeUp_0.5s_ease]">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-xl shadow-purple-500/30">
+                  <svg width="40" height="40" viewBox="0 0 36 36" fill="none">
+                    <circle cx="18" cy="18" r="17" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" />
+                    <path d="M11 18l5 5 9-10" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">Verified!</h3>
+                <p className="text-sm text-gray-500 text-center max-w-xs">
+                  Redirecting to the dashboard...
+                </p>
+                <div className="flex items-center gap-2 text-sm text-gray-400 mt-2">
+                  <div className="w-4 h-4 border-2 border-gray-200 border-t-purple-600 rounded-full animate-[spin_0.7s_linear_infinite]" />
+                  Loading workspace
+                </div>
+              </div>
+            )}
+
+            {/* Footer */}
+            <div className="mt-auto pt-5 border-t border-gray-100">
+              <p className="text-center text-xs text-gray-400">
+                🛡️ Secure admin area · All access is monitored
+              </p>
+            </div>
+          </div>
         </div>
+
+        <p className="mt-5 text-xs text-gray-400 text-center">
+          FinFilerAdmin Portal v2.0 · Secure SSL Encrypted Connection
+        </p>
       </div>
-      <p style={styles.footer}>FinFilerAdmin Portal v2.0 · Secure SSL Encrypted Connection</p>
-    </div>
+    </>
   );
 };
 
-/* ── Small helpers ── */
-const Field = ({ icon, label, children }) => (
-  <div style={{ position: "relative", marginBottom: 13 }}>
-    <span style={fieldIconStyle}>{icon}</span>
-    {children}
-  </div>
+/* ── Helper ── */
+const Spinner = () => (
+  <div className="w-4 h-4 border-2 border-white/35 border-t-white rounded-full animate-[spin_0.7s_linear_infinite]" />
 );
-
-const Divider = () => (
-  <div style={dividerStyle}>
-    <div style={dividerLine} />
-    <span style={dividerText}>or continue securely</span>
-    <div style={dividerLine} />
-  </div>
-);
-
-const Spinner = () => <div style={spinnerStyle} />;
-
-/* ── Styles ── */
-const fieldIconStyle = {
-  position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)",
-  fontSize: 15, pointerEvents: "none",
-};
-const dividerStyle = { display: "flex", alignItems: "center", gap: 10, margin: "15px 0" };
-const dividerLine  = { flex: 1, height: "0.5px", background: "#e5e7eb" };
-const dividerText  = { fontSize: 11, color: "#9ca3af", whiteSpace: "nowrap" };
-const spinnerStyle = {
-  width: 16, height: 16,
-  border: "2px solid rgba(255,255,255,0.35)",
-  borderTopColor: "#fff",
-  borderRadius: "50%",
-  animation: "spin 0.7s linear infinite",
-};
-
-const orbBase = {
-  position: "absolute", borderRadius: "50%", opacity: 0.38, pointerEvents: "none",
-};
-
-const styles = {
-  page: {
-    minHeight: "100vh", display: "flex", flexDirection: "column",
-    alignItems: "center", justifyContent: "center",
-    background: "#f5f3ff", padding: "24px 16px",
-  },
-  card: {
-    display: "grid", gridTemplateColumns: "1fr 1fr",
-    maxWidth: 900, width: "100%",
-    borderRadius: 20, overflow: "hidden",
-    border: "0.5px solid #d1c9f0",
-  },
-
-  /* Left */
-  left: {
-    position: "relative", overflow: "hidden",
-    background: "#f3f0fe",
-    display: "flex", flexDirection: "column", justifyContent: "space-between",
-    padding: "40px 36px", minHeight: 590,
-  },
-  orb1: { ...orbBase, width: 220, height: 220, background: "#a78bfa", top: -60, left: -60 },
-  orb2: { ...orbBase, width: 180, height: 180, background: "#67e8f9", bottom: 40, right: -50 },
-  orb3: { ...orbBase, width: 130, height: 130, background: "#f9a8d4", bottom: 180, left: 60 },
-  brand: { position: "relative", zIndex: 2 },
-  logoBadge: {
-    display: "inline-flex", alignItems: "center", gap: 10,
-    background: "#fff", border: "0.5px solid #d1c9f0",
-    borderRadius: 14, padding: "8px 14px", marginBottom: 22,
-  },
-  logoHex: {
-    width: 32, height: 32, background: "#7c3aed", borderRadius: 8,
-    display: "flex", alignItems: "center", justifyContent: "center",
-    fontWeight: 500, fontSize: 13, color: "#fff",
-  },
-  logoText:  { fontSize: 15, fontWeight: 500, color: "#26215c" },
-  brandH1:   { fontSize: 26, fontWeight: 500, color: "#26215c", lineHeight: 1.35, marginBottom: 10 },
-  brandP:    { fontSize: 13, color: "#534ab7", lineHeight: 1.6, maxWidth: 240 },
-  statsGrid: { position: "relative", zIndex: 2, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 },
-  statCard:  { background: "#fff", border: "0.5px solid #d1c9f0", borderRadius: 14, padding: "14px 16px" },
-  statIcon:  { fontSize: 16, marginBottom: 8 },
-  statVal:   { fontSize: 21, fontWeight: 500, color: "#26215c", marginBottom: 2 },
-  statLbl:   { fontSize: 11, color: "#534ab7" },
-  features:  { position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: 10 },
-  featRow:   { display: "flex", alignItems: "center", gap: 10 },
-  featDot:   { width: 6, height: 6, borderRadius: "50%", flexShrink: 0 },
-  featText:  { fontSize: 12, color: "#534ab7" },
-  trustRow:  { display: "flex", alignItems: "center", gap: 8, paddingTop: 10, borderTop: "0.5px solid #e5e7eb" },
-  avatarStack: { display: "flex" },
-  avatar: {
-    width: 22, height: 22, borderRadius: "50%",
-    border: "1.5px solid #f3f0fe",
-    fontSize: 9, fontWeight: 500,
-    display: "flex", alignItems: "center", justifyContent: "center",
-  },
-  trustText: { fontSize: 11, color: "#534ab7" },
-
-  /* Right */
-  right: {
-    background: "#fff", display: "flex", flexDirection: "column",
-    padding: "44px 40px", minHeight: 590,
-  },
-  formHeader: { textAlign: "center", marginBottom: 24 },
-  iconRing: {
-    width: 54, height: 54, borderRadius: 16,
-    background: "#f3f0fe", border: "0.5px solid #d1c9f0",
-    display: "flex", alignItems: "center", justifyContent: "center",
-    margin: "0 auto 14px", fontSize: 22,
-  },
-  formTitle: { fontSize: 20, fontWeight: 500, color: "#1a1523", marginBottom: 4 },
-  formSub:   { fontSize: 12, color: "#6b7280", margin: 0 },
-  pillRow:   { display: "flex", gap: 6, justifyContent: "center", marginBottom: 22 },
-  pill:      { height: 4, width: 28, borderRadius: 99, background: "#e5e7eb", transition: "all .35s" },
-  pillActive:{ background: "#7c3aed", width: 44 },
-  form:      { display: "flex", flexDirection: "column", flex: 1 },
-
-  /* Tabs */
-  tabRow: {
-    display: "flex", gap: 0, marginBottom: 18,
-    background: "#f3f0fe", borderRadius: 12, padding: 3,
-    border: "0.5px solid #e5e7eb",
-  },
-  tab: {
-    flex: 1, padding: "9px 0", borderRadius: 10,
-    border: "none", cursor: "pointer",
-    fontSize: 13, fontWeight: 500, fontFamily: "inherit",
-    background: "transparent", color: "#6b7280",
-    transition: "all .25s ease",
-    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-  },
-  tabActive: {
-    background: "#fff", color: "#7c3aed",
-    boxShadow: "0 1px 3px rgba(124,58,237,0.12)",
-  },
-
-  input: {
-    width: "100%", padding: "11px 13px 11px 38px",
-    border: "0.5px solid #e5e7eb", borderRadius: 12,
-    fontSize: 14, color: "#1a1523", background: "#f9fafb",
-    outline: "none", fontFamily: "inherit",
-  },
-  submitBtn: {
-    width: "100%", padding: 12, borderRadius: 12,
-    border: "none", cursor: "pointer",
-    fontSize: 14, fontWeight: 500, fontFamily: "inherit",
-    background: "#7c3aed", color: "#fff",
-    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-    transition: "all .2s",
-  },
-  helperRow:  { display: "flex", justifyContent: "flex-end", marginTop: 8 },
-  helperLink: {
-    fontSize: 11, color: "#7c3aed", cursor: "pointer",
-    background: "none", border: "none", fontFamily: "inherit",
-  },
-  secureNote: { fontSize: 11, color: "#9ca3af", textAlign: "center", marginTop: 4 },
-  emailChipWrap: { textAlign: "center", marginBottom: 18 },
-  emailChip: {
-    display: "inline-flex", alignItems: "center", gap: 6,
-    background: "#f3f0fe", border: "0.5px solid #d1c9f0",
-    borderRadius: 99, padding: "4px 10px",
-    fontSize: 11, color: "#534ab7",
-  },
-  otpHint: { fontSize: 12, color: "#6b7280", marginTop: 6 },
-  otpRow:  { display: "flex", gap: 8, justifyContent: "center", marginBottom: 8 },
-  otpDigit: {
-    width: 44, height: 52, border: "0.5px solid #e5e7eb",
-    borderRadius: 12, fontSize: 20, fontWeight: 500,
-    textAlign: "center", background: "#f9fafb", color: "#1a1523",
-    fontFamily: "monospace", outline: "none",
-  },
-  backRow:   { display: "flex", gap: 8, marginTop: 10 },
-  ghostBtn:  {
-    flex: 1, padding: 10, border: "0.5px solid #e5e7eb",
-    borderRadius: 10, background: "none", cursor: "pointer",
-    fontSize: 12, color: "#6b7280", fontFamily: "inherit",
-  },
-  successPanel: {
-    display: "flex", flexDirection: "column",
-    alignItems: "center", justifyContent: "center",
-    flex: 1, gap: 14, padding: "20px 0",
-  },
-  checkCircle: {
-    width: 72, height: 72, borderRadius: "50%",
-    background: "#f3f0fe", border: "0.5px solid #d1c9f0",
-    display: "flex", alignItems: "center", justifyContent: "center",
-  },
-  successTitle: { fontSize: 18, fontWeight: 500, color: "#1a1523" },
-  successSub:   { fontSize: 12, color: "#6b7280", textAlign: "center", maxWidth: 190, lineHeight: 1.6 },
-  loadingRow:   { display: "flex", gap: 6, alignItems: "center", fontSize: 12, color: "#9ca3af" },
-  spinnerPurple: {
-    width: 16, height: 16,
-    border: "2px solid #e5e7eb", borderTopColor: "#7c3aed",
-    borderRadius: "50%", animation: "spin 0.7s linear infinite",
-  },
-  securityNote: {
-    marginTop: "auto", paddingTop: 18,
-    borderTop: "0.5px solid #f3f4f6",
-    textAlign: "center", fontSize: 11, color: "#9ca3af",
-  },
-  footer: { marginTop: 20, fontSize: 11, color: "#9ca3af", textAlign: "center" },
-};
 
 export default AdminLogin;
