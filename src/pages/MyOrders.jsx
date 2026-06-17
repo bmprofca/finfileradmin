@@ -86,7 +86,7 @@ export default function MyOrders() {
       // If the user is an admin, passing their own username ensures they see orders assigned to them, or we can use the staff_username filter we added earlier.
       // Actually, if they want "my orders", we use staff_username=their_username just to be safe if they are an admin.
       const usernameParam = user?.username ? `staff_username=${user.username}&` : '';
-      const response = await apiCall(`/api/admin/staff/orders/list?${usernameParam}page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`, 'GET');
+      const response = await apiCall(`/api/admin/orders/list?page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`, 'GET');
       const data = await response.json();
       if (data.success) {
         setOrders(data.data.orders);

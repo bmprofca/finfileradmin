@@ -1,16 +1,15 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Search, X, Briefcase, Calendar, Hash, Phone, Mail, ArrowLeft, Building2, User
+  Search, X, Briefcase, Hash, User, Users
 } from 'lucide-react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
 import ManagementCard from '../components/common/ManagementCard';
 import ManagementGrid from '../components/common/ManagementGrid';
 import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
 import PaginationComponent from '../components/common/PaginationComponent';
-import Button from '../components/common/Button';
 import apiCall from '../utils/apiCall';
 
 const STATUS_COLORS = {
@@ -25,7 +24,6 @@ const StatusBadge = ({ status }) => {
   const normalizedStatus = (status || '').toString().toLowerCase();
   const config = STATUS_COLORS[normalizedStatus] || { pill: 'bg-gray-100 text-gray-700 border border-gray-200', dot: 'bg-gray-400' };
   
-  // Capitalize first letter of each word for display
   const displayStatus = normalizedStatus.replace(/\b\w/g, l => l.toUpperCase());
 
   return (
@@ -57,19 +55,22 @@ const OrderCard = ({ order, index }) => (
       </div>
     }
   >
-    <div className="mt-1">
+    <div className="mt-1 space-y-1">
       <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-        <User size={10} className="text-gray-400 dark:text-gray-500" /> Client: {order.client_username}
+        <User size={10} className="text-gray-400 dark:text-gray-500" /> Client: {order.client_name || order.client_username}
       </p>
+      {order.assigned_staff && order.assigned_staff.length > 0 && (
+        <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+          <Users size={10} className="text-gray-400 dark:text-gray-500" /> Staff: {order.assigned_staff.map(s => s.name).join(', ')}
+        </p>
+      )}
     </div>
   </ManagementCard>
 );
 
-export default function StaffProfile() {
-  const { username } = useParams();
+export default function Orders() {
   const navigate = useNavigate();
 
-  const [staff, setStaff] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -80,28 +81,17 @@ export default function StaffProfile() {
 
   const itemsPerPage = 10;
 
-  const fetchProfileAndOrders = async () => {
+  const fetchOrders = async () => {
     setLoading(true);
     try {
-      // 1. Fetch Staff Details
-      const staffRes = await apiCall('/api/admin/staff/list', 'GET');
-      const staffData = await staffRes.json();
-      if (staffData.success) {
-        const foundStaff = staffData.data.staffs.find(s => s.username === username);
-        if (foundStaff) {
-          setStaff(foundStaff);
-        }
-      }
-
-      // 2. Fetch Orders for this Staff
-      const ordersRes = await apiCall(`/api/admin/orders/list?staff_username=${username}&page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`, 'GET');
-      const ordersData = await ordersRes.json();
-      if (ordersData.success) {
-        setOrders(ordersData.data.orders);
-        setTotalOrders(ordersData.data.pagination.total);
+      const response = await apiCall(`/api/admin/orders/list?page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`, 'GET');
+      const data = await response.json();
+      if (data.success) {
+        setOrders(data.data.orders);
+        setTotalOrders(data.data.pagination.total);
       }
     } catch (error) {
-      console.error('Failed to fetch data', error);
+      console.error('Failed to fetch orders', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -109,78 +99,35 @@ export default function StaffProfile() {
   };
 
   useEffect(() => {
-    fetchProfileAndOrders();
-  }, [username, currentPage, searchTerm]);
+    fetchOrders();
+  }, [currentPage, searchTerm]);
 
   const handleRefresh = () => {
     setRefreshing(true);
-    fetchProfileAndOrders();
+    fetchOrders();
   };
 
   const columns = [
     { key: 'order_id', label: 'Order ID' },
     { key: 'name', label: 'Order Name' },
     { key: 'service_name', label: 'Service Name' },
-    { key: 'client_username', label: 'Client Username' },
+    { key: 'client', label: 'Client', render: (row) => row.client_name || row.client_username },
+    { key: 'assigned_staff', label: 'Assigned Staff', render: (row) => row.assigned_staff && row.assigned_staff.length > 0 ? row.assigned_staff.map(s => s.name).join(', ') : '-' },
     { key: 'fees', label: 'Fees', render: (row) => `₹${row.fees}` },
     { key: 'status', label: 'Status', render: (row) => <StatusBadge status={row.status} /> },
     { key: 'create_date', label: 'Date', render: (row) => new Date(row.create_date).toLocaleDateString() },
   ];
 
-  if (!staff && !loading) {
-    return (
-      <ManagementHub title="Staff Not Found" description="The staff member you are looking for does not exist." accent="blue">
-        <Button onClick={() => navigate('/staffs')} variant="primary" className="mt-4">
-          <ArrowLeft size={16} className="mr-2" /> Back to Staffs
-        </Button>
-      </ManagementHub>
-    );
-  }
-
   return (
     <ManagementHub
-      title={staff ? `${staff.name}'s Profile` : 'Staff Profile'}
-      description="View staff details and their assigned orders."
+      title="All Orders"
+      description="Manage all client orders in the system."
       accent="indigo"
       onRefresh={handleRefresh}
       refreshing={refreshing}
-      actions={
-        <Button variant="outline" onClick={() => navigate('/staffs')} className="flex items-center gap-2 text-sm py-1.5">
-          <ArrowLeft size={16} /> Back
-        </Button>
-      }
     >
       <div className="space-y-6">
-        
-        {/* Profile Details Card */}
-        {staff && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center gap-6">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg shrink-0">
-                {staff.name.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{staff.name}</h2>
-                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-2">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                    <User size={14} className="text-indigo-400" /> {staff.username}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                    <Mail size={14} className="text-indigo-400" /> {staff.email}
-                  </p>
-                  {staff.mobile && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                      <Phone size={14} className="text-indigo-400" /> {staff.mobile}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
         <div className="space-y-3">
-          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Assigned Orders</h3>
           {/* Filters Bar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -219,7 +166,7 @@ export default function StaffProfile() {
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-950/50">
               <Briefcase className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
               <p className="text-xl text-gray-500 dark:text-gray-400">No orders found</p>
-              <p className="text-gray-400 dark:text-gray-500 mt-2">{searchTerm ? 'Try adjusting your search' : 'No orders assigned to this staff yet'}</p>
+              <p className="text-gray-400 dark:text-gray-500 mt-2">{searchTerm ? 'Try adjusting your search' : 'There are no orders yet'}</p>
             </motion.div>
           )}
 

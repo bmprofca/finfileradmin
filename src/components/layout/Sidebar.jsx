@@ -5,18 +5,23 @@ import {
   ConciergeBell, 
   LifeBuoy, 
   BarChart3, 
-  Settings,
   Briefcase,
   ClipboardList,
+  FileBox,
+  Settings,
 } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) => {
   const [isHovered, setIsHovered] = useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
+  const { user } = useAuth();
+  
+  const userType = user?.user_type || 'admin';
 
-  const menuItems = [
+  const allMenuItems = [
     {
       icon: House,
       label: 'Dashboard',
@@ -26,26 +31,37 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
       icon: Users,
       label: 'Users',
       path: '/users',
+      roles: ['admin'],
     },
     {
       icon: Briefcase,
       label: 'Staffs',
       path: '/staffs',
+      roles: ['admin'],
     },
     {
       icon: ClipboardList,
       label: 'My Orders',
       path: '/my-orders',
+      roles: ['staff'],
+    },
+    {
+      icon: FileBox,
+      label: 'Orders',
+      path: '/orders',
+      roles: ['admin'],
     },
     {
       icon: ConciergeBell,
       label: 'Services',
       path: '/services',
+      roles: ['admin'],
     },
     {
       icon: BarChart3,
       label: 'Reports',
       path: '/reports',
+      roles: ['admin'],
     },
     {
       icon: Settings,
@@ -53,6 +69,8 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
       path: '/settings',
     },
   ];
+
+  const menuItems = allMenuItems.filter(item => !item.roles || item.roles.includes(userType));
 
   const isActiveRoute = (itemPath) => {
     return currentPath === itemPath || currentPath.startsWith(itemPath + '/');

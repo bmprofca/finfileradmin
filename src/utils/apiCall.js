@@ -1,3 +1,5 @@
+import toast from 'react-hot-toast';
+
 const API_BASE = process.env.NODE_ENV === 'production' ? "https://server.finfiler.com" : "http://localhost:8373";
 
 /**
@@ -65,9 +67,26 @@ export const apiCall = async (endpoint, method = 'GET', body = null) => {
       }
     }
 
+    // Try to show toast for messages
+    try {
+      const clonedResponse = response.clone();
+      const data = await clonedResponse.json();
+      
+      if (data && data.message) {
+        if (data.success === true || (data.success === undefined && response.ok)) {
+          toast.success(data.message);
+        } else {
+          toast.error(data.message);
+        }
+      }
+    } catch (e) {
+      // Ignored
+    }
+
     return response;
   } catch (error) {
     console.error(`API Call Error (${url}):`, error);
+    toast.error(error.message || "Network error or server unreachable");
     throw error;
   }
 };
