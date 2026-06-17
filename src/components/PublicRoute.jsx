@@ -1,10 +1,17 @@
 import { Navigate } from "react-router-dom";
 
 const PublicRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
-  const username = localStorage.getItem("username");
+  const userDataStr = localStorage.getItem("user_data");
+  let isAuthenticated = false;
 
-  const isAuthenticated = token && username;
+  if (userDataStr) {
+    try {
+      const parsed = JSON.parse(userDataStr);
+      if (parsed && parsed.token) {
+        isAuthenticated = true;
+      }
+    } catch (e) {}
+  }
 
   if (isAuthenticated) {
     return <Navigate to="/" replace />;

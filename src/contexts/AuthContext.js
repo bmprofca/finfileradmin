@@ -18,78 +18,48 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const username = localStorage.getItem("username");
-    const userData = localStorage.getItem("user");
+    const userDataStr = localStorage.getItem("user_data");
 
-    if (token && userData) {
-      setUser(JSON.parse(userData));
-    } else if (token && username) {
-      // Fallback to create userData from username if user object doesn't exist
-      const userData = { username };
-      setUser(userData);
+    if (userDataStr) {
+      try {
+        const parsedData = JSON.parse(userDataStr);
+        setUser(parsedData);
+      } catch (e) {
+        console.error("Failed to parse user_data", e);
+      }
     }
 
     setLoading(false);
   }, []);
 
-  const sendOtp = async (email, password) => {
-    const response = await apiCall("/auth/login/send-otp", "POST", {
-      email,
-      password,
-    });
-
+  const sendOtp = async ({ mobile }) => {
+    const response = await apiCall("/api/admin/auth/login-send-otp", "POST", { mobile });
     const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Failed to send OTP");
-    }
-
+    if (!response.ok || !data.success) throw new Error(data.message || "Failed to send OTP");
     return data;
   };
 
-  const login = async (email, password, otp) => {
-    const response = await apiCall("/auth/login", "POST", {
-      email,
-      password,
-      otp,
-    });
-
+  const login = async ({ mobile, otp }) => {
+    const response = await apiCall("/api/admin/auth/login-verify-otp", "POST", { mobile, otp });
     const data = await response.json();
-
-    if (!response.ok || !data.success) {
-      throw new Error(data.message || "Login failed");
-    }
-
-    const userData = {
-      email,
-      username: data.username || email.split('@')[0],
-    };
-
-    // Store in localStorage
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("username", userData.username);
-    localStorage.setItem("user", JSON.stringify(userData));
-
-    setUser(userData);
-
+    if (!response.ok || !data.success) throw new Error(data.message || "Login failed");
+    localStorage.setItem("user_data", JSON.stringify(data.data));
+    setUser(data.data);
     return data;
   };
 
   const logout = async () => {
-    const token = localStorage.getItem("token");
+    const userDataStr = localStorage.getItem("user_data");
 
-    if (!token) {
-      // No token, just clean up locally
-      localStorage.removeItem("token");
-      localStorage.removeItem("username");
-      localStorage.removeItem("user");
+    if (!userDataStr) {
+      // No user_data, just clean up locally
+      localStorage.removeItem("user_data");
       setUser(null);
       return;
     }
 
     try {
-      const response = await apiCall("/auth/logout", "POST");
+      const response = await apiCall("/api/admin/auth/logout", "POST");
 
       if (!response.ok) {
         console.error("Logout API call failed with status:", response.status);
@@ -97,20 +67,13 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Clear local storage and state
-      localStorage.removeItem("token");
-      localStorage.removeItem("username");
-      localStorage.removeItem("user");
+      localStorage.removeItem("user_data");
       setUser(null);
     } catch (error) {
       console.error("Logout failed:", error);
       // Still clear local data even if API call fails
-      localStorage.removeItem("token");
-      localStorage.removeItem("username");
-      localStorage.removeItem("user");
+      localStorage.removeItem("user_data");
       setUser(null);
-      
-      // Optionally re-throw if you want to handle the error in the component
-      // throw new Error("Failed to logout. Please try again.");
     }
   };
 

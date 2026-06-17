@@ -1,4 +1,4 @@
-const API_BASE = "https://hello.com";
+const API_BASE = "http://localhost:8373";
 
 /**
  * Unified API calling utility
@@ -8,8 +8,18 @@ const API_BASE = "https://hello.com";
  * @returns {Promise<Response>} - The fetch response object
  */
 export const apiCall = async (endpoint, method = 'GET', body = null) => {
-  const token = localStorage.getItem('token');
-  const username = localStorage.getItem('username');
+  const userDataStr = localStorage.getItem('user_data');
+  let token = null;
+  let username = null;
+  if (userDataStr) {
+    try {
+      const userData = JSON.parse(userDataStr);
+      token = userData.token;
+      username = userData.username;
+    } catch (e) {
+      console.error("Failed to parse user_data from local storage", e);
+    }
+  }
 
   const headers = {};
 
@@ -47,8 +57,7 @@ export const apiCall = async (endpoint, method = 'GET', body = null) => {
 
     // Global 401 Unauthorized handler
     if (response.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('username');
+      localStorage.removeItem('user_data');
 
       // Redirect to login page if not already there
       if (window.location.pathname !== '/login') {

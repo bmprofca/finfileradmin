@@ -2,10 +2,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
-import { ToastContainer } from 'react-toastify'; // Add this for react-toastify
-import 'react-toastify/dist/ReactToastify.css'; // Add this for styles
+import { ToastContainer } from 'react-toastify'; 
+import 'react-toastify/dist/ReactToastify.css';
 
-// import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import MainLayout from "./components/layout/MainLayout";
 import Login from "./pages/Login";
@@ -50,13 +50,15 @@ function App() {
             {/* Server Unreachable - Public Route */}
             <Route path="/server-error" element={<ServerUnreachable />} />
 
-            {/* Protected Routes with MainLayout - CORRECTED */}
-            <Route element={<MainLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="users" element={<Users />} />
-              <Route path="services" element={<Services />} />
-              <Route path="reports" element={<Reports />} />
+            {/* Protected Routes with MainLayout */}
+            <Route element={<ProtectedRoute />}>
+              <Route element={<MainLayout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="users" element={<Users />} />
+                <Route path="services" element={<Services />} />
+                <Route path="reports" element={<Reports />} />
+              </Route>
             </Route>
 
             {/* 404 Not Found Route */}

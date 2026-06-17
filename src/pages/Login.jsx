@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useAuth } from "../contexts/AuthContext";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const auth = useAuth();
+  const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [otpSent, setOtpSent] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -27,21 +28,42 @@ const AdminLogin = () => {
     }
   };
 
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (!pasted) return;
+    const next = [...otp];
+    for (let i = 0; i < 6; i++) next[i] = pasted[i] || "";
+    setOtp(next);
+    document.getElementById(`otp-${Math.min(pasted.length, 5)}`)?.focus();
+  };
+
   const sendOtp = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      toast.error("Please fill in all fields");
+    if (!mobile) {
+      toast.error("Please enter your mobile number");
       return;
     }
     try {
       setLoading(true);
-      // Replace with your actual API call:
-      // await apiCall("/auth/admin/login/send-otp", "POST", { email, password });
-      await new Promise((r) => setTimeout(r, 1300));
-      toast.success("Code sent to " + email.split("@")[0] + "@...");
+      await auth.sendOtp({ mobile });
+      toast.success("OTP sent to " + mobile);
       setOtpSent(true);
     } catch (err) {
       toast.error(err.message || "Failed to send OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resendOtp = async () => {
+    try {
+      setLoading(true);
+      await auth.sendOtp({ mobile });
+      setOtp(["", "", "", "", "", ""]);
+      toast.success("New OTP sent to " + mobile);
+    } catch (err) {
+      toast.error(err.message || "Failed to resend OTP");
     } finally {
       setLoading(false);
     }
@@ -56,14 +78,10 @@ const AdminLogin = () => {
     }
     try {
       setLoading(true);
-      // Replace with your actual API call:
-      // await apiCall("/auth/admin/login", "POST", { email, password, otp: code });
-      await new Promise((r) => setTimeout(r, 1400));
-      localStorage.setItem("token", "sample-token-12345");
-      localStorage.setItem("adminEmail", email);
-      localStorage.setItem("adminName", email.split("@")[0]);
+      await auth.login({ mobile, otp: code });
       setSuccess(true);
-      setTimeout(() => navigate("/admin/dashboard"), 1800);
+      toast.success("Login successful!");
+      setTimeout(() => navigate("/"), 1800);
     } catch (err) {
       toast.error(err.message || "Login failed");
     } finally {
@@ -82,8 +100,6 @@ const AdminLogin = () => {
           <div style={styles.orb1} />
           <div style={styles.orb2} />
           <div style={styles.orb3} />
-
-          {/* Brand */}
           <div style={styles.brand}>
             <div style={styles.logoBadge}>
               <div style={styles.logoHex}>FF</div>
@@ -94,8 +110,6 @@ const AdminLogin = () => {
               A secure control center for compliance, analytics, and financial oversight.
             </p>
           </div>
-
-          {/* Stats */}
           <div style={styles.statsGrid}>
             {[
               { icon: "$", val: "$42.8K", lbl: "Tax collected" },
@@ -110,8 +124,6 @@ const AdminLogin = () => {
               </div>
             ))}
           </div>
-
-          {/* Features */}
           <div style={styles.features}>
             {[
               { color: "#7c3aed", text: "Government-grade security & encryption" },
@@ -145,7 +157,6 @@ const AdminLogin = () => {
 
         {/* ── Right panel ── */}
         <div style={styles.right}>
-          {/* Header */}
           <div style={styles.formHeader}>
             <div style={styles.iconRing}>🛡️</div>
             <h2 style={styles.formTitle}>
@@ -153,71 +164,46 @@ const AdminLogin = () => {
             </h2>
             <p style={styles.formSub}>
               {success
-                ? `Welcome back, ${email.split("@")[0]}`
+                ? `Welcome back, ${mobile}`
                 : otpSent
-                ? "Enter the code from your email"
+                ? "Enter the code sent to your phone"
                 : "Secure access to your tax dashboard"}
             </p>
           </div>
 
-          {/* Step pills */}
           <div style={styles.pillRow}>
             {[1, 2, 3].map((n) => (
-              <div
-                key={n}
-                style={{
-                  ...styles.pill,
-                  ...(n <= step ? styles.pillActive : {}),
-                }}
-              />
+              <div key={n} style={{ ...styles.pill, ...(n <= step ? styles.pillActive : {}) }} />
             ))}
           </div>
 
-          {/* Step 1 — credentials */}
+          {/* Step 1 */}
           {step === 1 && (
             <form onSubmit={sendOtp} style={styles.form}>
-              <Field icon="✉️" label="Admin email address">
+              <Field icon="📱" label="Mobile number">
                 <input
-                  type="email"
-                  placeholder="Admin email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  style={styles.input}
-                />
-              </Field>
-              <Field icon="🔒" label="Password">
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  id="login-mobile"
+                  type="tel"
+                  placeholder="Enter your mobile number"
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value.replace(/[^\d+\-\s()]/g, ""))}
                   required
                   style={styles.input}
                 />
               </Field>
               <button type="submit" disabled={loading} style={styles.submitBtn}>
-                {loading ? <Spinner /> : <>Continue →</>}
+                {loading ? <Spinner /> : <>Request OTP →</>}
               </button>
-              <div style={styles.helperRow}>
-                <button
-                  type="button"
-                  style={styles.helperLink}
-                  onClick={() => toast.info("Contact your system administrator")}
-                >
-                  Forgot password?
-                </button>
-              </div>
               <Divider />
               <p style={styles.secureNote}>🔒 SSL secured · 👁 Access logged</p>
             </form>
           )}
 
-          {/* Step 2 — OTP */}
+          {/* Step 2 */}
           {step === 2 && (
             <form onSubmit={verifyLogin} style={styles.form}>
               <div style={styles.emailChipWrap}>
-                <div style={styles.emailChip}>✉️ {email}</div>
+                <div style={styles.emailChip}>📱 {mobile}</div>
                 <p style={styles.otpHint}>Enter the 6-digit code we sent you</p>
               </div>
               <div style={styles.otpRow}>
@@ -231,23 +217,17 @@ const AdminLogin = () => {
                     value={val}
                     onChange={(e) => handleOtpChange(i, e.target.value)}
                     onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                    onPaste={i === 0 ? handleOtpPaste : undefined}
                     autoFocus={i === 0}
                     style={styles.otpDigit}
                   />
                 ))}
               </div>
               <button type="submit" disabled={loading} style={{ ...styles.submitBtn, marginTop: 12 }}>
-                {loading ? <Spinner /> : "Verify & access dashboard"}
+                {loading ? <Spinner /> : "Verify & Login"}
               </button>
               <div style={styles.backRow}>
-                <button
-                  type="button"
-                  style={styles.ghostBtn}
-                  onClick={() => {
-                    setOtp(["", "", "", "", "", ""]);
-                    toast.success("New code sent");
-                  }}
-                >
+                <button type="button" style={styles.ghostBtn} disabled={loading} onClick={resendOtp}>
                   ↺ Resend code
                 </button>
                 <button
@@ -261,19 +241,13 @@ const AdminLogin = () => {
             </form>
           )}
 
-          {/* Step 3 — success */}
+          {/* Step 3 */}
           {step === 3 && (
             <div style={styles.successPanel}>
               <div style={styles.checkCircle}>
                 <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
                   <circle cx="18" cy="18" r="17" stroke="#d1c9f0" strokeWidth="1" />
-                  <path
-                    d="M11 18l5 5 9-10"
-                    stroke="#7c3aed"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
+                  <path d="M11 18l5 5 9-10" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
               <h3 style={styles.successTitle}>Verified!</h3>
@@ -284,12 +258,9 @@ const AdminLogin = () => {
             </div>
           )}
 
-          <div style={styles.securityNote}>
-            🛡️ Secure admin area · All access is monitored
-          </div>
+          <div style={styles.securityNote}>🛡️ Secure admin area · All access is monitored</div>
         </div>
       </div>
-
       <p style={styles.footer}>FinFilerAdmin Portal v2.0 · Secure SSL Encrypted Connection</p>
     </div>
   );
@@ -407,6 +378,26 @@ const styles = {
   pill:      { height: 4, width: 28, borderRadius: 99, background: "#e5e7eb", transition: "all .35s" },
   pillActive:{ background: "#7c3aed", width: 44 },
   form:      { display: "flex", flexDirection: "column", flex: 1 },
+
+  /* Tabs */
+  tabRow: {
+    display: "flex", gap: 0, marginBottom: 18,
+    background: "#f3f0fe", borderRadius: 12, padding: 3,
+    border: "0.5px solid #e5e7eb",
+  },
+  tab: {
+    flex: 1, padding: "9px 0", borderRadius: 10,
+    border: "none", cursor: "pointer",
+    fontSize: 13, fontWeight: 500, fontFamily: "inherit",
+    background: "transparent", color: "#6b7280",
+    transition: "all .25s ease",
+    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+  },
+  tabActive: {
+    background: "#fff", color: "#7c3aed",
+    boxShadow: "0 1px 3px rgba(124,58,237,0.12)",
+  },
+
   input: {
     width: "100%", padding: "11px 13px 11px 38px",
     border: "0.5px solid #e5e7eb", borderRadius: 12,

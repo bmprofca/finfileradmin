@@ -9,6 +9,8 @@ import {
   LogOut,
 } from 'lucide-react';
 
+import { useAuth } from '../../contexts/AuthContext';
+
 const Navbar = ({
   toggleSidebar,
   isMobile,
@@ -17,10 +19,10 @@ const Navbar = ({
 }) => {
   const [openDropdown, setOpenDropdown] = useState(false);
   const navigate = useNavigate();
+  const { logout, user } = useAuth();
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 
@@ -68,7 +70,7 @@ const Navbar = ({
                 {/* Avatar */}
                 <div className="relative">
                   <div className="w-9 h-9 rounded-lg overflow-hidden flex items-center justify-center shadow-md bg-gradient-to-br from-blue-500 to-indigo-600">
-                    <span className="text-white font-bold text-sm">A</span>
+                    <span className="text-white font-bold text-sm">{user?.username?.[0]?.toUpperCase() || 'A'}</span>
                   </div>
                   {/* Online dot */}
                   <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-white rounded-full"></div>
@@ -76,10 +78,10 @@ const Navbar = ({
 
                 <div className="hidden md:block text-left">
                   <p className="text-sm font-semibold text-gray-800">
-                    Admin User
+                    {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.username || "Admin"}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    Administrator
+                  <p className="text-xs text-gray-500 capitalize">
+                    {user?.user_type || "Administrator"}
                   </p>
                 </div>
 
@@ -94,11 +96,11 @@ const Navbar = ({
                     {/* Mobile user info */}
                     <div className="md:hidden p-4 border-b border-gray-200 bg-gray-50 flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                        <span className="text-white font-bold">A</span>
+                        <span className="text-white font-bold">{user?.username?.[0]?.toUpperCase() || 'A'}</span>
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-800">Admin User</p>
-                        <p className="text-xs text-gray-500">Administrator</p>
+                        <p className="font-semibold text-gray-800">{user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.username || "Admin"}</p>
+                        <p className="text-xs text-gray-500 capitalize">{user?.user_type || "Administrator"}</p>
                       </div>
                     </div>
 
