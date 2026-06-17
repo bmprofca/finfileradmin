@@ -59,7 +59,7 @@ const InfoItem = ({ icon: Icon, label, value }) => (
 
 // ─── View Service Modal ───────────────────────────────────────────────────────
 
-const ViewServiceModal = ({ service, onClose }) => (
+const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
   <Modal 
     isOpen={true} 
     onClose={onClose} 
@@ -68,10 +68,18 @@ const ViewServiceModal = ({ service, onClose }) => (
     size="2xl"
     contentClassName="p-5 space-y-4"
     footer={
-      <div className="flex items-center justify-end">
-        <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all">
-          Close
+      <div className="flex items-center justify-between w-full">
+        <button onClick={() => onDelete(service)} className="px-5 py-2.5 rounded-xl border border-red-200 bg-red-50 text-sm font-semibold text-red-600 hover:bg-red-100 transition-all flex items-center gap-2">
+          <Trash2 size={16} /> Delete
         </button>
+        <div className="flex items-center gap-3">
+          <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all">
+            Close
+          </button>
+          <button onClick={() => onEdit(service)} className="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-all flex items-center gap-2">
+            <Edit size={16} /> Edit Service
+          </button>
+        </div>
       </div>
     }
   >
@@ -205,6 +213,9 @@ export default function Services() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingService, setEditingService] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [serviceToDelete, setServiceToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch Services
   const fetchServices = async () => {
@@ -244,6 +255,7 @@ export default function Services() {
   const handleEdit = (service) => {
     setEditingService(service);
     setIsFormModalOpen(true);
+    setIsViewModalOpen(false);
   };
 
   const handleCreateNew = () => {
@@ -251,20 +263,30 @@ export default function Services() {
     setIsFormModalOpen(true);
   };
 
-  const handleDelete = async (service) => {
-    if (window.confirm(`Are you sure you want to delete ${service.name}?`)) {
-      try {
-        const response = await apiCall('/api/admin/services/delete', 'POST', { service_id: service.service_id });
-        const json = await response.json();
-        if (json.success) {
-          toast.success('Service deleted successfully.');
-          fetchServices();
-        } else {
-          toast.error(json.message || 'Failed to delete service.');
-        }
-      } catch (error) {
-        toast.error('Error connecting to server.');
+  const handleDeleteRequest = (service) => {
+    setServiceToDelete(service);
+    setIsDeleteModalOpen(true);
+    setIsViewModalOpen(false);
+  };
+
+  const confirmDelete = async () => {
+    if (!serviceToDelete) return;
+    setIsDeleting(true);
+    try {
+      const response = await apiCall('/api/admin/services/delete', 'POST', { service_id: serviceToDelete.service_id });
+      const json = await response.json();
+      if (json.success) {
+        toast.success('Service deleted successfully.');
+        setIsDeleteModalOpen(false);
+        setServiceToDelete(null);
+        fetchServices();
+      } else {
+        toast.error(json.message || 'Failed to delete service.');
       }
+    } catch (error) {
+      toast.error('Error connecting to server.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -294,23 +316,27 @@ export default function Services() {
   const tableColumns = [
     {
       key: 'name', label: 'Service Name', render: (row) => (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {row.image ? (
-            <img src={row.image} alt="" className="w-9 h-9 rounded-xl object-cover shrink-0" />
+            <img src={row.image} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0" />
           ) : (
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shrink-0">
-              <Briefcase size={16} />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shrink-0">
+              <Briefcase size={14} />
             </div>
           )}
-          <div>
-            <div className="font-semibold text-gray-800 text-sm">{row.name}</div>
-            <div className="text-xs text-gray-500">{row.type}</div>
+          <div className="min-w-[120px]">
+            <div className="font-semibold text-gray-800 text-sm whitespace-nowrap">{row.name}</div>
+            <div className="text-[11px] text-gray-500 whitespace-nowrap">{row.type}</div>
           </div>
         </div>
       ),
     },
-    { key: 'fees', label: 'Final Fees', render: (row) => `₹${row.fees}` },
-    { key: 'delivery_time', label: 'Delivery Time' },
+    { key: 'base_price', label: 'Base', render: (row) => <span className="text-xs whitespace-nowrap text-gray-600">₹{row.base_price}</span> },
+    { key: 'discount', label: 'Discount', render: (row) => <span className="text-xs whitespace-nowrap text-emerald-600 font-medium">₹{row.discount_value}</span> },
+    { key: 'tax', label: 'Tax', render: (row) => <span className="text-[11px] whitespace-nowrap text-gray-500">{row.tax_rate}% (₹{row.tax_value})</span> },
+    { key: 'fees', label: 'Final Fees', render: (row) => <span className="text-sm font-semibold whitespace-nowrap text-gray-800">₹{row.fees}</span> },
+    { key: 'delivery_time', label: 'Delivery', render: (row) => <span className="text-xs whitespace-nowrap text-gray-600">{row.delivery_time}</span> },
+    { key: 'docs', label: 'Docs', render: (row) => <span className="text-[11px] whitespace-nowrap bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-md font-medium">{row.documents?.length || 0} req</span> },
     {
       key: 'status', label: 'Status', render: (row) => <ServiceStatusBadge status={row.status} />,
     },
@@ -392,7 +418,7 @@ export default function Services() {
                       index={index} 
                       onView={handleView} 
                       onEdit={handleEdit}
-                      onDelete={handleDelete}
+                      onDelete={handleDeleteRequest}
                     />
                   ))}
                 </AnimatePresence>
@@ -409,7 +435,7 @@ export default function Services() {
                 getActions={(row) => [
                   { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50' },
                   { label: 'Edit Service', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50' },
-                  { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDelete(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50' },
+                  { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50' },
                 ]}
                 accent="emerald"
               />
@@ -424,7 +450,44 @@ export default function Services() {
           <ViewServiceModal
             service={selectedService}
             onClose={() => { setIsViewModalOpen(false); setSelectedService(null); }}
+            onEdit={handleEdit}
+            onDelete={handleDeleteRequest}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {isDeleteModalOpen && serviceToDelete && (
+          <Modal
+            isOpen={true}
+            onClose={() => !isDeleting && setIsDeleteModalOpen(false)}
+            title="Delete Service"
+            icon={Trash2}
+            size="md"
+            footer={
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  disabled={isDeleting}
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  className="px-5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  disabled={isDeleting}
+                  onClick={confirmDelete}
+                  className="px-5 py-2.5 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-all flex items-center gap-2 disabled:opacity-50"
+                >
+                  {isDeleting ? 'Deleting...' : 'Yes, Delete Service'}
+                </button>
+              </div>
+            }
+          >
+            <div className="text-gray-600">
+              Are you sure you want to delete <span className="font-semibold text-gray-800">{serviceToDelete.name}</span>? This action cannot be undone.
+            </div>
+          </Modal>
         )}
       </AnimatePresence>
 
