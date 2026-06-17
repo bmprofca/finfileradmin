@@ -2,6 +2,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
+import { ServiceOptionsProvider } from "./contexts/ServiceOptionsContext";
 
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -20,6 +21,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <ServiceOptionsProvider>
         <ToastProvider>
 
           
@@ -55,6 +57,7 @@ function App() {
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Routes>
         </ToastProvider>
+        </ServiceOptionsProvider>
       </AuthProvider>
     </BrowserRouter>
   );

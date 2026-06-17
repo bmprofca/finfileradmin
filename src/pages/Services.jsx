@@ -30,7 +30,7 @@ const backdropVariants = {
 };
 
 const ServiceStatusBadge = ({ status }) => {
-  const isActive = status === 1 || status === 'Active';
+  const isActive = status === 1 || status === true || status === 'Active';
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${isActive
         ? 'bg-emerald-100 text-emerald-800 border-emerald-200'

@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, Briefcase } from 'lucide-react';
 import Modal from './Modal';
 import SelectField from './SelectField';
+import { useServiceOptions } from '../../contexts/ServiceOptionsContext';
 
 export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitting }) {
+  const { serviceTypeOptions } = useServiceOptions();
   const [formData, setFormData] = useState({
     name: "",
     type: "",
@@ -18,7 +20,7 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
     image: "",
     description: "",
     delivery_time: "",
-    status: 1,
+    status: true,
     fields: {},
     documents: []
   });
@@ -165,13 +167,18 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Type/Category</label>
-            <input required type="text" name="type" value={formData.type} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" />
+            <SelectField 
+              options={serviceTypeOptions}
+              value={formData.type ? { value: formData.type, label: formData.type } : null}
+              onChange={(selected) => handleSelectChange('type', selected)}
+              placeholder="Select category..."
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 z-20 relative">Status</label>
             <SelectField 
-              options={[{ value: 1, label: 'Active' }, { value: 0, label: 'Inactive' }]}
-              value={{ value: formData.status, label: formData.status === 1 ? 'Active' : 'Inactive' }}
+              options={[{ value: true, label: 'Active' }, { value: false, label: 'Inactive' }]}
+              value={{ value: formData.status, label: (formData.status === true || formData.status === 1) ? 'Active' : 'Inactive' }}
               onChange={(selected) => handleSelectChange('status', selected)}
             />
           </div>
