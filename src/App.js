@@ -14,6 +14,9 @@ import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import Services from "./pages/Services";
 import Reports from "./pages/Reports";
+import Staffs from "./pages/Staffs";
+import StaffProfile from "./pages/StaffProfile";
+import MyOrders from "./pages/MyOrders";
 import NotFound from "./pages/NotFound";
 import ServerUnreachable from "./pages/ServerUnreachable";
 
@@ -47,6 +50,9 @@ function App() {
                 <Route index element={<Dashboard />} />
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="users" element={<Users />} />
+                <Route path="staffs" element={<Staffs />} />
+                <Route path="staffs/:username" element={<StaffProfile />} />
+                <Route path="my-orders" element={<MyOrders />} />
                 <Route path="services" element={<Services />} />
                 <Route path="reports" element={<Reports />} />
               </Route>

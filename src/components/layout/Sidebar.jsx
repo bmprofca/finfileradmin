@@ -6,6 +6,8 @@ import {
   LifeBuoy, 
   BarChart3, 
   Settings,
+  Briefcase,
+  ClipboardList,
 } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 
@@ -24,6 +26,16 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
       icon: Users,
       label: 'Users',
       path: '/users',
+    },
+    {
+      icon: Briefcase,
+      label: 'Staffs',
+      path: '/staffs',
+    },
+    {
+      icon: ClipboardList,
+      label: 'My Orders',
+      path: '/my-orders',
     },
     {
       icon: ConciergeBell,
