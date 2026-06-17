@@ -54,13 +54,13 @@ const ServerUnreachable = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/20 dark:to-orange-950/20 dark:bg-gray-900 flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
         {/* Server Error Illustration */}
         <div className="relative mb-8">
           <div className="relative">
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-32 h-32 bg-red-100 rounded-full animate-ping opacity-20"></div>
+              <div className="w-32 h-32 bg-red-100 dark:bg-red-900/30 rounded-full animate-ping opacity-20"></div>
             </div>
             <div className="relative bg-gradient-to-br from-red-500 to-orange-500 w-32 h-32 rounded-full flex items-center justify-center mx-auto shadow-2xl">
               <Server className="w-16 h-16 text-white" />
@@ -72,24 +72,24 @@ const ServerUnreachable = () => {
         </div>
 
         {/* Error Message */}
-        <h1 className="text-3xl font-bold text-gray-800 mb-3">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">
           Server Unreachable
         </h1>
-        <p className="text-gray-600 mb-4">
+        <p className="text-gray-600 dark:text-gray-400 mb-4">
           Unable to connect to the server. This could be due to:
         </p>
         
         {/* Reasons List */}
-        <div className="bg-white/50 rounded-xl p-4 mb-6 text-left space-y-2">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="bg-white/50 dark:bg-gray-800/50 rounded-xl p-4 mb-6 text-left space-y-2">
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
             <Globe className="w-4 h-4 text-red-500" />
             <span>Network connectivity issues</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
             <Server className="w-4 h-4 text-red-500" />
             <span>Server is down or under maintenance</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
             <AlertTriangle className="w-4 h-4 text-red-500" />
             <span>Firewall or proxy blocking the connection</span>
           </div>
@@ -108,7 +108,7 @@ const ServerUnreachable = () => {
           
           <button
             onClick={() => navigate('/dashboard')}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200"
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
           >
             <Home className="w-4 h-4" />
             Go to Dashboard
@@ -116,13 +116,13 @@ const ServerUnreachable = () => {
         </div>
 
         {/* Help Text */}
-        <div className="mt-8 p-4 bg-white/50 rounded-xl">
-          <p className="text-sm text-gray-600">
+        <div className="mt-8 p-4 bg-white/50 dark:bg-gray-800/50 rounded-xl">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             If the problem persists, please check your internet connection or contact your system administrator.
           </p>
           <button 
             onClick={() => window.location.href = '/login'}
-            className="text-sm text-blue-600 hover:text-blue-700 font-semibold mt-2"
+            className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold mt-2"
           >
             Try logging in again →
           </button>

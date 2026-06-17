@@ -110,7 +110,7 @@ const ActionMenu = ({ actions = [], activeId, onToggle, menuId, trigger }) => {
         zIndex: 9999,
         width: `${menuWidth}px`,
       }}
-      className="overflow-hidden rounded-xl border border-gray-100 bg-white/95 p-1.5 shadow-2xl backdrop-blur-xl ring-1 ring-black/5"
+      className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700 bg-white/95 dark:bg-gray-800/95 p-1.5 shadow-2xl dark:shadow-gray-950/50 backdrop-blur-xl ring-1 ring-black/5 dark:ring-white/10"
     >
       {actions.map((action, index) => (
         <button
@@ -126,8 +126,8 @@ const ActionMenu = ({ actions = [], activeId, onToggle, menuId, trigger }) => {
             flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold
             transition-all duration-150
             ${action.disabled
-              ? 'cursor-not-allowed opacity-50 text-gray-400'
-              : `hover:bg-blue-50 hover:pl-4 ${action.className || 'text-gray-700 hover:text-blue-600'}`
+              ? 'cursor-not-allowed opacity-50 text-gray-400 dark:text-gray-500'
+              : `hover:bg-blue-50 dark:hover:bg-gray-700/50 hover:pl-4 ${action.className || 'text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400'}`
             }
           `}
         >
@@ -145,9 +145,9 @@ const ActionMenu = ({ actions = [], activeId, onToggle, menuId, trigger }) => {
         {trigger || (
           <button
             type="button"
-            className="flex h-8 w-8 items-center justify-center rounded-xl border border-gray-200
-                       bg-white text-gray-500 transition-all hover:border-blue-300
-                       hover:text-blue-600 hover:shadow-sm active:scale-95"
+            className="flex h-8 w-8 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-600
+                       bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 transition-all hover:border-blue-300 dark:hover:border-gray-500
+                       hover:text-blue-600 dark:hover:text-blue-400 hover:shadow-sm active:scale-95"
           >
             <FaEllipsisV size={14} />
           </button>

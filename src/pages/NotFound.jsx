@@ -7,21 +7,21 @@ const NotFound = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
         {/* Animated 404 Illustration */}
         <div className="relative mb-8">
-          <div className="text-8xl font-bold text-gray-200 animate-pulse">404</div>
+          <div className="text-8xl font-bold text-gray-200 dark:text-gray-800 animate-pulse">404</div>
           <div className="absolute inset-0 flex items-center justify-center">
             <AlertCircle className="w-20 h-20 text-blue-500 animate-bounce" />
           </div>
         </div>
 
         {/* Error Message */}
-        <h1 className="text-3xl font-bold text-gray-800 mb-3">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">
           Page Not Found
         </h1>
-        <p className="text-gray-600 mb-8">
+        <p className="text-gray-600 dark:text-gray-400 mb-8">
           Oops! The page you're looking for doesn't exist or has been moved.
         </p>
 
@@ -37,7 +37,7 @@ const NotFound = () => {
           
           <button
             onClick={() => navigate(-1)}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200"
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
           >
             <ArrowLeft className="w-4 h-4" />
             Go Back
@@ -45,8 +45,8 @@ const NotFound = () => {
         </div>
 
         {/* Help Text */}
-        <p className="text-sm text-gray-500 mt-8">
-          Need assistance? <button onClick={() => navigate('/settings')} className="text-blue-600 hover:text-blue-700 font-semibold">Contact Support</button>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-8">
+          Need assistance? <button onClick={() => navigate('/settings')} className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold">Contact Support</button>
         </p>
       </div>
     </div>

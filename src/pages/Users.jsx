@@ -52,13 +52,13 @@ const StatusBadge = ({ status }) => (
 );
 
 const InfoItem = ({ icon: Icon, label, value }) => (
-  <div className="flex items-start gap-2 rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100 px-3 py-2">
-    <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/80 border border-gray-200">
-      <Icon size={14} />
+  <div className="flex items-start gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
+    <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600">
+      <Icon size={14} className="dark:text-gray-300" />
     </div>
     <div className="min-w-0 flex-1">
-      <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 leading-none mb-1">{label}</div>
-      <div className="text-sm font-medium text-gray-800 leading-snug break-words">{value || 'N/A'}</div>
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 leading-none mb-1">{label}</div>
+      <div className="text-sm font-medium text-gray-800 dark:text-gray-100 leading-snug break-words">{value || 'N/A'}</div>
     </div>
   </div>
 );
@@ -74,15 +74,15 @@ const ViewClientModal = ({ client, onClose }) => (
     <ModalScrollLock />
     <motion.div
       variants={modalVariants} initial="hidden" animate="visible" exit="exit"
-      className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden"
+      className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden"
       onClick={(e) => e.stopPropagation()}
     >
       {/* Header */}
-      <div className="shrink-0 flex justify-between items-center p-5 border-b bg-white rounded-t-xl">
-        <h2 className="text-lg font-bold flex items-center gap-2 text-slate-800">
-          <User className="text-blue-500" size={20} /> Client Details
+      <div className="shrink-0 flex justify-between items-center p-5 border-b dark:border-gray-700 bg-white dark:bg-gray-800 rounded-t-xl">
+        <h2 className="text-lg font-bold flex items-center gap-2 text-slate-800 dark:text-gray-100">
+          <User className="text-blue-500 dark:text-blue-400" size={20} /> Client Details
         </h2>
-        <button onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition-all shadow-sm hover:shadow-md bg-white/50 border border-slate-100">
+        <button onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 dark:text-gray-400 transition-all shadow-sm hover:shadow-md bg-white/50 dark:bg-gray-700/50 border border-slate-100 dark:border-gray-600">
           <X size={18} />
         </button>
       </div>
@@ -90,13 +90,13 @@ const ViewClientModal = ({ client, onClose }) => (
       {/* Body */}
       <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
         {/* Avatar + Name */}
-        <div className="flex items-center gap-4 pb-4 border-b">
+        <div className="flex items-center gap-4 pb-4 border-b dark:border-gray-700">
           <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-2xl font-bold shrink-0">
             {client.name.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h3 className="text-xl font-bold text-gray-800">{client.name}</h3>
-            <p className="text-gray-500 text-sm flex items-center gap-1.5 mt-0.5">
+            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{client.name}</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-sm flex items-center gap-1.5 mt-0.5">
               <Mail size={13} className="text-blue-400" /> {client.email}
             </p>
             <div className="mt-1.5">
@@ -106,21 +106,21 @@ const ViewClientModal = ({ client, onClose }) => (
         </div>
 
         {/* Summary band */}
-        <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 flex justify-between items-center">
+        <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-100 dark:border-blue-800/50 flex justify-between items-center">
           <div>
-            <p className="text-xs text-gray-500">Filing Year</p>
-            <p className="text-sm font-semibold text-gray-700">{client.year}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Filing Year</p>
+            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">{client.year}</p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-500">Last Activity</p>
-            <p className="text-sm font-semibold text-gray-700">{client.lastActivity}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Last Activity</p>
+            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">{client.lastActivity}</p>
           </div>
         </div>
 
         {/* Info Grid */}
         <div>
-          <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <FileText className="text-blue-500" size={15} /> Filing Information
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+            <FileText className="text-blue-500 dark:text-blue-400" size={15} /> Filing Information
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <InfoItem icon={User} label="Full Name" value={client.name} />
@@ -135,8 +135,8 @@ const ViewClientModal = ({ client, onClose }) => (
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-end gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4 shrink-0">
-        <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all">
+      <div className="flex items-center justify-end gap-3 border-t border-slate-100 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-6 py-4 shrink-0">
+        <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-600 transition-all">
           Close
         </button>
       </div>
@@ -162,20 +162,20 @@ const ClientCard = ({ client, index, onView }) => (
     onClick={() => onView(client)}
     hoverable
     actions={[
-      { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(client), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50' },
+      { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(client), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
     ]}
     menuId={`client-card-${client.id}`}
     footer={
-      <div className="flex items-center justify-between w-full text-xs text-gray-500">
-        <span className="flex items-center gap-1"><Hash size={10} className="text-blue-400" /> {client.ssn}</span>
-        <span className="flex items-center gap-1"><Calendar size={10} className="text-gray-400" /> {client.year}</span>
+      <div className="flex items-center justify-between w-full text-xs text-gray-500 dark:text-gray-400">
+        <span className="flex items-center gap-1"><Hash size={10} className="text-blue-400 dark:text-blue-500" /> {client.ssn}</span>
+        <span className="flex items-center gap-1"><Calendar size={10} className="text-gray-400 dark:text-gray-500" /> {client.year}</span>
       </div>
     }
   >
     <div className="mt-1">
       {client.phone && (
-        <p className="text-xs text-gray-500 flex items-center gap-1.5">
-          <Phone size={10} className="text-gray-400" /> {client.phone}
+        <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+          <Phone size={10} className="text-gray-400 dark:text-gray-500" /> {client.phone}
         </p>
       )}
     </div>
@@ -221,8 +221,8 @@ export default function Users() {
             {row.name.charAt(0).toUpperCase()}
           </div>
           <div>
-            <div className="font-semibold text-gray-800 text-sm">{row.name}</div>
-            <div className="text-xs text-gray-500">{row.email}</div>
+            <div className="font-semibold text-gray-800 dark:text-gray-100 text-sm">{row.name}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">{row.email}</div>
           </div>
         </div>
       ),
@@ -256,27 +256,27 @@ export default function Users() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm"
+          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm"
         >
           <div className="flex items-center gap-4 flex-1">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
               <input
                 type="text"
                 placeholder="Search clients by name, email, or Tax ID..."
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                className="w-full pl-11 pr-10 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm min-h-[42px]"
+                className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
               />
               {searchTerm && (
-                <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1">
+                <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1">
                   <X size={14} />
                 </button>
               )}
             </div>
-            <p className="text-sm text-gray-500 hidden xl:block whitespace-nowrap">
-              <span className="font-semibold text-gray-800">{filtered.length}</span> clients
-              {searchTerm && <span className="ml-1 text-blue-600">· "{searchTerm}"</span>}
+            <p className="text-sm text-gray-500 dark:text-gray-400 hidden xl:block whitespace-nowrap">
+              <span className="font-semibold text-gray-800 dark:text-gray-200">{filtered.length}</span> clients
+              {searchTerm && <span className="ml-1 text-blue-600 dark:text-blue-400">· "{searchTerm}"</span>}
             </p>
           </div>
 
@@ -293,17 +293,17 @@ export default function Users() {
 
         {/* Empty state */}
         {filtered.length === 0 && (
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white rounded-xl shadow-xl">
-            <User className="text-gray-300 mx-auto mb-4" size={64} />
-            <p className="text-xl text-gray-500">No clients found</p>
-            <p className="text-gray-400 mt-2">{searchTerm ? 'Try adjusting your search' : 'No clients registered yet'}</p>
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-950/50">
+            <User className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
+            <p className="text-xl text-gray-500 dark:text-gray-400">No clients found</p>
+            <p className="text-gray-400 dark:text-gray-500 mt-2">{searchTerm ? 'Try adjusting your search' : 'No clients registered yet'}</p>
           </motion.div>
         )}
 
         {/* Content */}
         {filtered.length > 0 && (
           <>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl bg-white shadow-xl">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
 
               {/* Table View */}
               {viewMode === 'table' && (
@@ -313,7 +313,7 @@ export default function Users() {
                   rowKey="id"
                   onRowClick={(row) => handleView(row)}
                   getActions={(row) => [
-                    { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50' },
+                    { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
                   ]}
                   accent="blue"
                 />

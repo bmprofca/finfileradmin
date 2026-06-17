@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import { ServiceOptionsProvider } from "./contexts/ServiceOptionsContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -19,6 +20,7 @@ import ServerUnreachable from "./pages/ServerUnreachable";
 
 function App() {
   return (
+    <ThemeProvider>
     <BrowserRouter>
       <AuthProvider>
         <ServiceOptionsProvider>
@@ -60,6 +62,7 @@ function App() {
         </ServiceOptionsProvider>
       </AuthProvider>
     </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

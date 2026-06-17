@@ -86,8 +86,8 @@ const AdminLogin = () => {
   const step = success ? 3 : otpSent ? 2 : 1;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-50/90 via-indigo-50/80 to-sky-50/90 px-4 py-6 font-sans">
-      <div className="flex flex-col md:flex-row w-full max-w-[900px] rounded-2xl overflow-hidden shadow-2xl shadow-purple-500/10">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-50/90 via-indigo-50/80 to-sky-50/90 dark:from-gray-900 dark:via-indigo-950/20 dark:to-sky-950/20 px-4 py-6 font-sans">
+      <div className="flex flex-col md:flex-row w-full max-w-[900px] rounded-2xl overflow-hidden shadow-2xl shadow-purple-500/10 dark:shadow-black/40">
 
         {/* ── Left panel — hidden on mobile ── */}
         <div className="hidden md:flex relative flex-1 flex-col justify-center items-center p-12 min-h-[560px] bg-gradient-to-br from-purple-600 via-indigo-600 to-sky-500 overflow-hidden">
@@ -165,15 +165,15 @@ const AdminLogin = () => {
         </div>
 
         {/* ── Right panel ── */}
-        <div className="flex-1 bg-white flex flex-col p-6 sm:p-8 md:p-10">
+        <div className="flex-1 bg-white dark:bg-gray-800 flex flex-col p-6 sm:p-8 md:p-10">
           <div className="text-center mb-6">
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center mx-auto mb-3 text-xl sm:text-2xl shadow-lg shadow-purple-500/20">
               🛡️
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
               {success ? "Access granted" : otpSent ? "Two-factor auth" : "Admin sign in"}
             </h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               {success
                 ? `Welcome back, ${mobile}`
                 : otpSent
@@ -190,7 +190,7 @@ const AdminLogin = () => {
                 className={`h-1.5 rounded-full transition-all duration-500 ${
                   n <= step
                     ? "bg-gradient-to-r from-purple-600 to-indigo-600 w-10"
-                    : "bg-gray-200 w-7"
+                    : "bg-gray-200 dark:bg-gray-700 w-7"
                 }`}
               />
             ))}
@@ -202,7 +202,7 @@ const AdminLogin = () => {
               <div className="relative mb-4">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base pointer-events-none">📱</span>
                 <input
-                  className="w-full py-3 px-4 pl-11 border-2 border-gray-200 rounded-xl text-sm text-gray-900 bg-gray-50/80 outline-none transition-all duration-200 focus:bg-white focus:border-purple-500"
+                  className="w-full py-3 px-4 pl-11 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 bg-gray-50/80 dark:bg-gray-900/50 outline-none transition-all duration-200 focus:bg-white dark:focus:bg-gray-800 focus:border-purple-500 dark:focus:border-purple-500"
                   type="tel"
                   placeholder="Enter your mobile number"
                   value={mobile}
@@ -219,12 +219,12 @@ const AdminLogin = () => {
               </button>
 
               <div className="flex items-center gap-3 my-4">
-                <div className="flex-1 h-px bg-gray-200" />
-                <span className="text-xs text-gray-400 whitespace-nowrap">or continue securely</span>
-                <div className="flex-1 h-px bg-gray-200" />
+                <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+                <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">or continue securely</span>
+                <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
               </div>
 
-              <div className="flex items-center justify-center gap-4 text-xs text-gray-400">
+              <div className="flex items-center justify-center gap-4 text-xs text-gray-400 dark:text-gray-500">
                 <span>🔒 SSL secured</span>
                 <span>·</span>
                 <span>👁 Access logged</span>
@@ -236,10 +236,10 @@ const AdminLogin = () => {
           {step === 2 && (
             <form onSubmit={verifyLogin} className="flex flex-col flex-1">
               <div className="text-center mb-4">
-                <div className="inline-flex items-center gap-2 bg-purple-50 border border-purple-200 rounded-full px-4 py-1.5 text-sm text-indigo-700 font-medium">
+                <div className="inline-flex items-center gap-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800/50 rounded-full px-4 py-1.5 text-sm text-indigo-700 dark:text-indigo-300 font-medium">
                   📱 {mobile}
                 </div>
-                <p className="text-sm text-gray-500 mt-2">Enter the 6-digit code we sent you</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Enter the 6-digit code we sent you</p>
               </div>
 
               <div className="flex gap-1.5 xs:gap-2 sm:gap-3 justify-center mb-4">
@@ -247,7 +247,7 @@ const AdminLogin = () => {
                   <input
                     key={i}
                     id={`otp-${i}`}
-                    className="w-9 h-11 xs:w-10 xs:h-12 sm:w-12 sm:h-14 border-2 border-gray-200 rounded-xl text-lg sm:text-2xl font-bold text-center bg-gray-50/80 text-gray-900 font-mono outline-none transition-all duration-200 focus:bg-white focus:border-purple-500"
+                    className="w-9 h-11 xs:w-10 xs:h-12 sm:w-12 sm:h-14 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-lg sm:text-2xl font-bold text-center bg-gray-50/80 dark:bg-gray-900/50 text-gray-900 dark:text-gray-100 font-mono outline-none transition-all duration-200 focus:bg-white dark:focus:bg-gray-800 focus:border-purple-500 dark:focus:border-purple-500"
                     type="text"
                     inputMode="numeric"
                     maxLength={1}
@@ -271,7 +271,7 @@ const AdminLogin = () => {
               <div className="flex gap-2 mt-3">
                 <button
                   type="button"
-                  className="flex-1 py-2.5 border-2 border-gray-200 rounded-xl bg-transparent cursor-pointer text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-gray-50 hover:border-gray-300"
+                  className="flex-1 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-transparent cursor-pointer text-sm font-medium text-gray-600 dark:text-gray-400 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                   disabled={loading}
                   onClick={resendOtp}
                 >
@@ -279,7 +279,7 @@ const AdminLogin = () => {
                 </button>
                 <button
                   type="button"
-                  className="flex-1 py-2.5 border-2 border-gray-200 rounded-xl bg-transparent cursor-pointer text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-gray-50 hover:border-gray-300"
+                  className="flex-1 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-transparent cursor-pointer text-sm font-medium text-gray-600 dark:text-gray-400 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                   onClick={() => { setOtpSent(false); setOtp(["", "", "", "", "", ""]); }}
                 >
                   ← Back
@@ -297,27 +297,27 @@ const AdminLogin = () => {
                   <path d="M11 18l5 5 9-10" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">Verified!</h3>
-              <p className="text-sm text-gray-500 text-center max-w-xs">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Verified!</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-xs">
                 Redirecting to the dashboard...
               </p>
-              <div className="flex items-center gap-2 text-sm text-gray-400 mt-2">
-                <div className="w-4 h-4 border-2 border-gray-200 border-t-purple-600 rounded-full animate-[spin_0.7s_linear_infinite]" />
+              <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500 mt-2">
+                <div className="w-4 h-4 border-2 border-gray-200 dark:border-gray-700 border-t-purple-600 dark:border-t-purple-500 rounded-full animate-[spin_0.7s_linear_infinite]" />
                 Loading workspace
               </div>
             </div>
           )}
 
           {/* Footer */}
-          <div className="mt-auto pt-4 border-t border-gray-100">
-            <p className="text-center text-xs text-gray-400">
+          <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
+            <p className="text-center text-xs text-gray-400 dark:text-gray-500">
               🛡️ Secure admin area · All access is monitored
             </p>
           </div>
         </div>
       </div>
 
-      <p className="mt-4 text-xs text-gray-400 text-center">
+      <p className="mt-4 text-xs text-gray-400 dark:text-gray-500 text-center">
         FinFilerAdmin Portal v2.0 · Secure SSL Encrypted Connection
       </p>
     </div>

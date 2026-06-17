@@ -4,6 +4,7 @@ import {
   BarChart3, TrendingUp, DollarSign, FileText,
   Download, Search, X, Eye, User, Calendar,
   CheckCircle, Clock, AlertTriangle, Hash,
+  BarChart2, DownloadCloud, Tag,
 } from 'lucide-react';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementCard from '../components/common/ManagementCard';
@@ -58,14 +59,14 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const InfoItem = ({ icon: Icon, label, value }) => (
-  <div className="flex items-start gap-2 rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100 px-3 py-2">
-    <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/80 border border-gray-200">
-      <Icon size={14} />
+const InfoItem = ({ icon: Icon, label, value, valueClassName = '' }) => (
+  <div className="flex items-start gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
+    <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600">
+      <Icon size={14} className="dark:text-gray-300" />
     </div>
     <div className="min-w-0 flex-1">
-      <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 leading-none mb-1">{label}</div>
-      <div className="text-sm font-medium text-gray-800 leading-snug break-words">{value || 'N/A'}</div>
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 leading-none mb-1">{label}</div>
+      <div className={`text-sm font-medium text-gray-800 dark:text-gray-100 leading-snug break-words ${valueClassName}`}>{value || 'N/A'}</div>
     </div>
   </div>
 );
@@ -81,15 +82,15 @@ const ViewFilingModal = ({ filing, onClose }) => (
     <ModalScrollLock />
     <motion.div
       variants={modalVariants} initial="hidden" animate="visible" exit="exit"
-      className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden"
+      className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden"
       onClick={(e) => e.stopPropagation()}
     >
       {/* Header */}
-      <div className="shrink-0 flex justify-between items-center p-5 border-b bg-white rounded-t-xl">
-        <h2 className="text-lg font-bold flex items-center gap-2 text-slate-800">
-          <FileText className="text-indigo-500" size={20} /> Filing Details
+      <div className="shrink-0 flex justify-between items-center p-5 border-b dark:border-gray-700 bg-white dark:bg-gray-800 rounded-t-xl">
+        <h2 className="text-lg font-bold flex items-center gap-2 text-slate-800 dark:text-gray-100">
+          <FileText className="text-purple-500 dark:text-purple-400" size={20} /> Report Details
         </h2>
-        <button onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition-all shadow-sm hover:shadow-md bg-white/50 border border-slate-100">
+        <button onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 dark:text-gray-400 transition-all shadow-sm hover:shadow-md bg-white/50 dark:bg-gray-700/50 border border-slate-100 dark:border-gray-600">
           <X size={18} />
         </button>
       </div>
@@ -98,12 +99,12 @@ const ViewFilingModal = ({ filing, onClose }) => (
       <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
         {/* Client Avatar + Name */}
         <div className="flex items-center gap-4 pb-4 border-b">
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold shrink-0">
-            {filing.client.charAt(0).toUpperCase()}
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white shrink-0">
+            <BarChart2 size={16} />
           </div>
-          <div>
-            <h3 className="text-lg font-bold text-gray-800">{filing.client}</h3>
-            <p className="text-sm text-gray-500 flex items-center gap-1 mt-0.5">
+          <div className="min-w-[150px]">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">{filing.client}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-0.5">
               <Hash size={12} className="text-indigo-400" /> Invoice #{filing.id}
             </p>
             <div className="mt-1.5">
@@ -113,20 +114,20 @@ const ViewFilingModal = ({ filing, onClose }) => (
         </div>
 
         {/* Summary band */}
-        <div className="p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100 flex justify-between items-center">
+        <div className="p-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 rounded-xl border border-indigo-100 dark:border-gray-700 flex justify-between items-center">
           <div>
-            <p className="text-xs text-gray-500">Amount</p>
-            <p className="text-lg font-bold text-indigo-700">{filing.amount}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Amount</p>
+            <p className="text-lg font-bold text-indigo-700 dark:text-indigo-300">{filing.amount}</p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-500">Date</p>
-            <p className="text-sm font-semibold text-gray-700">{filing.date}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Date</p>
+            <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">{filing.date}</p>
           </div>
         </div>
 
         {/* Info grid */}
         <div>
-          <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
             <FileText className="text-indigo-500" size={15} /> Details
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -141,16 +142,19 @@ const ViewFilingModal = ({ filing, onClose }) => (
 
         {/* Notes */}
         {filing.notes && (
-          <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Notes</p>
-            <p className="text-sm text-gray-700">{filing.notes}</p>
+          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Notes</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">{filing.notes}</p>
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-end gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4 shrink-0">
-        <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all">
+      <div className="flex items-center justify-between gap-3 border-t border-slate-100 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-6 py-4 shrink-0">
+        <button onClick={() => console.log('Downloading', filing.id)} className="px-4 py-2.5 rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/30 text-sm font-semibold text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-all flex items-center gap-2">
+          <DownloadCloud size={16} /> Download PDF
+        </button>
+        <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-600 transition-all">
           Close
         </button>
       </div>
@@ -164,29 +168,33 @@ const FilingCard = ({ filing, index, onView }) => (
   <ManagementCard
     delay={index * 0.05}
     accent="indigo"
-    eyebrow={`Date: ${filing.date}`}
     title={filing.client}
-    subtitle={filing.type}
     icon={
       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
         {filing.client.charAt(0).toUpperCase()}
       </div>
     }
-    badge={<StatusBadge status={filing.status} />}
-    onClick={() => onView(filing)}
-    hoverable
     actions={[
-      { label: 'View Invoice', icon: <Eye size={12} />, onClick: () => onView(filing), className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50' },
+      { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(filing), className: 'text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30 dark:text-purple-400 dark:hover:text-purple-300' },
+      { label: 'Download', icon: <DownloadCloud size={12} />, onClick: () => console.log('Downloading', filing.id), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
     ]}
     menuId={`filing-card-${filing.id}`}
-    footer={
-      <div className="flex items-center justify-between w-full text-xs text-gray-500">
-        <span className="flex items-center gap-1"><Hash size={10} className="text-indigo-400" /> #{filing.id}</span>
-        <span className="font-semibold text-indigo-700">{filing.amount}</span>
-      </div>
-    }
   >
-    <div className="mt-1" />
+    <div className="py-1">
+      <p className="text-sm font-medium text-gray-800 dark:text-gray-100 mb-1">{filing.type}</p>
+      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+        <Tag size={12} className="text-purple-400" /> {filing.status}
+      </div>
+    </div>
+    <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+      <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+        <Hash size={12} />
+        <span>{filing.id}</span>
+      </div>
+      <div className="flex items-center gap-1.5 text-xs text-indigo-700 dark:text-indigo-300 font-semibold">
+        {filing.amount}
+      </div>
+    </div>
   </ManagementCard>
 );
 
@@ -234,7 +242,7 @@ export default function Reports() {
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shrink-0">
             {row.client.charAt(0).toUpperCase()}
           </div>
-          <span className="font-medium text-gray-900 text-sm">{row.client}</span>
+          <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">{row.client}</span>
         </div>
       ),
     },
@@ -271,14 +279,14 @@ export default function Reports() {
               <ManagementCard key={metric.id} accent={metric.color} delay={index * 0.1}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-500">{metric.title}</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-1">{metric.value}</p>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{metric.title}</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">{metric.value}</p>
                   </div>
-                  <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center">
-                    <Icon className="w-5 h-5 text-indigo-600" />
+                  <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center">
+                    <Icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                   </div>
                 </div>
-                <div className="mt-4 text-xs text-indigo-600 font-medium">{metric.trend}</div>
+                <div className="mt-4 text-xs text-indigo-600 dark:text-indigo-400 font-medium">{metric.trend}</div>
               </ManagementCard>
             );
           })}
@@ -286,34 +294,34 @@ export default function Reports() {
 
         {/* Transactions Section */}
         <div className="space-y-3">
-          <h3 className="text-lg font-bold text-gray-800">Recent Transactions</h3>
+          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Recent Transactions</h3>
 
           {/* Filters Bar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm"
+            className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm"
           >
             <div className="flex items-center gap-4 flex-1">
               <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
                 <input
                   type="text"
                   placeholder="Search by client, service type, or status..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-11 pr-10 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm min-h-[42px]"
+                  className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
                 />
                 {searchTerm && (
-                  <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1">
+                  <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1">
                     <X size={14} />
                   </button>
                 )}
               </div>
-              <p className="text-sm text-gray-500 hidden xl:block whitespace-nowrap">
-                <span className="font-semibold text-gray-800">{filtered.length}</span> transactions
-                {searchTerm && <span className="ml-1 text-indigo-600">· "{searchTerm}"</span>}
+              <p className="text-sm text-gray-500 dark:text-gray-400 hidden xl:block whitespace-nowrap">
+                <span className="font-semibold text-gray-800 dark:text-gray-200">{filtered.length}</span> transactions
+                {searchTerm && <span className="ml-1 text-indigo-600 dark:text-indigo-400">· "{searchTerm}"</span>}
               </p>
             </div>
             <div className="flex items-center gap-4">
@@ -329,16 +337,16 @@ export default function Reports() {
 
           {/* Empty state */}
           {filtered.length === 0 && (
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white rounded-xl shadow-xl">
-              <FileText className="text-gray-300 mx-auto mb-4" size={64} />
-              <p className="text-xl text-gray-500">No transactions found</p>
-              <p className="text-gray-400 mt-2">{searchTerm ? 'Try adjusting your search' : 'No transactions yet'}</p>
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-950/50">
+              <FileText className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
+              <p className="text-xl text-gray-500 dark:text-gray-400">No transactions found</p>
+              <p className="text-gray-400 dark:text-gray-500 mt-2">{searchTerm ? 'Try adjusting your search' : 'No transactions yet'}</p>
             </motion.div>
           )}
 
           {/* Content */}
           {filtered.length > 0 && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl bg-white shadow-xl">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
               {viewMode === 'table' && (
                 <ManagementTable
                   columns={columns}
@@ -346,7 +354,7 @@ export default function Reports() {
                   rowKey="id"
                   onRowClick={(row) => handleView(row)}
                   getActions={(row) => [
-                    { label: 'View Invoice', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50' },
+                    { label: 'View Invoice', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300' },
                   ]}
                   accent="indigo"
                 />

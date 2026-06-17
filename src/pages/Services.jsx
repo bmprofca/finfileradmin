@@ -46,13 +46,13 @@ const ServiceStatusBadge = ({ status }) => {
 };
 
 const InfoItem = ({ icon: Icon, label, value }) => (
-  <div className="flex items-start gap-2 rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100 px-3 py-2">
-    <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/80 border border-gray-200">
-      <Icon size={14} />
+  <div className="flex items-start gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
+    <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600">
+      <Icon size={14} className="dark:text-gray-300" />
     </div>
     <div className="min-w-0 flex-1">
-      <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 leading-none mb-1">{label}</div>
-      <div className="text-sm font-medium text-gray-800 leading-snug break-words">{value || 'N/A'}</div>
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 leading-none mb-1">{label}</div>
+      <div className="text-sm font-medium text-gray-800 dark:text-gray-100 leading-snug break-words">{value || 'N/A'}</div>
     </div>
   </div>
 );
@@ -69,14 +69,14 @@ const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
     contentClassName="p-5 space-y-4"
     footer={
       <div className="flex items-center justify-between w-full">
-        <button onClick={() => onDelete(service)} className="px-5 py-2.5 rounded-xl border border-red-200 bg-red-50 text-sm font-semibold text-red-600 hover:bg-red-100 transition-all flex items-center gap-2">
+        <button onClick={() => onDelete(service)} className="px-5 py-2.5 rounded-xl border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2">
           <Trash2 size={16} /> Delete
         </button>
         <div className="flex items-center gap-3">
-          <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all">
+          <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all">
             Close
           </button>
-          <button onClick={() => onEdit(service)} className="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-all flex items-center gap-2">
+          <button onClick={() => onEdit(service)} className="px-5 py-2.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2">
             <Edit size={16} /> Edit Service
           </button>
         </div>
@@ -84,7 +84,7 @@ const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
     }
   >
     {/* Icon + Name */}
-    <div className="flex items-center gap-4 pb-4 border-b">
+    <div className="flex items-center gap-4 pb-4 border-b dark:border-gray-700">
       {service.image ? (
         <img src={service.image} alt={service.name} className="w-16 h-16 rounded-xl object-cover" />
       ) : (
@@ -93,25 +93,25 @@ const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
         </div>
       )}
       <div>
-        <h3 className="text-lg font-bold text-gray-800">{service.name}</h3>
-        <p className="text-sm text-gray-500 mt-0.5">{service.type}</p>
+        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">{service.name}</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{service.type}</p>
         <div className="mt-1.5 flex gap-2 items-center">
           <ServiceStatusBadge status={service.status} />
-          <span className="text-xs text-gray-500 font-mono text-[10px]">ID: {service.service_id}</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400 font-mono text-[10px]">ID: {service.service_id}</span>
         </div>
       </div>
     </div>
 
     {/* Description */}
-    <div className="p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-100">
-      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Description</p>
-      <p className="text-sm text-gray-700">{service.description || "No description provided."}</p>
+    <div className="p-3 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/50">
+      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Description</p>
+      <p className="text-sm text-gray-700 dark:text-gray-300">{service.description || "No description provided."}</p>
     </div>
 
     {/* Info Grid */}
     <div>
-      <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-        <FileText className="text-emerald-500" size={15} /> Financial & General Details
+      <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+        <FileText className="text-emerald-500 dark:text-emerald-400" size={15} /> Financial & General Details
       </h4>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
         <InfoItem icon={Briefcase} label="Service Name" value={service.name} />
@@ -128,36 +128,36 @@ const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
     {/* Fields and Documents */}
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-          <CheckCircle className="text-emerald-500" size={15} /> Fields Requirement
+        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+          <CheckCircle className="text-emerald-500 dark:text-emerald-400" size={15} /> Fields Requirement
         </h4>
-        <div className="bg-gray-50 rounded-xl border border-gray-200 p-3 flex flex-wrap gap-2">
+        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-3 flex flex-wrap gap-2">
           {service.fields && Object.keys(service.fields).length > 0 ? (
             Object.entries(service.fields).map(([key, val]) => (
-              <span key={key} className="text-xs px-2 py-1 bg-white border border-gray-200 rounded-md text-gray-600">
-                {key}: <span className={val ? 'text-emerald-600' : 'text-red-600'}>{val ? 'Yes' : 'No'}</span>
+              <span key={key} className="text-xs px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md text-gray-600 dark:text-gray-300">
+                {key}: <span className={val ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}>{val ? 'Yes' : 'No'}</span>
               </span>
             ))
           ) : (
-            <span className="text-xs text-gray-500">No specific fields</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">No specific fields</span>
           )}
         </div>
       </div>
       <div>
-        <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-          <FileText className="text-emerald-500" size={15} /> Required Documents
+        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+          <FileText className="text-emerald-500 dark:text-emerald-400" size={15} /> Required Documents
         </h4>
-        <div className="bg-gray-50 rounded-xl border border-gray-200 p-3 space-y-2">
+        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-3 space-y-2">
           {service.documents && service.documents.length > 0 ? (
             service.documents.map((doc, idx) => (
-              <div key={idx} className="text-xs bg-white border border-gray-200 rounded-md p-2">
-                <div className="font-semibold text-gray-700">{doc.name} {doc.is_required && <span className="text-red-500">*</span>}</div>
-                <div className="text-gray-500 mt-1">Accepts: {doc.accept_extensions?.join(', ')}</div>
-                {doc.description && <div className="text-gray-400 mt-0.5">{doc.description}</div>}
+              <div key={idx} className="text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md p-2">
+                <div className="font-semibold text-gray-700 dark:text-gray-300">{doc.name} {doc.is_required && <span className="text-red-500">*</span>}</div>
+                <div className="text-gray-500 dark:text-gray-400 mt-1">Accepts: {doc.accept_extensions?.join(', ')}</div>
+                {doc.description && <div className="text-gray-400 dark:text-gray-500 mt-0.5">{doc.description}</div>}
               </div>
             ))
           ) : (
-            <span className="text-xs text-gray-500">No documents required</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">No documents required</span>
           )}
         </div>
       </div>
@@ -180,22 +180,22 @@ const ServiceManagementCard = ({ service, index, onView, onEdit, onDelete }) => 
     onClick={() => onView(service)}
     hoverable
     actions={[
-      { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(service), className: 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50' },
-      { label: 'Edit Service', icon: <Edit size={12} />, onClick: () => onEdit(service), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50' },
-      { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => onDelete(service), className: 'text-red-600 hover:text-red-700 hover:bg-red-50' },
+      { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(service), className: 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 dark:text-emerald-400 dark:hover:text-emerald-300' },
+      { label: 'Edit Service', icon: <Edit size={12} />, onClick: () => onEdit(service), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
+      { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => onDelete(service), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
     ]}
     menuId={`service-card-${service.service_id}`}
   >
     <div className="py-1.5">
-      <p className="text-sm text-gray-600 line-clamp-2">{service.description || "No description."}</p>
+      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{service.description || "No description."}</p>
     </div>
-    <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
-      <div className="flex items-center gap-1.5 text-xs text-gray-500">
+    <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+      <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
         <FileText className="w-3.5 h-3.5" />
         <span className="truncate max-w-[120px]">{service.type}</span>
       </div>
       <div className="flex items-center gap-1.5 text-xs">
-        <span className="text-gray-500">{service.delivery_time}</span>
+        <span className="text-gray-500 dark:text-gray-400">{service.delivery_time}</span>
       </div>
     </div>
   </ManagementCard>
@@ -325,18 +325,18 @@ export default function Services() {
             </div>
           )}
           <div className="min-w-[120px]">
-            <div className="font-semibold text-gray-800 text-sm whitespace-nowrap">{row.name}</div>
-            <div className="text-[11px] text-gray-500 whitespace-nowrap">{row.type}</div>
+            <div className="font-semibold text-gray-800 dark:text-gray-100 text-sm whitespace-nowrap">{row.name}</div>
+            <div className="text-[11px] text-gray-500 dark:text-gray-400 whitespace-nowrap">{row.type}</div>
           </div>
         </div>
       ),
     },
-    { key: 'base_price', label: 'Base', render: (row) => <span className="text-xs whitespace-nowrap text-gray-600">₹{row.base_price}</span> },
-    { key: 'discount', label: 'Discount', render: (row) => <span className="text-xs whitespace-nowrap text-emerald-600 font-medium">₹{row.discount_value}</span> },
-    { key: 'tax', label: 'Tax', render: (row) => <span className="text-[11px] whitespace-nowrap text-gray-500">{row.tax_rate}% (₹{row.tax_value})</span> },
-    { key: 'fees', label: 'Final Fees', render: (row) => <span className="text-sm font-semibold whitespace-nowrap text-gray-800">₹{row.fees}</span> },
-    { key: 'delivery_time', label: 'Delivery', render: (row) => <span className="text-xs whitespace-nowrap text-gray-600">{row.delivery_time}</span> },
-    { key: 'docs', label: 'Docs', render: (row) => <span className="text-[11px] whitespace-nowrap bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-md font-medium">{row.documents?.length || 0} req</span> },
+    { key: 'base_price', label: 'Base', render: (row) => <span className="text-xs whitespace-nowrap text-gray-600 dark:text-gray-300">₹{row.base_price}</span> },
+    { key: 'discount', label: 'Discount', render: (row) => <span className="text-xs whitespace-nowrap text-emerald-600 dark:text-emerald-400 font-medium">₹{row.discount_value}</span> },
+    { key: 'tax', label: 'Tax', render: (row) => <span className="text-[11px] whitespace-nowrap text-gray-500 dark:text-gray-400">{row.tax_rate}% (₹{row.tax_value})</span> },
+    { key: 'fees', label: 'Final Fees', render: (row) => <span className="text-sm font-semibold whitespace-nowrap text-gray-800 dark:text-gray-100">₹{row.fees}</span> },
+    { key: 'delivery_time', label: 'Delivery', render: (row) => <span className="text-xs whitespace-nowrap text-gray-600 dark:text-gray-300">{row.delivery_time}</span> },
+    { key: 'docs', label: 'Docs', render: (row) => <span className="text-[11px] whitespace-nowrap bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-1.5 py-0.5 rounded-md font-medium border border-gray-200 dark:border-gray-700">{row.documents?.length || 0} req</span> },
     {
       key: 'status', label: 'Status', render: (row) => <ServiceStatusBadge status={row.status} />,
     },
@@ -359,27 +359,27 @@ export default function Services() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm"
+          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm"
         >
           <div className="flex items-center gap-4 flex-1">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
               <input
                 type="text"
                 placeholder="Search services by name, category, or status..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-11 pr-10 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm min-h-[42px]"
+                className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
               />
               {searchTerm && (
-                <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1">
+                <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1">
                   <X size={14} />
                 </button>
               )}
             </div>
-            <p className="text-sm text-gray-500 hidden xl:block whitespace-nowrap">
-              <span className="font-semibold text-gray-800">{filtered.length}</span> services
-              {searchTerm && <span className="ml-1 text-emerald-600">· "{searchTerm}"</span>}
+            <p className="text-sm text-gray-500 dark:text-gray-400 hidden xl:block whitespace-nowrap">
+              <span className="font-semibold text-gray-800 dark:text-gray-200">{filtered.length}</span> services
+              {searchTerm && <span className="ml-1 text-emerald-600 dark:text-emerald-400">· "{searchTerm}"</span>}
             </p>
           </div>
 
@@ -397,16 +397,16 @@ export default function Services() {
 
         {/* Empty state */}
         {!loading && filtered.length === 0 && (
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white rounded-xl shadow-xl">
-            <Briefcase className="text-gray-300 mx-auto mb-4" size={64} />
-            <p className="text-xl text-gray-500">No services found</p>
-            <p className="text-gray-400 mt-2">{searchTerm ? 'Try adjusting your search' : 'No services available'}</p>
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-950/50">
+            <Briefcase className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
+            <p className="text-xl text-gray-500 dark:text-gray-400">No services found</p>
+            <p className="text-gray-400 dark:text-gray-500 mt-2">{searchTerm ? 'Try adjusting your search' : 'No services available'}</p>
           </motion.div>
         )}
 
         {/* Content */}
         {!loading && filtered.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl bg-white shadow-xl">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
             {/* Card View (default) */}
             {viewMode === 'card' && (
               <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4">
@@ -433,9 +433,9 @@ export default function Services() {
                 rowKey="service_id"
                 onRowClick={(row) => handleView(row)}
                 getActions={(row) => [
-                  { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50' },
-                  { label: 'Edit Service', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50' },
-                  { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50' },
+                  { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 dark:text-emerald-400 dark:hover:text-emerald-300' },
+                  { label: 'Edit Service', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
+                  { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
                 ]}
                 accent="emerald"
               />
@@ -470,22 +470,22 @@ export default function Services() {
                 <button
                   disabled={isDeleting}
                   onClick={() => setIsDeleteModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   disabled={isDeleting}
                   onClick={confirmDelete}
-                  className="px-5 py-2.5 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-all flex items-center gap-2 disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
                 >
                   {isDeleting ? 'Deleting...' : 'Yes, Delete Service'}
                 </button>
               </div>
             }
           >
-            <div className="text-gray-600">
-              Are you sure you want to delete <span className="font-semibold text-gray-800">{serviceToDelete.name}</span>? This action cannot be undone.
+            <div className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to delete <span className="font-semibold text-gray-800 dark:text-gray-100">{serviceToDelete.name}</span>? This action cannot be undone.
             </div>
           </Modal>
         )}

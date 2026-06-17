@@ -32,16 +32,16 @@ const Modal = ({ isOpen, onClose, title, icon: Icon, children, onConfirm, confir
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
-      <div className={`relative bg-white rounded-lg shadow-xl w-full mx-4 z-10 animate-fade-in flex flex-col max-h-[90vh] ${sizeClasses[size] || sizeClasses.md} ${className}`}>
+      <div className={`relative bg-white dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-gray-950 w-full mx-4 z-10 animate-fade-in flex flex-col max-h-[90vh] ${sizeClasses[size] || sizeClasses.md} ${className}`}>
         {/* Fixed Header */}
-        <div className="flex justify-between items-center p-4 border-b border-gray-100 shrink-0 bg-white rounded-t-lg">
-          <h3 className="text-lg font-bold flex items-center gap-2 text-slate-800">
-            {Icon && <Icon size={20} className="text-emerald-700" />}
+        <div className="flex justify-between items-center p-4 border-b border-gray-100 dark:border-gray-700 shrink-0 bg-white dark:bg-gray-800 rounded-t-lg">
+          <h3 className="text-lg font-bold flex items-center gap-2 text-slate-800 dark:text-gray-100">
+            {Icon && <Icon size={20} className="text-emerald-700 dark:text-emerald-400" />}
             {title}
           </h3>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <X size={20} />
           </button>
@@ -54,11 +54,11 @@ const Modal = ({ isOpen, onClose, title, icon: Icon, children, onConfirm, confir
 
         {/* Fixed Footer */}
         {footer ? (
-          <div className="p-4 border-t border-gray-100 shrink-0 bg-gray-50 rounded-b-lg">
+          <div className="p-4 border-t border-gray-100 dark:border-gray-700 shrink-0 bg-gray-50 dark:bg-gray-800/50 rounded-b-lg">
             {footer}
           </div>
         ) : onConfirm ? (
-          <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-100 shrink-0 bg-gray-50 rounded-b-lg">
+          <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-100 dark:border-gray-700 shrink-0 bg-gray-50 dark:bg-gray-800/50 rounded-b-lg">
             <Button variant="secondary" onClick={onClose}>
               Cancel
             </Button>

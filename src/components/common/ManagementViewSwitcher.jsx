@@ -3,7 +3,7 @@ import { FaTh, FaListUl } from 'react-icons/fa';
 
 const colorClasses = {
   active: 'bg-blue-600 text-white shadow-md',
-  inactive: 'text-gray-600 hover:text-blue-600 hover:bg-blue-50',
+  inactive: 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-gray-800',
 };
 
 const iconByView = {

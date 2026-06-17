@@ -10,6 +10,9 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  body {
+    @apply transition-colors duration-300;
+  }
   ::-webkit-scrollbar {
     width: 6px;
   }
@@ -22,6 +25,13 @@
   }
   ::-webkit-scrollbar-thumb:hover {
     background: #475569;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: #4b5563;
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
   }
 
   .custom-scrollbar::-webkit-scrollbar {
@@ -37,5 +47,12 @@
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
+  }
+
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #4b5563;
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
   }
 }
