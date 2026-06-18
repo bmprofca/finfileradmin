@@ -22,6 +22,7 @@ import ServerUnreachable from "./pages/ServerUnreachable";
 import Clients from "./pages/Clients";
 import Firms from "./pages/Firms";
 import Payments from "./pages/Payments";
+import Profile from "./pages/Profile";
 
 
 function App() {
@@ -60,6 +61,7 @@ function App() {
                 <Route path="services" element={<RoleRoute allowedRoles={['admin']}><Services /></RoleRoute>} />
                 <Route path="firms" element={<RoleRoute allowedRoles={['admin']}><Firms /></RoleRoute>} /> 
                 <Route path="payments" element={<RoleRoute allowedRoles={['admin']}><Payments /></RoleRoute>} />
+                <Route path="profile" element={<Profile />} />
               </Route>
             </Route>
 
