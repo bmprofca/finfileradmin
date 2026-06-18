@@ -10,6 +10,7 @@ import ManagementCard from '../components/common/ManagementCard';
 import ManagementGrid from '../components/common/ManagementGrid';
 import ManagementTable from '../components/common/ManagementTable';
 import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
+import PaginationComponent from '../components/common/PaginationComponent';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 import ServiceFormModal from '../components/common/ServiceFormModal';
@@ -190,6 +191,7 @@ const ServiceManagementCard = ({ service, index, onView, onEdit, onDelete }) => 
 export default function Services() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('table');
   const [selectedService, setSelectedService] = useState(null);
@@ -200,16 +202,24 @@ export default function Services() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalServices, setTotalServices] = useState(0);
 
   // Fetch Services
-  const fetchServices = async () => {
-    setLoading(true);
+  const fetchServices = async ({ silent = false } = {}) => {
+    if (silent) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
     try {
-      // Pass pagination params if needed, for now just fetch large limit to handle search locally
-      const response = await apiCall('/api/admin/services/list?page_no=1&limit=100');
+      const response = await apiCall(`/api/admin/services/list?page_no=${currentPage}&limit=${itemsPerPage}`);
       const json = await response.json();
       if (json.success) {
         setServices(json.data.services || []);
+        const pagination = json.data.pagination || {};
+        setTotalServices(pagination.total || 0);
       } else {
         toast.error('Failed to fetch services.');
       }
@@ -217,16 +227,22 @@ export default function Services() {
       toast.error('Error connecting to server.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
-  const fetchServicesRef = useRef(false);
+  const lastFetchRef = useRef({ page: null, limit: null });
   useEffect(() => {
-    if (!fetchServicesRef.current) {
-      fetchServicesRef.current = true;
-      fetchServices();
+    if (
+      lastFetchRef.current.page === currentPage &&
+      lastFetchRef.current.limit === itemsPerPage
+    ) {
+      return;
     }
-  }, []);
+
+    lastFetchRef.current = { page: currentPage, limit: itemsPerPage };
+    fetchServices();
+  }, [currentPage, itemsPerPage]);
 
   const filtered = useMemo(() =>
     services.filter((s) =>
@@ -251,6 +267,15 @@ export default function Services() {
     setIsFormModalOpen(true);
   };
 
+  const handleRefresh = () => {
+    fetchServices({ silent: true });
+  };
+
+  const handleLimitChange = (limit) => {
+    setItemsPerPage(limit);
+    setCurrentPage(1);
+  };
+
   const handleDeleteRequest = (service) => {
     setServiceToDelete(service);
     setIsDeleteModalOpen(true);
@@ -267,7 +292,7 @@ export default function Services() {
         toast.success('Service deleted successfully.');
         setIsDeleteModalOpen(false);
         setServiceToDelete(null);
-        fetchServices();
+        fetchServices({ silent: true });
       } else {
         toast.error(json.message || 'Failed to delete service.');
       }
@@ -290,7 +315,7 @@ export default function Services() {
       if (json.success) {
         toast.success(editingService ? 'Service updated successfully!' : 'Service created successfully!');
         setIsFormModalOpen(false);
-        fetchServices();
+        fetchServices({ silent: true });
       } else {
         toast.error(json.message || 'Operation failed.');
       }
@@ -335,6 +360,8 @@ export default function Services() {
       title="Services Management"
       description="Manage the services and packages offered to your clients."
       accent="emerald"
+      onRefresh={handleRefresh}
+      refreshing={refreshing}
       actions={
         <Button onClick={handleCreateNew} variant="primary" className="flex items-center gap-2 text-sm py-1.5 bg-blue-600 hover:bg-blue-700">
           <Plus size={16} /> Add Service
@@ -427,6 +454,17 @@ export default function Services() {
               />
             )}
           </motion.div>
+        )}
+
+        {!loading && totalServices > 0 && !searchTerm && (
+          <PaginationComponent
+            currentPage={currentPage}
+            totalItems={totalServices}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+            onLimitChange={handleLimitChange}
+            availableLimits={[10, 20, 50, 100]}
+          />
         )}
       </div>
 
