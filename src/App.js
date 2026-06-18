@@ -19,6 +19,8 @@ import MyOrders from "./pages/MyOrders";
 import Orders from "./pages/Orders";
 import NotFound from "./pages/NotFound";
 import ServerUnreachable from "./pages/ServerUnreachable";
+import Clients from "./pages/Clients";
+import Firms from "./pages/Firms";
 
 
 function App() {
@@ -49,11 +51,13 @@ function App() {
               <Route element={<MainLayout />}>
                 <Route index element={<Dashboard />} />
                 <Route path="dashboard" element={<Dashboard />} />
+                <Route path="clients" element={<RoleRoute allowedRoles={['admin']}><Clients /></RoleRoute>} />
                 <Route path="staffs" element={<RoleRoute allowedRoles={['admin']}><Staffs /></RoleRoute>} />
                 <Route path="staffs/:username" element={<RoleRoute allowedRoles={['admin']}><StaffProfile /></RoleRoute>} />
                 <Route path="my-orders" element={<RoleRoute allowedRoles={['staff']}><MyOrders /></RoleRoute>} />
                 <Route path="orders" element={<RoleRoute allowedRoles={['admin']}><Orders /></RoleRoute>} />
                 <Route path="services" element={<RoleRoute allowedRoles={['admin']}><Services /></RoleRoute>} />
+                <Route path="firms" element={<RoleRoute allowedRoles={['admin']}><Firms /></RoleRoute>} /> 
               </Route>
             </Route>
 

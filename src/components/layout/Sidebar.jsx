@@ -9,9 +9,11 @@ import {
   ClipboardList,
   FileBox,
   Settings,
+  BrickWall,
 } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { label } from 'framer-motion/client';
 
 const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -57,6 +59,12 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
       path: '/services',
       roles: ['admin'],
     },
+    {
+      icon: BrickWall,
+      label:'Firms',
+      path:'/firms',
+      roles:['admin'],
+    }
     
   ];
 
