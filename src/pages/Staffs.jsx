@@ -14,7 +14,7 @@ import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher'
 import PaginationComponent from '../components/common/PaginationComponent';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
-import apiCall from '../utils/apiCall';
+import apiCall, { uploadFile } from '../utils/apiCall';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -128,6 +128,7 @@ const ViewStaffModal = ({ staff, onClose, onEdit, onDelete }) => (
 
 const StaffFormModal = ({ staff, onClose, onSubmit, isSubmitting }) => {
   const isEdit = !!staff;
+  const [isUploading, setIsUploading] = useState(false);
   const [form, setForm] = useState({
     username: staff?.username || '',
     first_name: staff?.first_name || '',
@@ -142,13 +143,28 @@ const StaffFormModal = ({ staff, onClose, onSubmit, isSubmitting }) => {
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
   const setStatus = (val) => setForm((f) => ({ ...f, status: val }));
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setIsUploading(true);
+    try {
+      const url = await uploadFile(file);
+      setForm((f) => ({ ...f, image: url }));
+      toast.success('Image uploaded successfully');
+    } catch (error) {
+      toast.error('Failed to upload image');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(form);
   };
 
   const inputCls =
-    'w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm dark:text-gray-100';
+    'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm dark:text-gray-100';
 
   return (
     <Modal
@@ -179,70 +195,108 @@ const StaffFormModal = ({ staff, onClose, onSubmit, isSubmitting }) => {
         </div>
       }
     >
-      <form id="staff-form" onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Username *</label>
-            <input
-              required
-              disabled={isEdit}
-              value={form.username}
-              onChange={set('username')}
-              placeholder="e.g. john_doe"
-              className={`${inputCls} ${isEdit ? 'opacity-60 cursor-not-allowed' : ''}`}
-            />
-            {isEdit && <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">Username cannot be changed after creation.</p>}
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">First Name *</label>
-            <input required value={form.first_name} onChange={set('first_name')} placeholder="First name" className={inputCls} />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Middle Name</label>
-            <input value={form.middle_name} onChange={set('middle_name')} placeholder="Middle name (optional)" className={inputCls} />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Last Name *</label>
-            <input required value={form.last_name} onChange={set('last_name')} placeholder="Last name" className={inputCls} />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Mobile *</label>
-            <input required value={form.mobile} onChange={set('mobile')} placeholder="e.g. +91 9876543210" className={inputCls} />
-          </div>
-
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Email *</label>
-            <input required type="email" value={form.email} onChange={set('email')} placeholder="staff@example.com" className={inputCls} />
-          </div>
-
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Image URL</label>
-            <input value={form.image} onChange={set('image')} placeholder="https://..." className={inputCls} />
-          </div>
-
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Status</label>
-            <div className="flex gap-3">
-              {[{ label: 'Active', value: 1 }, { label: 'Inactive', value: 0 }].map(({ label, value }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setStatus(value)}
-                  className={`flex-1 py-2 rounded-xl border text-sm font-semibold transition-all ${
-                    form.status === value
-                      ? value === 1
-                        ? 'bg-emerald-50 border-emerald-400 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-600 dark:text-emerald-300'
-                        : 'bg-gray-100 border-gray-400 text-gray-700 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-200'
-                      : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+      <form id="staff-form" onSubmit={handleSubmit} className="space-y-6">
+        
+        {/* Account Information */}
+        <div>
+          <h4 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3">Account Information</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Username *</label>
+              <input
+                required
+                disabled={isEdit}
+                value={form.username}
+                onChange={set('username')}
+                placeholder="e.g. john_doe"
+                className={`${inputCls} ${isEdit ? 'opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-800' : ''}`}
+              />
+              {isEdit && <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">Username cannot be changed after creation.</p>}
+            </div>
+            
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Account Status</label>
+              <div className="flex gap-3">
+                {[{ label: 'Active', value: 1 }, { label: 'Inactive', value: 0 }].map(({ label, value }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setStatus(value)}
+                    className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
+                      form.status === value
+                        ? value === 1
+                          ? 'bg-emerald-50 border-emerald-400 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-600 dark:text-emerald-300 shadow-sm'
+                          : 'bg-gray-100 border-gray-400 text-gray-700 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-200 shadow-sm'
+                        : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
+
+        <div className="h-px w-full bg-gray-200 dark:bg-gray-700"></div>
+
+        {/* Personal Details */}
+        <div>
+          <h4 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3">Personal Details</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">First Name *</label>
+              <input required value={form.first_name} onChange={set('first_name')} placeholder="First name" className={inputCls} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Middle Name</label>
+              <input value={form.middle_name} onChange={set('middle_name')} placeholder="Middle name (optional)" className={inputCls} />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Last Name *</label>
+              <input required value={form.last_name} onChange={set('last_name')} placeholder="Last name" className={inputCls} />
+            </div>
+            
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Email *</label>
+              <input required type="email" value={form.email} onChange={set('email')} placeholder="staff@example.com" className={inputCls} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Mobile *</label>
+              <input required value={form.mobile} onChange={set('mobile')} placeholder="e.g. +91 9876543210" className={inputCls} />
+            </div>
+          </div>
+        </div>
+
+        <div className="h-px w-full bg-gray-200 dark:bg-gray-700"></div>
+
+        {/* Profile Image */}
+        <div>
+          <h4 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3">Profile Image</h4>
+          <div className={`mt-2 flex justify-center rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 px-6 py-8 bg-gray-50 dark:bg-gray-800/50 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 ${isUploading ? 'opacity-50' : ''}`}>
+            <div className="text-center flex flex-col items-center">
+              {form.image && !isUploading ? (
+                <div className="mb-4">
+                  <img src={form.image} alt="Preview" className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-700 shadow-lg mx-auto" />
+                </div>
+              ) : (
+                <div className="mx-auto h-16 w-16 mb-4 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <svg className="h-8 w-8 text-blue-600 dark:text-blue-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+              )}
+              <div className="flex text-sm text-gray-600 dark:text-gray-400 justify-center">
+                <label htmlFor="staff-image-upload" className="relative cursor-pointer rounded-md font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-2">
+                  <span>{isUploading ? 'Uploading image...' : form.image ? 'Change profile image' : 'Upload a profile image'}</span>
+                  <input id="staff-image-upload" type="file" accept="image/*" className="sr-only" onChange={handleImageUpload} disabled={isUploading} />
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">PNG, JPG, GIF up to 5MB</p>
+            </div>
+          </div>
+        </div>
+
       </form>
     </Modal>
   );
