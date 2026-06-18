@@ -340,9 +340,20 @@ export default function Clients() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const itemsPerPage = 20;
+  const lastFetchRef = useRef(null);
+  const activeFetchRef = useRef(null);
 
   // ── Fetch ────────────────────────────────────────────────────────────────────
-  const fetchClients = async () => {
+  const fetchClients = async ({ force = false } = {}) => {
+    const requestKey = `${currentPage}|${itemsPerPage}|${searchTerm}`;
+    if (activeFetchRef.current === requestKey) {
+      setRefreshing(false);
+      return;
+    }
+    if (!force && lastFetchRef.current === requestKey) return;
+
+    lastFetchRef.current = requestKey;
+    activeFetchRef.current = requestKey;
     setLoading(true);
     try {
       const response = await apiCall(`/api/admin/clients/list?page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`, 'GET');
@@ -358,19 +369,19 @@ export default function Clients() {
     } finally {
       setLoading(false);
       setRefreshing(false);
+      if (activeFetchRef.current === requestKey) {
+        activeFetchRef.current = null;
+      }
     }
   };
 
-  const lastFetchRef = useRef({ page: null, search: null });
   useEffect(() => {
-    if (lastFetchRef.current.page === currentPage && lastFetchRef.current.search === searchTerm) return;
-    lastFetchRef.current = { page: currentPage, search: searchTerm };
     fetchClients();
   }, [currentPage, searchTerm]);
 
   const handleRefresh = () => {
     setRefreshing(true);
-    fetchClients();
+    fetchClients({ force: true });
   };
 
   // ── Handlers ──────────────────────────────────────────────────────────────
@@ -389,7 +400,7 @@ export default function Clients() {
         toast.success('Client deleted successfully.');
         setIsDeleteModalOpen(false);
         setClientToDelete(null);
-        fetchClients();
+        fetchClients({ force: true });
       } else {
         toast.error(json.message || 'Failed to delete client.');
       }
@@ -415,7 +426,7 @@ export default function Clients() {
       if (json.success) {
         toast.success(isEdit ? 'Client updated successfully!' : 'Client created successfully!');
         setIsFormModalOpen(false);
-        fetchClients();
+        fetchClients({ force: true });
       } else {
         toast.error(json.message || 'Operation failed.');
       }

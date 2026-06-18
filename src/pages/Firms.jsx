@@ -303,9 +303,20 @@ export default function Firms() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const itemsPerPage = 20;
+  const lastFetchRef = useRef(null);
+  const activeFetchRef = useRef(null);
 
   // ── Fetch ─────────────────────────────────────────────────────────────────
-  const fetchFirms = async () => {
+  const fetchFirms = async ({ force = false } = {}) => {
+    const requestKey = `${currentPage}|${itemsPerPage}|${searchTerm}`;
+    if (activeFetchRef.current === requestKey) {
+      setRefreshing(false);
+      return;
+    }
+    if (!force && lastFetchRef.current === requestKey) return;
+
+    lastFetchRef.current = requestKey;
+    activeFetchRef.current = requestKey;
     setLoading(true);
     try {
       const response = await apiCall(
@@ -324,17 +335,17 @@ export default function Firms() {
     } finally {
       setLoading(false);
       setRefreshing(false);
+      if (activeFetchRef.current === requestKey) {
+        activeFetchRef.current = null;
+      }
     }
   };
 
-  const lastFetchRef = useRef({ page: null, search: null });
   useEffect(() => {
-    if (lastFetchRef.current.page === currentPage && lastFetchRef.current.search === searchTerm) return;
-    lastFetchRef.current = { page: currentPage, search: searchTerm };
     fetchFirms();
   }, [currentPage, searchTerm]);
 
-  const handleRefresh = () => { setRefreshing(true); fetchFirms(); };
+  const handleRefresh = () => { setRefreshing(true); fetchFirms({ force: true }); };
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleView         = (firm) => { setSelectedFirm(firm); setIsViewModalOpen(true); };
@@ -352,7 +363,7 @@ export default function Firms() {
         toast.success('Firm deleted successfully.');
         setIsDeleteModalOpen(false);
         setFirmToDelete(null);
-        fetchFirms();
+        fetchFirms({ force: true });
       } else {
         toast.error(json.message || 'Failed to delete firm.');
       }
@@ -374,7 +385,7 @@ export default function Firms() {
       if (json.success) {
         toast.success(isEdit ? 'Firm updated successfully!' : 'Firm created successfully!');
         setIsFormModalOpen(false);
-        fetchFirms();
+        fetchFirms({ force: true });
       } else {
         toast.error(json.message || 'Operation failed.');
       }
