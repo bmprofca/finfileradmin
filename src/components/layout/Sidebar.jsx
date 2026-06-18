@@ -29,8 +29,8 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
     },
     {
       icon: Users,
-      label: 'Users',
-      path: '/users',
+      label: 'Clients',
+      path: '/clients',
       roles: ['admin'],
     },
     {
@@ -57,17 +57,7 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
       path: '/services',
       roles: ['admin'],
     },
-    {
-      icon: BarChart3,
-      label: 'Reports',
-      path: '/reports',
-      roles: ['admin'],
-    },
-    {
-      icon: Settings,
-      label: 'Settings',
-      path: '/settings',
-    },
+    
   ];
 
   const menuItems = allMenuItems.filter(item => !item.roles || item.roles.includes(userType));

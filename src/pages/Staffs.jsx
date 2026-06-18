@@ -70,28 +70,20 @@ const ViewStaffModal = ({ staff, onClose, onEdit, onDelete }) => (
     size="2xl"
     contentClassName="p-5 space-y-4"
     footer={
-      <div className="flex items-center justify-between w-full">
+      <>
         <button
           onClick={() => onDelete(staff)}
           className="px-5 py-2.5 rounded-xl border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2"
         >
           <Trash2 size={16} /> Delete
         </button>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onClose}
-            className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all"
-          >
-            Close
-          </button>
-          <button
-            onClick={() => onEdit(staff)}
-            className="px-5 py-2.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2"
-          >
-            <Edit size={16} /> Edit Staff
-          </button>
-        </div>
-      </div>
+        <button
+          onClick={() => onEdit(staff)}
+          className="px-5 py-2.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2"
+        >
+          <Edit size={16} /> Edit Staff
+        </button>
+      </>
     }
   >
     {/* Avatar + Name */}
@@ -174,25 +166,16 @@ const StaffFormModal = ({ staff, onClose, onSubmit, isSubmitting }) => {
       icon={isEdit ? Edit : Plus}
       size="2xl"
       contentClassName="p-5"
+      closeText="Cancel"
       footer={
-        <div className="flex items-center justify-end gap-3 w-full">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            form="staff-form"
-            disabled={isSubmitting}
-            className="px-5 py-2.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2 disabled:opacity-50"
-          >
-            {isSubmitting ? 'Saving...' : isEdit ? 'Update Staff' : 'Create Staff'}
-          </button>
-        </div>
+        <button
+          type="submit"
+          form="staff-form"
+          disabled={isSubmitting}
+          className="px-5 py-2.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2 disabled:opacity-50"
+        >
+          {isSubmitting ? 'Saving...' : isEdit ? 'Update Staff' : 'Create Staff'}
+        </button>
       }
     >
       <form id="staff-form" onSubmit={handleSubmit} className="space-y-6">
@@ -649,23 +632,15 @@ export default function Staffs() {
             title="Delete Staff"
             icon={Trash2}
             size="md"
+            closeText="Cancel"
             footer={
-              <div className="flex items-center justify-end gap-3">
-                <button
-                  disabled={isDeleting}
-                  onClick={() => setIsDeleteModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  disabled={isDeleting}
-                  onClick={confirmDelete}
-                  className="px-5 py-2.5 rounded-xl bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
-                >
-                  {isDeleting ? 'Deleting...' : 'Yes, Delete Staff'}
-                </button>
-              </div>
+              <button
+                disabled={isDeleting}
+                onClick={confirmDelete}
+                className="px-5 py-2.5 rounded-xl bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
+              >
+                {isDeleting ? 'Deleting...' : 'Yes, Delete Staff'}
+              </button>
             }
           >
             <div className="text-gray-600 dark:text-gray-400">
@@ -686,23 +661,15 @@ export default function Staffs() {
             title="Force Logout Staff"
             icon={LogOut}
             size="md"
+            closeText="Cancel"
             footer={
-              <div className="flex items-center justify-end gap-3">
-                <button
-                  disabled={isLoggingOut}
-                  onClick={() => setIsLogoutModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  disabled={isLoggingOut}
-                  onClick={confirmLogout}
-                  className="px-5 py-2.5 rounded-xl bg-orange-600 dark:bg-orange-500 text-white text-sm font-semibold hover:bg-orange-700 dark:hover:bg-orange-600 transition-all flex items-center gap-2 disabled:opacity-50"
-                >
-                  {isLoggingOut ? 'Logging out...' : 'Yes, Force Logout'}
-                </button>
-              </div>
+              <button
+                disabled={isLoggingOut}
+                onClick={confirmLogout}
+                className="px-5 py-2.5 rounded-xl bg-orange-600 dark:bg-orange-500 text-white text-sm font-semibold hover:bg-orange-700 dark:hover:bg-orange-600 transition-all flex items-center gap-2 disabled:opacity-50"
+              >
+                {isLoggingOut ? 'Logging out...' : 'Yes, Force Logout'}
+              </button>
             }
           >
             <div className="text-gray-600 dark:text-gray-400">

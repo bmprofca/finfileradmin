@@ -174,20 +174,16 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
       icon={Briefcase}
       size="4xl"
       contentClassName="p-0"
+      closeText="Cancel"
       footer={
-        <div className="flex items-center justify-end gap-3">
-          <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-200 hover:bg-slate-50 dark:hover:bg-gray-700">
-            Cancel
-          </button>
-          <button 
-            type="submit" 
-            form="service-form"
-            disabled={isSubmitting}
-            className="px-5 py-2.5 rounded-xl bg-emerald-600 dark:bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 disabled:opacity-50"
-          >
-            {isSubmitting ? 'Saving...' : 'Save Service'}
-          </button>
-        </div>
+        <button 
+          type="submit" 
+          form="service-form"
+          disabled={isSubmitting}
+          className="px-5 py-2.5 rounded-xl bg-emerald-600 dark:bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 disabled:opacity-50"
+        >
+          {isSubmitting ? 'Saving...' : 'Save Service'}
+        </button>
       }
     >
       <form id="service-form" onSubmit={handleSubmit} className="p-6 space-y-8">

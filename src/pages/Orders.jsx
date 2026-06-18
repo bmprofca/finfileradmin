@@ -94,16 +94,7 @@ const ViewAssignedStaffModal = ({ order, onClose }) => (
     title={`Assigned Staff · ${order?.name || ''}`}
     icon={Users}
     size="md"
-    footer={
-      <div className="flex items-center justify-end">
-        <button
-          onClick={onClose}
-          className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all"
-        >
-          Close
-        </button>
-      </div>
-    }
+    footer={null}
   >
     <div className="max-h-60 overflow-y-auto space-y-2 border border-gray-100 dark:border-gray-700 rounded-lg p-2 bg-gray-50 dark:bg-gray-900/50">
       {order.assigned_staff && order.assigned_staff.length > 0 ? (
@@ -135,37 +126,28 @@ const ViewOrderModal = ({ order, onClose, onAssign, onEditStaff, onRemoveStaff }
     size="2xl"
     contentClassName="p-5 space-y-4"
     footer={
-      <div className="flex items-center justify-between w-full">
+      <>
+        {order.assigned_staff && order.assigned_staff.length > 0 && (
+          <button
+            onClick={() => onRemoveStaff(order)}
+            className="px-4 py-2.5 rounded-xl border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2"
+          >
+            <UserMinus size={14} /> Remove
+          </button>
+        )}
         <button
-          onClick={onClose}
-          className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all"
+          onClick={() => onEditStaff(order)}
+          className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center gap-2"
         >
-          Close
+          <Users size={14} /> Edit Staff
         </button>
-        {/* Staff actions */}
-        <div className="flex items-center gap-2">
-          {order.assigned_staff && order.assigned_staff.length > 0 && (
-            <button
-              onClick={() => onRemoveStaff(order)}
-              className="px-4 py-2.5 rounded-xl border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2"
-            >
-              <UserMinus size={14} /> Remove
-            </button>
-          )}
-          <button
-            onClick={() => onEditStaff(order)}
-            className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center gap-2"
-          >
-            <Users size={14} /> Edit Staff
-          </button>
-          <button
-            onClick={() => onAssign(order)}
-            className="px-4 py-2.5 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-sm font-semibold text-white hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2"
-          >
-            <UserPlus size={14} /> Assign Staff
-          </button>
-        </div>
-      </div>
+        <button
+          onClick={() => onAssign(order)}
+          className="px-4 py-2.5 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-sm font-semibold text-white hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2"
+        >
+          <UserPlus size={14} /> Assign Staff
+        </button>
+      </>
     }
   >
     {/* Icon + Name */}
@@ -660,23 +642,16 @@ export default function Orders() {
             title={`Assign Staff · ${selectedOrder?.name || ''}`}
             icon={UserPlus}
             size="md"
+            closeText="Cancel"
             footer={
-              <div className="flex items-center justify-end gap-3">
-                <button
-                  onClick={() => setAssignModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  disabled={saving || selectedStaffUsernames.length === 0}
-                  onClick={handleAssignStaff}
-                  className="px-5 py-2.5 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-50"
-                >
-                  <UserPlus size={14} />
-                  {saving ? 'Assigning…' : `Assign${selectedStaffUsernames.length > 0 ? ` (${selectedStaffUsernames.length})` : ''}`}
-                </button>
-              </div>
+              <button
+                disabled={saving || selectedStaffUsernames.length === 0}
+                onClick={handleAssignStaff}
+                className="px-5 py-2.5 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-50"
+              >
+                <UserPlus size={14} />
+                {saving ? 'Assigning…' : `Assign${selectedStaffUsernames.length > 0 ? ` (${selectedStaffUsernames.length})` : ''}`}
+              </button>
             }
           >
             <div className="space-y-3">
@@ -708,23 +683,16 @@ export default function Orders() {
             title={`Edit Staff · ${selectedOrder?.name || ''}`}
             icon={Users}
             size="md"
+            closeText="Cancel"
             footer={
-              <div className="flex items-center justify-end gap-3">
-                <button
-                  onClick={() => setEditStaffModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  disabled={saving}
-                  onClick={handleEditStaff}
-                  className="px-5 py-2.5 rounded-xl bg-amber-500 dark:bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 dark:hover:bg-amber-600 transition-all flex items-center gap-2 disabled:opacity-50"
-                >
-                  <Users size={14} />
-                  {saving ? 'Saving…' : 'Update Assignments'}
-                </button>
-              </div>
+              <button
+                disabled={saving}
+                onClick={handleEditStaff}
+                className="px-5 py-2.5 rounded-xl bg-amber-500 dark:bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 dark:hover:bg-amber-600 transition-all flex items-center gap-2 disabled:opacity-50"
+              >
+                <Users size={14} />
+                {saving ? 'Saving…' : 'Update Assignments'}
+              </button>
             }
           >
             <div className="space-y-3">
@@ -750,23 +718,16 @@ export default function Orders() {
             title={`Remove Staff · ${selectedOrder?.name || ''}`}
             icon={UserMinus}
             size="md"
+            closeText="Cancel"
             footer={
-              <div className="flex items-center justify-end gap-3">
-                <button
-                  onClick={() => setRemoveStaffModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  disabled={saving || selectedStaffUsernames.length === 0}
-                  onClick={handleRemoveStaff}
-                  className="px-5 py-2.5 rounded-xl bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
-                >
-                  <UserMinus size={14} />
-                  {saving ? 'Removing…' : `Remove${selectedStaffUsernames.length > 0 ? ` (${selectedStaffUsernames.length})` : ''}`}
-                </button>
-              </div>
+              <button
+                disabled={saving || selectedStaffUsernames.length === 0}
+                onClick={handleRemoveStaff}
+                className="px-5 py-2.5 rounded-xl bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
+              >
+                <UserMinus size={14} />
+                {saving ? 'Removing…' : `Remove${selectedStaffUsernames.length > 0 ? ` (${selectedStaffUsernames.length})` : ''}`}
+              </button>
             }
           >
             <div className="space-y-3">

@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Briefcase, Plus, FileText, CheckCircle, XCircle,
-  Search, X, Eye, DollarSign, Users, Trash2, Edit
+  Search, X, Eye, DollarSign, Trash2, Edit
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ManagementHub from '../components/common/ManagementHub';
@@ -16,18 +16,6 @@ import ServiceFormModal from '../components/common/ServiceFormModal';
 import { apiCall } from '../utils/apiCall';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const modalVariants = {
-  hidden: { opacity: 0, scale: 0.9, y: 20 },
-  visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', duration: 0.5 } },
-  exit: { opacity: 0, scale: 0.9, y: 20, transition: { duration: 0.3 } },
-};
-
-const backdropVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-  exit: { opacity: 0 },
-};
 
 const ServiceStatusBadge = ({ status }) => {
   const isActive = status === 1 || status === true || status === 'Active';
@@ -68,19 +56,14 @@ const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
     size="2xl"
     contentClassName="p-5 space-y-4"
     footer={
-      <div className="flex items-center justify-between w-full">
+      <>
         <button onClick={() => onDelete(service)} className="px-5 py-2.5 rounded-xl border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2">
           <Trash2 size={16} /> Delete
         </button>
-        <div className="flex items-center gap-3">
-          <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all">
-            Close
-          </button>
-          <button onClick={() => onEdit(service)} className="px-5 py-2.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2">
-            <Edit size={16} /> Edit Service
-          </button>
-        </div>
-      </div>
+        <button onClick={() => onEdit(service)} className="px-5 py-2.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2">
+          <Edit size={16} /> Edit Service
+        </button>
+      </>
     }
   >
     {/* Icon + Name */}
@@ -469,23 +452,15 @@ export default function Services() {
             title="Delete Service"
             icon={Trash2}
             size="md"
+            closeText="Cancel"
             footer={
-              <div className="flex items-center justify-end gap-3">
-                <button
-                  disabled={isDeleting}
-                  onClick={() => setIsDeleteModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  disabled={isDeleting}
-                  onClick={confirmDelete}
-                  className="px-5 py-2.5 rounded-xl bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
-                >
-                  {isDeleting ? 'Deleting...' : 'Yes, Delete Service'}
-                </button>
-              </div>
+              <button
+                disabled={isDeleting}
+                onClick={confirmDelete}
+                className="px-5 py-2.5 rounded-xl bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
+              >
+                {isDeleting ? 'Deleting...' : 'Yes, Delete Service'}
+              </button>
             }
           >
             <div className="text-gray-600 dark:text-gray-400">
