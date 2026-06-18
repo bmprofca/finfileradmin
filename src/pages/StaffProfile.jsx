@@ -139,7 +139,7 @@ export default function StaffProfile() {
 
   return (
     <ManagementHub
-      title={staff ? `${staff.name}'s Profile` : 'Staff Profile'}
+      title={staff ? `${staff.full_name}'s Profile` : 'Staff Profile'}
       description="View staff details and their assigned orders."
       accent="indigo"
       onRefresh={handleRefresh}
@@ -157,10 +157,10 @@ export default function StaffProfile() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
             <div className="flex items-center gap-6">
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg shrink-0">
-                {staff.name.charAt(0).toUpperCase()}
+                {staff.full_name?.charAt(0)?.toUpperCase()}
               </div>
               <div className="flex-1">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{staff.name}</h2>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{staff.full_name}</h2>
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-2">
                   <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
                     <User size={14} className="text-indigo-400" /> {staff.username}

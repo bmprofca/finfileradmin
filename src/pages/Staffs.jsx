@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, X, Eye, User, Phone, Mail,
-  Plus, Trash2, Edit, CheckCircle, XCircle, Briefcase
+  Plus, Trash2, Edit, CheckCircle, XCircle, Briefcase, LogOut
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -250,7 +250,7 @@ const StaffFormModal = ({ staff, onClose, onSubmit, isSubmitting }) => {
 
 // ─── Staff Card (Card View) ───────────────────────────────────────────────────
 
-const StaffManagementCard = ({ staff, index, onView, onEdit, onDelete, onNavigate }) => (
+const StaffManagementCard = ({ staff, index, onView, onEdit, onDelete, onLogout, onNavigate }) => (
   <ManagementCard
     key={staff.username}
     delay={index * 0.05}
@@ -265,6 +265,7 @@ const StaffManagementCard = ({ staff, index, onView, onEdit, onDelete, onNavigat
     actions={[
       { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(staff), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
       { label: 'Edit Staff', icon: <Edit size={12} />, onClick: () => onEdit(staff), className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300' },
+      { label: 'Force Logout', icon: <LogOut size={12} />, onClick: () => onLogout(staff), className: 'text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/30 dark:text-orange-400 dark:hover:text-orange-300' },
       { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => onDelete(staff), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
     ]}
     menuId={`staff-card-${staff.username}`}
@@ -300,6 +301,10 @@ export default function Staffs() {
   const [staffToDelete, setStaffToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [staffToLogout, setStaffToLogout] = useState(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const itemsPerPage = 10;
 
   // ── Fetch ────────────────────────────────────────────────────────────────────
@@ -334,6 +339,27 @@ export default function Staffs() {
   const handleEdit = (staff) => { setEditingStaff(staff); setIsFormModalOpen(true); setIsViewModalOpen(false); };
   const handleCreateNew = () => { setEditingStaff(null); setIsFormModalOpen(true); };
   const handleDeleteRequest = (staff) => { setStaffToDelete(staff); setIsDeleteModalOpen(true); setIsViewModalOpen(false); };
+  const handleLogoutRequest = (staff) => { setStaffToLogout(staff); setIsLogoutModalOpen(true); setIsViewModalOpen(false); };
+
+  const confirmLogout = async () => {
+    if (!staffToLogout) return;
+    setIsLoggingOut(true);
+    try {
+      const response = await apiCall(`/api/admin/staff/logout/${staffToLogout.username}`, 'POST');
+      const json = await response.json();
+      if (json.success) {
+        toast.success(json.message || 'Staff sessions terminated successfully.');
+        setIsLogoutModalOpen(false);
+        setStaffToLogout(null);
+      } else {
+        toast.error(json.message || 'Failed to logout staff.');
+      }
+    } catch {
+      toast.error('Error connecting to server.');
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   const confirmDelete = async () => {
     if (!staffToDelete) return;
@@ -394,6 +420,7 @@ export default function Staffs() {
     },
     { key: 'username', label: 'Username', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">@{row.username}</span> },
     { key: 'first_name', label: 'First Name', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">{row.first_name || '—'}</span> },
+    { key: 'middle_name', label: 'Middle Name', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">{row.middle_name || '—'}</span> },
     { key: 'last_name', label: 'Last Name', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">{row.last_name || '—'}</span> },
     { key: 'email', label: 'Email', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300">{row.email || '—'}</span> },
     { key: 'mobile', label: 'Mobile', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">{row.mobile || '—'}</span> },
@@ -490,6 +517,7 @@ export default function Staffs() {
                   getActions={(row) => [
                     { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
                     { label: 'Edit Staff', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300' },
+                    { label: 'Force Logout', icon: <LogOut size={12} />, onClick: () => handleLogoutRequest(row), className: 'text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/30 dark:text-orange-400 dark:hover:text-orange-300' },
                     { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
                   ]}
                   accent="blue"
@@ -507,6 +535,7 @@ export default function Staffs() {
                         index={index}
                         onView={handleView}
                         onEdit={handleEdit}
+                        onLogout={handleLogoutRequest}
                         onDelete={handleDeleteRequest}
                         onNavigate={(row) => navigate(`/staffs/${row.username}`)}
                       />
@@ -584,6 +613,43 @@ export default function Staffs() {
               Are you sure you want to delete{' '}
               <span className="font-semibold text-gray-800 dark:text-gray-100">{staffToDelete.full_name}</span>
               {' '}(@{staffToDelete.username})? This action cannot be undone.
+            </div>
+          </Modal>
+        )}
+      </AnimatePresence>
+
+      {/* Logout Confirmation Modal */}
+      <AnimatePresence>
+        {isLogoutModalOpen && staffToLogout && (
+          <Modal
+            isOpen={true}
+            onClose={() => !isLoggingOut && setIsLogoutModalOpen(false)}
+            title="Force Logout Staff"
+            icon={LogOut}
+            size="md"
+            footer={
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  disabled={isLoggingOut}
+                  onClick={() => setIsLogoutModalOpen(false)}
+                  className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  disabled={isLoggingOut}
+                  onClick={confirmLogout}
+                  className="px-5 py-2.5 rounded-xl bg-orange-600 dark:bg-orange-500 text-white text-sm font-semibold hover:bg-orange-700 dark:hover:bg-orange-600 transition-all flex items-center gap-2 disabled:opacity-50"
+                >
+                  {isLoggingOut ? 'Logging out...' : 'Yes, Force Logout'}
+                </button>
+              </div>
+            }
+          >
+            <div className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to force logout{' '}
+              <span className="font-semibold text-gray-800 dark:text-gray-100">{staffToLogout.full_name}</span>
+              {' '}(@{staffToLogout.username})? This will immediately terminate all active sessions for this staff member.
             </div>
           </Modal>
         )}

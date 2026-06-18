@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, X, Briefcase, Hash, User, Users, UserPlus, UserMinus,
@@ -84,6 +84,45 @@ const InfoItem = ({ icon: Icon, label, value }) => (
       <div className="text-sm font-medium text-gray-800 dark:text-gray-100 leading-snug break-words">{value || 'N/A'}</div>
     </div>
   </div>
+);
+
+/* ─── View Assigned Staff Modal ─── */
+const ViewAssignedStaffModal = ({ order, onClose }) => (
+  <Modal
+    isOpen={true}
+    onClose={onClose}
+    title={`Assigned Staff · ${order?.name || ''}`}
+    icon={Users}
+    size="md"
+    footer={
+      <div className="flex items-center justify-end">
+        <button
+          onClick={onClose}
+          className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all"
+        >
+          Close
+        </button>
+      </div>
+    }
+  >
+    <div className="max-h-60 overflow-y-auto space-y-2 border border-gray-100 dark:border-gray-700 rounded-lg p-2 bg-gray-50 dark:bg-gray-900/50">
+      {order.assigned_staff && order.assigned_staff.length > 0 ? (
+        order.assigned_staff.map(staff => (
+          <div key={staff.username} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+              {staff.name?.charAt(0) || '?'}
+            </div>
+            <div className="min-w-0">
+              <p className="font-medium text-sm text-gray-800 dark:text-gray-200">{staff.name}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">@{staff.username}</p>
+            </div>
+          </div>
+        ))
+      ) : (
+        <p className="text-sm text-gray-500 dark:text-gray-400 p-3 text-center">No staff assigned to this order.</p>
+      )}
+    </div>
+  </Modal>
 );
 
 /* ─── View Order Modal ─── */
@@ -186,7 +225,7 @@ const ViewOrderModal = ({ order, onClose, onAssign, onEditStaff, onRemoveStaff }
 );
 
 /* ─── Order Card ─── */
-const OrderCard = ({ order, index, getActions, onClick }) => (
+const OrderCard = ({ order, index, getActions, onClick, onViewStaff }) => (
   <ManagementCard
     delay={index * 0.05}
     accent="indigo"
@@ -217,10 +256,12 @@ const OrderCard = ({ order, index, getActions, onClick }) => (
         Client: {order.client_name || order.client_username}
       </p>
       {order.assigned_staff && order.assigned_staff.length > 0 && (
-        <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-          <Users size={10} className="text-gray-400 dark:text-gray-500" />
-          Staff: {order.assigned_staff.map(s => s.name).join(', ')}
-        </p>
+        <button
+          onClick={(e) => { e.stopPropagation(); onViewStaff && onViewStaff(order); }}
+          className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold flex items-center gap-1.5 mt-1"
+        >
+          <Users size={12} /> {order.assigned_staff.length} Staff Assigned
+        </button>
       )}
     </div>
   </ManagementCard>
@@ -249,6 +290,7 @@ export default function Orders() {
   const [assignModalOpen, setAssignModalOpen]             = useState(false);
   const [editStaffModalOpen, setEditStaffModalOpen]       = useState(false);
   const [removeStaffModalOpen, setRemoveStaffModalOpen]   = useState(false);
+  const [viewStaffModalOpen, setViewStaffModalOpen]       = useState(false);
   const [selectedStaffUsernames, setSelectedStaffUsernames] = useState([]);
   const [saving, setSaving] = useState(false);
 
@@ -265,7 +307,13 @@ export default function Orders() {
     }
   };
 
-  useEffect(() => { fetchAllStaff(); }, []);
+  const staffFetchedRef = useRef(false);
+  useEffect(() => { 
+    if (!staffFetchedRef.current) {
+      staffFetchedRef.current = true;
+      fetchAllStaff(); 
+    }
+  }, []);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -287,7 +335,12 @@ export default function Orders() {
     }
   };
 
-  useEffect(() => { fetchOrders(); }, [currentPage, searchTerm]);
+  const lastOrderFetchRef = useRef({ page: null, search: null });
+  useEffect(() => { 
+    if (lastOrderFetchRef.current.page === currentPage && lastOrderFetchRef.current.search === searchTerm) return;
+    lastOrderFetchRef.current = { page: currentPage, search: searchTerm };
+    fetchOrders(); 
+  }, [currentPage, searchTerm]);
 
   const handleRefresh = () => { setRefreshing(true); fetchOrders(); };
 
@@ -295,6 +348,11 @@ export default function Orders() {
   const openDetailModal = (order) => {
     setSelectedOrder(order);
     setDetailModalOpen(true);
+  };
+
+  const openViewStaffModal = (order) => {
+    setSelectedOrder(order);
+    setViewStaffModalOpen(true);
   };
 
   const openAssignModal = (order) => {
@@ -419,16 +477,12 @@ export default function Orders() {
       render: (row) =>
         row.assigned_staff && row.assigned_staff.length > 0
           ? (
-            <div className="flex flex-wrap gap-1">
-              {row.assigned_staff.map(s => (
-                <span
-                  key={s.username}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700"
-                >
-                  <User size={8} /> {s.name}
-                </span>
-              ))}
-            </div>
+            <button
+              onClick={(e) => { e.stopPropagation(); openViewStaffModal(row); }}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition-colors dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700 dark:hover:bg-indigo-900/50 cursor-pointer"
+            >
+              <Users size={12} /> {row.assigned_staff.length} Assigned
+            </button>
           )
           : <span className="text-xs text-gray-400 dark:text-gray-500 italic">Unassigned</span>,
     },
@@ -551,6 +605,7 @@ export default function Orders() {
                           index={index}
                           getActions={getActions}
                           onClick={openDetailModal}
+                          onViewStaff={openViewStaffModal}
                         />
                       ))}
                     </AnimatePresence>
@@ -580,6 +635,16 @@ export default function Orders() {
             onAssign={openAssignModal}
             onEditStaff={openEditStaffModal}
             onRemoveStaff={openRemoveStaffModal}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── VIEW ASSIGNED STAFF MODAL ── */}
+      <AnimatePresence>
+        {viewStaffModalOpen && selectedOrder && (
+          <ViewAssignedStaffModal
+            order={selectedOrder}
+            onClose={() => { setViewStaffModalOpen(false); setSelectedOrder(null); }}
           />
         )}
       </AnimatePresence>
