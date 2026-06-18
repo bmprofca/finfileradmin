@@ -99,7 +99,7 @@ const ViewFirmModal = ({ firm, onClose, onEdit, onDelete }) => (
         </button>
         <button
           onClick={() => onEdit(firm)}
-          className="px-5 py-2.5 rounded-xl bg-violet-600 dark:bg-violet-500 text-white text-sm font-semibold hover:bg-violet-700 dark:hover:bg-violet-600 transition-all flex items-center gap-2"
+          className="px-5 py-2.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2"
         >
           <Edit size={16} /> Edit Firm
         </button>
@@ -175,7 +175,7 @@ const FirmFormModal = ({ firm, onClose, onSubmit, isSubmitting }) => {
           type="submit"
           form="firm-form"
           disabled={isSubmitting}
-          className="px-5 py-2.5 rounded-xl bg-violet-600 dark:bg-violet-500 text-white text-sm font-semibold hover:bg-violet-700 dark:hover:bg-violet-600 transition-all flex items-center gap-2 disabled:opacity-50"
+          className="px-5 py-2.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2 disabled:opacity-50"
         >
           {isSubmitting ? 'Saving...' : isEdit ? 'Update Firm' : 'Create Firm'}
         </button>
@@ -266,8 +266,8 @@ const FirmManagementCard = ({ firm, index, onView, onEdit, onDelete }) => (
     onClick={() => onView(firm)}
     hoverable
     actions={[
-      { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(firm), className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300' },
-      { label: 'Edit Firm',    icon: <Edit size={12} />, onClick: () => onEdit(firm),  className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300' },
+      { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(firm), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
+      { label: 'Edit Firm',    icon: <Edit size={12} />, onClick: () => onEdit(firm),  className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
       { label: 'Delete',       icon: <Trash2 size={12} />, onClick: () => onDelete(firm), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
     ]}
     menuId={`firm-card-${firm.firm_id}`}
@@ -499,8 +499,8 @@ export default function Firms() {
                   rowKey="firm_id"
                   onRowClick={(row) => handleView(row)}
                   getActions={(row) => [
-                    { label: 'View Details', icon: <Eye size={12} />,   onClick: () => handleView(row),          className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300' },
-                    { label: 'Edit Firm',    icon: <Edit size={12} />,   onClick: () => handleEdit(row),          className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300' },
+                    { label: 'View Details', icon: <Eye size={12} />,   onClick: () => handleView(row),          className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
+                    { label: 'Edit Firm',    icon: <Edit size={12} />,   onClick: () => handleEdit(row),          className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
                     { label: 'Delete',       icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
                   ]}
                   accent="violet"

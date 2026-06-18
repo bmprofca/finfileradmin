@@ -169,13 +169,13 @@ const ViewOrderModal = ({ order, onClose, onAssign, onEditStaff, onRemoveStaff, 
         )}
         <button
           onClick={() => onEditStaff(order)}
-          className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center gap-2"
+          className="px-4 py-2.5 rounded-xl border border-yellow-200 dark:border-yellow-900/30 bg-yellow-50 dark:bg-yellow-900/20 text-sm font-semibold text-yellow-700 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition-all flex items-center gap-2"
         >
           <Users size={14} /> Edit Staff
         </button>
         <button
           onClick={() => onAssign(order)}
-          className="px-4 py-2.5 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-sm font-semibold text-white hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2"
+          className="px-4 py-2.5 rounded-xl border border-blue-200 dark:border-blue-900/30 bg-blue-50 dark:bg-blue-900/20 text-sm font-semibold text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all flex items-center gap-2"
         >
           <UserPlus size={14} /> Assign Staff
         </button>
