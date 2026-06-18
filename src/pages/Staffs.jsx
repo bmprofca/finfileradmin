@@ -50,11 +50,11 @@ const StaffAvatar = ({ staff, size = 'md' }) => {
   const sizes = { sm: 'w-8 h-8 text-xs', md: 'w-10 h-10 text-sm', lg: 'w-16 h-16 text-xl' };
   const cls = sizes[size] || sizes.md;
   if (staff.image) {
-    return <img src={staff.image} alt={staff.name} className={`${cls} rounded-xl object-cover shrink-0`} />;
+    return <img src={staff.image} alt={staff.full_name} className={`${cls} rounded-xl object-cover shrink-0`} />;
   }
   return (
     <div className={`${cls} rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shrink-0`}>
-      {staff.name?.charAt(0)?.toUpperCase() || <User size={16} />}
+      {staff.full_name?.charAt(0)?.toUpperCase() || <User size={16} />}
     </div>
   );
 };
@@ -98,7 +98,7 @@ const ViewStaffModal = ({ staff, onClose, onEdit, onDelete }) => (
     <div className="flex items-center gap-4 pb-4 border-b dark:border-gray-700">
       <StaffAvatar staff={staff} size="lg" />
       <div>
-        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">{staff.name}</h3>
+        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">{staff.full_name}</h3>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">@{staff.username}</p>
         <div className="mt-1.5 flex gap-2 items-center">
           <StaffStatusBadge status={staff.status} />
@@ -112,7 +112,7 @@ const ViewStaffModal = ({ staff, onClose, onEdit, onDelete }) => (
         <User className="text-blue-500 dark:text-blue-400" size={15} /> Contact & Personal Details
       </h4>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        <InfoItem icon={User} label="Full Name" value={staff.name} />
+        <InfoItem icon={User} label="Full Name" value={staff.full_name} />
         <InfoItem icon={User} label="Username" value={`@${staff.username}`} />
         <InfoItem icon={Mail} label="Email" value={staff.email} />
         <InfoItem icon={Phone} label="Mobile" value={staff.mobile} />
@@ -256,7 +256,7 @@ const StaffManagementCard = ({ staff, index, onView, onEdit, onDelete, onNavigat
     delay={index * 0.05}
     accent="blue"
     eyebrow={`@${staff.username}`}
-    title={staff.name}
+    title={staff.full_name}
     subtitle={staff.email}
     icon={<StaffAvatar staff={staff} size="sm" />}
     badge={<StaffStatusBadge status={staff.status} />}
@@ -287,6 +287,7 @@ export default function Staffs() {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('table');
   const [staffs, setStaffs] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -305,10 +306,11 @@ export default function Staffs() {
   const fetchStaffs = async () => {
     setLoading(true);
     try {
-      const response = await apiCall('/api/admin/staff/list', 'GET');
+      const response = await apiCall(`/api/admin/staff/list?page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`, 'GET');
       const data = await response.json();
       if (data.success) {
         setStaffs(data.data.staffs);
+        setTotalItems(data.pagination?.total || 0);
       } else {
         toast.error('Failed to fetch staff.');
       }
@@ -320,29 +322,12 @@ export default function Staffs() {
     }
   };
 
-  useEffect(() => { fetchStaffs(); }, []);
+  useEffect(() => { fetchStaffs(); }, [currentPage, searchTerm]);
 
   const handleRefresh = () => {
     setRefreshing(true);
-    setSearchTerm('');
-    setCurrentPage(1);
     fetchStaffs();
   };
-
-  // ── Filter + Paginate ─────────────────────────────────────────────────────
-  const filtered = useMemo(() =>
-    staffs.filter((s) =>
-      [s.name, s.email, s.username, s.mobile,
-       s.status === 1 ? 'Active' : 'Inactive'
-      ].some((f) => f?.toLowerCase().includes(searchTerm.toLowerCase()))
-    ),
-    [searchTerm, staffs]
-  );
-
-  const paginated = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return filtered.slice(start, start + itemsPerPage);
-  }, [filtered, currentPage]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleView = (staff) => { setSelectedStaff(staff); setIsViewModalOpen(true); };
@@ -400,10 +385,10 @@ export default function Staffs() {
   // ── Table Columns ─────────────────────────────────────────────────────────
   const columns = [
     {
-      key: 'name', label: 'Staff Member', render: (row) => (
+      key: 'full_name', label: 'Staff Member', render: (row) => (
         <div className="flex items-center gap-2">
           <StaffAvatar staff={row} size="sm" />
-          <span className="font-semibold text-gray-800 dark:text-gray-100 text-sm whitespace-nowrap">{row.name}</span>
+          <span className="font-semibold text-gray-800 dark:text-gray-100 text-sm whitespace-nowrap">{row.full_name}</span>
         </div>
       ),
     },
@@ -454,7 +439,7 @@ export default function Staffs() {
               )}
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 hidden xl:block whitespace-nowrap">
-              <span className="font-semibold text-gray-800 dark:text-gray-200">{filtered.length}</span> staff
+              <span className="font-semibold text-gray-800 dark:text-gray-200">{totalItems}</span> staff
               {searchTerm && <span className="ml-1 text-blue-600 dark:text-blue-400">· "{searchTerm}"</span>}
             </p>
           </div>
@@ -472,7 +457,7 @@ export default function Staffs() {
         )}
 
         {/* Empty State */}
-        {!loading && filtered.length === 0 && (
+        {!loading && staffs.length === 0 && (
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-950/50">
             <Briefcase className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
             <p className="text-xl text-gray-500 dark:text-gray-400">No staff found</p>
@@ -491,7 +476,7 @@ export default function Staffs() {
         )}
 
         {/* Content */}
-        {!loading && filtered.length > 0 && (
+        {!loading && staffs.length > 0 && (
           <>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
 
@@ -499,7 +484,7 @@ export default function Staffs() {
               {viewMode === 'table' && (
                 <ManagementTable
                   columns={columns}
-                  rows={paginated}
+                  rows={staffs}
                   rowKey="username"
                   onRowClick={(row) => navigate(`/staffs/${row.username}`)}
                   getActions={(row) => [
@@ -515,7 +500,7 @@ export default function Staffs() {
               {viewMode === 'card' && (
                 <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4">
                   <AnimatePresence>
-                    {paginated.map((staff, index) => (
+                    {staffs.map((staff, index) => (
                       <StaffManagementCard
                         key={staff.username}
                         staff={staff}
@@ -534,7 +519,7 @@ export default function Staffs() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-4">
               <PaginationComponent
                 currentPage={currentPage}
-                totalItems={filtered.length}
+                totalItems={totalItems}
                 itemsPerPage={itemsPerPage}
                 onPageChange={setCurrentPage}
               />
@@ -597,7 +582,7 @@ export default function Staffs() {
           >
             <div className="text-gray-600 dark:text-gray-400">
               Are you sure you want to delete{' '}
-              <span className="font-semibold text-gray-800 dark:text-gray-100">{staffToDelete.name}</span>
+              <span className="font-semibold text-gray-800 dark:text-gray-100">{staffToDelete.full_name}</span>
               {' '}(@{staffToDelete.username})? This action cannot be undone.
             </div>
           </Modal>
