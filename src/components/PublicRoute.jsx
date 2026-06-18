@@ -1,19 +1,15 @@
 import { Navigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { GlobalSkeleton } from "./SkeletonComponent";
 
 const PublicRoute = ({ children }) => {
-  const userDataStr = localStorage.getItem("user_data");
-  let isAuthenticated = false;
+  const { user, loading } = useAuth();
 
-  if (userDataStr) {
-    try {
-      const parsed = JSON.parse(userDataStr);
-      if (parsed && parsed.token) {
-        isAuthenticated = true;
-      }
-    } catch (e) {}
+  if (loading) {
+    return <GlobalSkeleton />;
   }
 
-  if (isAuthenticated) {
+  if (user?.token) {
     return <Navigate to="/" replace />;
   }
 

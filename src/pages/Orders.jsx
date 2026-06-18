@@ -12,6 +12,7 @@ import ManagementGrid from '../components/common/ManagementGrid';
 import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
 import PaginationComponent from '../components/common/PaginationComponent';
 import Modal from '../components/common/Modal';
+import { PageContentSkeleton } from '../components/SkeletonComponent';
 import apiCall from '../utils/apiCall';
 
 /* ─── Status Badge ─── */
@@ -537,9 +538,7 @@ export default function Orders() {
 
           {/* Loading */}
           {loading && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500" />
-            </motion.div>
+            <PageContentSkeleton viewMode={viewMode} rows={6} columns={6} />
           )}
 
           {/* Empty */}

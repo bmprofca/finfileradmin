@@ -12,9 +12,7 @@ import PublicRoute from "./components/PublicRoute";
 import MainLayout from "./components/layout/MainLayout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import Users from "./pages/Users";
 import Services from "./pages/Services";
-import Reports from "./pages/Reports";
 import Staffs from "./pages/Staffs";
 import StaffProfile from "./pages/StaffProfile";
 import MyOrders from "./pages/MyOrders";
@@ -51,13 +49,11 @@ function App() {
               <Route element={<MainLayout />}>
                 <Route index element={<Dashboard />} />
                 <Route path="dashboard" element={<Dashboard />} />
-                <Route path="users" element={<RoleRoute allowedRoles={['admin']}><Users /></RoleRoute>} />
                 <Route path="staffs" element={<RoleRoute allowedRoles={['admin']}><Staffs /></RoleRoute>} />
                 <Route path="staffs/:username" element={<RoleRoute allowedRoles={['admin']}><StaffProfile /></RoleRoute>} />
                 <Route path="my-orders" element={<RoleRoute allowedRoles={['staff']}><MyOrders /></RoleRoute>} />
                 <Route path="orders" element={<RoleRoute allowedRoles={['admin']}><Orders /></RoleRoute>} />
                 <Route path="services" element={<RoleRoute allowedRoles={['admin']}><Services /></RoleRoute>} />
-                <Route path="reports" element={<RoleRoute allowedRoles={['admin']}><Reports /></RoleRoute>} />
               </Route>
             </Route>
 

@@ -12,6 +12,7 @@ import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher'
 import PaginationComponent from '../components/common/PaginationComponent';
 import Button from '../components/common/Button';
 import apiCall from '../utils/apiCall';
+import { PageContentSkeleton } from '../components/SkeletonComponent';
 
 const STATUS_COLORS = {
   'created': { pill: 'bg-blue-100 text-blue-800 border border-blue-200', dot: 'bg-blue-500' },
@@ -233,9 +234,7 @@ export default function StaffProfile() {
 
           {/* Loading State */}
           {loading && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center items-center py-16">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
-            </motion.div>
+            <PageContentSkeleton viewMode={viewMode} rows={6} columns={5} />
           )}
 
           {/* Content */}

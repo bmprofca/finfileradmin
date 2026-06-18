@@ -14,6 +14,7 @@ import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher'
 import PaginationComponent from '../components/common/PaginationComponent';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
+import { PageContentSkeleton } from '../components/SkeletonComponent';
 import apiCall, { uploadFile } from '../utils/apiCall';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -520,9 +521,7 @@ export default function Staffs() {
 
         {/* Loading State */}
         {loading && (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
-          </div>
+          <PageContentSkeleton viewMode={viewMode} rows={6} columns={6} />
         )}
 
         {/* Empty State */}

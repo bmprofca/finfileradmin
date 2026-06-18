@@ -13,6 +13,7 @@ import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher'
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 import ServiceFormModal from '../components/common/ServiceFormModal';
+import { PageContentSkeleton } from '../components/SkeletonComponent';
 import { apiCall } from '../utils/apiCall';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -377,9 +378,7 @@ export default function Services() {
 
         {/* Loading state */}
         {loading && (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600"></div>
-          </div>
+          <PageContentSkeleton viewMode={viewMode} rows={6} columns={8} />
         )}
 
         {/* Empty state */}
