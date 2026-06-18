@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, X, Briefcase, Calendar, Hash, Phone, Mail, ArrowLeft, Building2, User
@@ -108,7 +108,15 @@ export default function StaffProfile() {
     }
   };
 
+  const lastFetchRef = useRef({ username: null, page: null, search: null });
   useEffect(() => {
+    if (
+      lastFetchRef.current.username === username &&
+      lastFetchRef.current.page === currentPage &&
+      lastFetchRef.current.search === searchTerm
+    ) return;
+    
+    lastFetchRef.current = { username, page: currentPage, search: searchTerm };
     fetchProfileAndOrders();
   }, [username, currentPage, searchTerm]);
 

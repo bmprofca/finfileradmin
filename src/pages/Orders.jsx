@@ -297,23 +297,22 @@ export default function Orders() {
   const itemsPerPage = 10;
 
   /* ─── Data Fetching ─── */
-  const fetchAllStaff = async () => {
-    try {
-      const res  = await apiCall('/api/admin/staff/list', 'GET');
-      const data = await res.json();
-      if (data.success) setAllStaff(data.data.staffs);
-    } catch (err) {
-      console.error('Failed to fetch staff', err);
+  const staffFetchedRef = useRef(false);
+
+  const ensureStaffFetched = async () => {
+    if (!staffFetchedRef.current) {
+      try {
+        const res  = await apiCall('/api/admin/staff/list', 'GET');
+        const data = await res.json();
+        if (data.success) {
+          setAllStaff(data.data.staffs);
+          staffFetchedRef.current = true;
+        }
+      } catch (err) {
+        console.error('Failed to fetch staff', err);
+      }
     }
   };
-
-  const staffFetchedRef = useRef(false);
-  useEffect(() => { 
-    if (!staffFetchedRef.current) {
-      staffFetchedRef.current = true;
-      fetchAllStaff(); 
-    }
-  }, []);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -355,24 +354,27 @@ export default function Orders() {
     setViewStaffModalOpen(true);
   };
 
-  const openAssignModal = (order) => {
+  const openAssignModal = async (order) => {
     setSelectedOrder(order);
     setSelectedStaffUsernames([]);
     setDetailModalOpen(false);
+    await ensureStaffFetched();
     setAssignModalOpen(true);
   };
 
-  const openEditStaffModal = (order) => {
+  const openEditStaffModal = async (order) => {
     setSelectedOrder(order);
     setSelectedStaffUsernames(order.assigned_staff ? order.assigned_staff.map(s => s.username) : []);
     setDetailModalOpen(false);
+    await ensureStaffFetched();
     setEditStaffModalOpen(true);
   };
 
-  const openRemoveStaffModal = (order) => {
+  const openRemoveStaffModal = async (order) => {
     setSelectedOrder(order);
     setSelectedStaffUsernames([]);
     setDetailModalOpen(false);
+    await ensureStaffFetched();
     setRemoveStaffModalOpen(true);
   };
 

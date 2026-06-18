@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, X, Eye, User, Phone, Mail,
@@ -327,7 +327,12 @@ export default function Staffs() {
     }
   };
 
-  useEffect(() => { fetchStaffs(); }, [currentPage, searchTerm]);
+  const lastFetchRef = useRef({ page: null, search: null });
+  useEffect(() => { 
+    if (lastFetchRef.current.page === currentPage && lastFetchRef.current.search === searchTerm) return;
+    lastFetchRef.current = { page: currentPage, search: searchTerm };
+    fetchStaffs(); 
+  }, [currentPage, searchTerm]);
 
   const handleRefresh = () => {
     setRefreshing(true);

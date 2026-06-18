@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Briefcase, Plus, FileText, CheckCircle, XCircle,
@@ -236,8 +236,12 @@ export default function Services() {
     }
   };
 
+  const fetchServicesRef = useRef(false);
   useEffect(() => {
-    fetchServices();
+    if (!fetchServicesRef.current) {
+      fetchServicesRef.current = true;
+      fetchServices();
+    }
   }, []);
 
   const filtered = useMemo(() =>
