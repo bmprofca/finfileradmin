@@ -21,6 +21,7 @@ import NotFound from "./pages/NotFound";
 import ServerUnreachable from "./pages/ServerUnreachable";
 import Clients from "./pages/Clients";
 import Firms from "./pages/Firms";
+import Payments from "./pages/Payments";
 
 
 function App() {
@@ -58,6 +59,7 @@ function App() {
                 <Route path="orders" element={<RoleRoute allowedRoles={['admin']}><Orders /></RoleRoute>} />
                 <Route path="services" element={<RoleRoute allowedRoles={['admin']}><Services /></RoleRoute>} />
                 <Route path="firms" element={<RoleRoute allowedRoles={['admin']}><Firms /></RoleRoute>} /> 
+                <Route path="payments" element={<RoleRoute allowedRoles={['admin']}><Payments /></RoleRoute>} />
               </Route>
             </Route>
 

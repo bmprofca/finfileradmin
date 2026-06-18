@@ -3,17 +3,15 @@ import {
   House, 
   Users, 
   ConciergeBell, 
-  LifeBuoy, 
-  BarChart3, 
+  LifeBuoy,  
   Briefcase,
   ClipboardList,
   FileBox,
-  Settings,
   BrickWall,
+  IndianRupee,
 } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { label } from 'framer-motion/client';
 
 const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -64,8 +62,12 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
       label:'Firms',
       path:'/firms',
       roles:['admin'],
+    },{
+      icon:IndianRupee,
+      label:'Payments',
+      path:'/payments',
+      roles:['admin'],
     }
-    
   ];
 
   const menuItems = allMenuItems.filter(item => !item.roles || item.roles.includes(userType));
