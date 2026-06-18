@@ -472,7 +472,7 @@ export default function Clients() {
       onRefresh={handleRefresh}
       refreshing={refreshing}
       actions={
-        <Button onClick={handleCreateNew} variant="primary" className="flex items-center gap-2 text-sm py-1.5 bg-violet-600 hover:bg-violet-700">
+        <Button onClick={handleCreateNew} ariant="primary" className="flex items-center gap-2 text-sm py-1.5 bg-blue-600 hover:bg-blue-700">
           <Plus size={16} /> Add Client
         </Button>
       }

@@ -301,8 +301,8 @@ const StaffManagementCard = ({ staff, index, onView, onEdit, onDelete, onLogout,
     onClick={() => onNavigate(staff)}
     hoverable
     actions={[
-      { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(staff), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
-      { label: 'Edit Staff', icon: <Edit size={12} />, onClick: () => onEdit(staff), className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300' },
+      { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(staff), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
+      { label: 'Edit Staff', icon: <Edit size={12} />, onClick: () => onEdit(staff), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
       { label: 'Force Logout', icon: <LogOut size={12} />, onClick: () => onLogout(staff), className: 'text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/30 dark:text-orange-400 dark:hover:text-orange-300' },
       { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => onDelete(staff), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
     ]}
@@ -556,8 +556,8 @@ export default function Staffs() {
                   rowKey="username"
                   onRowClick={(row) => navigate(`/staffs/${row.username}`)}
                   getActions={(row) => [
-                    { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
-                    { label: 'Edit Staff', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300' },
+                    { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
+                    { label: 'Edit Staff', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
                     { label: 'Force Logout', icon: <LogOut size={12} />, onClick: () => handleLogoutRequest(row), className: 'text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/30 dark:text-orange-400 dark:hover:text-orange-300' },
                     { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
                   ]}

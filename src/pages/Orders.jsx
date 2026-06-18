@@ -663,19 +663,19 @@ export default function Orders() {
         label: 'View Details',
         icon: <Eye size={12} />,
         onClick: () => openDetailModal(order),
-        className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300',
+        className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300',
       },
       {
         label: 'Update Order',
         icon: <Edit size={12} />,
         onClick: () => openUpdateOrderModal(order),
-        className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300',
+        className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300',
       },
       {
         label: 'Update Status',
         icon: <RefreshCw size={12} />,
         onClick: () => openStatusModal(order),
-        className: 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 dark:text-emerald-400 dark:hover:text-emerald-300',
+        className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300',
       },
       {
         label: 'Assign Staff',

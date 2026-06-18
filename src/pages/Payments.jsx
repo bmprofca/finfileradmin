@@ -217,7 +217,7 @@ const OrderManagementCard = ({ order, index, onView }) => {
       onClick={() => onView(order)}
       hoverable
       actions={[
-        { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(order), className: 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 dark:text-emerald-400' },
+        { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(order), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400' },
       ]}
       menuId={`order-card-${order.order_id}`}
     >
@@ -448,7 +448,7 @@ export default function Payments() {
                   rowKey="order_id"
                   onRowClick={(row) => handleView(row)}
                   getActions={(row) => [
-                    { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 dark:text-emerald-400 dark:hover:text-emerald-300' },
+                    { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
                   ]}
                   accent="emerald"
                 />
