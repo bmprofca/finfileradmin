@@ -2,9 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, X, Briefcase, Hash, User, Users, UserPlus, UserMinus,
-  Eye, Calendar, IndianRupee, FileText, Tag, CheckCircle
+  Eye, Calendar, IndianRupee, FileText, Tag, CheckCircle, Edit, RefreshCw
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
 import ManagementCard from '../components/common/ManagementCard';
@@ -12,6 +11,7 @@ import ManagementGrid from '../components/common/ManagementGrid';
 import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
 import PaginationComponent from '../components/common/PaginationComponent';
 import Modal from '../components/common/Modal';
+import SelectField from '../components/common/SelectField';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
 import apiCall from '../utils/apiCall';
 
@@ -23,6 +23,25 @@ const STATUS_COLORS = {
   'completed':                { pill: 'bg-green-100 text-green-800 border border-green-200', dot: 'bg-green-500' },
   'cancelled':                { pill: 'bg-red-100 text-red-800 border border-red-200',       dot: 'bg-red-500' },
 };
+
+const ORDER_STATUS_OPTIONS = [
+  'created',
+  'in process',
+  'pending from department',
+  'completed',
+  'cancelled',
+];
+
+const ORDER_STATUS_SELECT_OPTIONS = ORDER_STATUS_OPTIONS.map((status) => ({
+  value: status,
+  label: status.replace(/\b\w/g, l => l.toUpperCase()),
+}));
+
+const DISCOUNT_TYPE_OPTIONS = [
+  { value: 'not applicable', label: 'Not Applicable' },
+  { value: 'percentage', label: 'Percentage' },
+  { value: 'flat', label: 'Flat' },
+];
 
 const StatusBadge = ({ status }) => {
   const key = (status || '').toString().toLowerCase();
@@ -118,7 +137,7 @@ const ViewAssignedStaffModal = ({ order, onClose }) => (
 );
 
 /* ─── View Order Modal ─── */
-const ViewOrderModal = ({ order, onClose, onAssign, onEditStaff, onRemoveStaff }) => (
+const ViewOrderModal = ({ order, onClose, onAssign, onEditStaff, onRemoveStaff, onUpdateOrder, onUpdateStatus }) => (
   <Modal
     isOpen={true}
     onClose={onClose}
@@ -128,6 +147,18 @@ const ViewOrderModal = ({ order, onClose, onAssign, onEditStaff, onRemoveStaff }
     contentClassName="p-5 space-y-4"
     footer={
       <>
+        <button
+          onClick={() => onUpdateStatus(order)}
+          className="px-4 py-2.5 rounded-xl border border-emerald-200 dark:border-emerald-900/30 bg-emerald-50 dark:bg-emerald-900/20 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all flex items-center gap-2"
+        >
+          <RefreshCw size={14} /> Status
+        </button>
+        <button
+          onClick={() => onUpdateOrder(order)}
+          className="px-4 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-900/30 bg-indigo-50 dark:bg-indigo-900/20 text-sm font-semibold text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-all flex items-center gap-2"
+        >
+          <Edit size={14} /> Update
+        </button>
         {order.assigned_staff && order.assigned_staff.length > 0 && (
           <button
             onClick={() => onRemoveStaff(order)}
@@ -207,6 +238,172 @@ const ViewOrderModal = ({ order, onClose, onAssign, onEditStaff, onRemoveStaff }
   </Modal>
 );
 
+const OrderUpdateModal = ({ order, onClose, onSubmit, isSubmitting }) => {
+  const [form, setForm] = useState({
+    name: order?.name || '',
+    service_id: order?.service_id || '',
+    base_price: order?.base_price ?? 1,
+    tax_rate: order?.tax_rate ?? 1,
+    tax_value: order?.tax_value ?? 1,
+    total_fees: order?.total_fees ?? 1,
+    discount_type: order?.discount_type || 'not applicable',
+    discount_percentage: order?.discount_percentage ?? 1,
+    discount_value: order?.discount_value ?? 1,
+    fees: order?.fees ?? 1,
+    partial_payment_allowed: order?.partial_payment_allowed ?? true,
+  });
+
+  const inputCls = 'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm dark:text-gray-100';
+
+  const setText = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
+  const setNumber = (key) => (e) => {
+    const value = e.target.value;
+    setForm((prev) => ({ ...prev, [key]: value === '' ? '' : Number(value) }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit({
+      ...form,
+      base_price: Number(form.base_price),
+      tax_rate: Number(form.tax_rate),
+      tax_value: Number(form.tax_value),
+      total_fees: Number(form.total_fees),
+      discount_percentage: Number(form.discount_percentage),
+      discount_value: Number(form.discount_value),
+      fees: Number(form.fees),
+      partial_payment_allowed: Boolean(form.partial_payment_allowed),
+    });
+  };
+
+  return (
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title={`Update Order · ${order?.name || ''}`}
+      icon={Edit}
+      size="3xl"
+      contentClassName="p-5"
+      closeText="Cancel"
+      footer={
+        <button
+          type="submit"
+          form="order-update-form"
+          disabled={isSubmitting}
+          className="px-5 py-2.5 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-50"
+        >
+          <Edit size={14} />
+          {isSubmitting ? 'Updating...' : 'Update Order'}
+        </button>
+      }
+    >
+      <form id="order-update-form" onSubmit={handleSubmit} className="space-y-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Order Name</label>
+            <input required value={form.name} onChange={setText('name')} className={inputCls} />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Service ID</label>
+            <input required value={form.service_id} onChange={setText('service_id')} className={inputCls} />
+          </div>
+          {[
+            ['base_price', 'Base Price'],
+            ['tax_rate', 'Tax Rate'],
+            ['tax_value', 'Tax Value'],
+            ['total_fees', 'Total Fees'],
+            ['discount_percentage', 'Discount Percentage'],
+            ['discount_value', 'Discount Value'],
+            ['fees', 'Final Fees'],
+          ].map(([key, label]) => (
+            <div key={key}>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">{label}</label>
+              <input required type="number" min="0" step="0.01" value={form[key]} onChange={setNumber(key)} className={inputCls} />
+            </div>
+          ))}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Discount Type</label>
+            <SelectField
+              options={DISCOUNT_TYPE_OPTIONS}
+              value={DISCOUNT_TYPE_OPTIONS.find((option) => option.value === form.discount_type) || DISCOUNT_TYPE_OPTIONS[0]}
+              onChange={(selected) => setForm((prev) => ({ ...prev, discount_type: selected?.value || 'not applicable' }))}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200">
+              <input
+                type="checkbox"
+                checked={form.partial_payment_allowed}
+                onChange={(e) => setForm((prev) => ({ ...prev, partial_payment_allowed: e.target.checked }))}
+                className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+              />
+              Partial payment allowed
+            </label>
+          </div>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
+const OrderStatusModal = ({ order, onClose, onSubmit, isSubmitting }) => {
+  const [form, setForm] = useState({
+    status: (order?.status || 'created').toString().toLowerCase(),
+    remark: order?.remark || '',
+  });
+
+  const inputCls = 'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm dark:text-gray-100';
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(form);
+  };
+
+  return (
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title={`Update Status · ${order?.name || ''}`}
+      icon={RefreshCw}
+      size="md"
+      contentClassName="p-5"
+      closeText="Cancel"
+      footer={
+        <button
+          type="submit"
+          form="order-status-form"
+          disabled={isSubmitting}
+          className="px-5 py-2.5 rounded-xl bg-emerald-600 dark:bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-all flex items-center gap-2 disabled:opacity-50"
+        >
+          <RefreshCw size={14} />
+          {isSubmitting ? 'Updating...' : 'Update Status'}
+        </button>
+      }
+    >
+      <form id="order-status-form" onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Status</label>
+          <SelectField
+            options={ORDER_STATUS_SELECT_OPTIONS}
+            value={ORDER_STATUS_SELECT_OPTIONS.find((option) => option.value === form.status) || ORDER_STATUS_SELECT_OPTIONS[0]}
+            onChange={(selected) => setForm((prev) => ({ ...prev, status: selected?.value || 'created' }))}
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Remark</label>
+          <textarea
+            value={form.remark}
+            onChange={(e) => setForm((prev) => ({ ...prev, remark: e.target.value }))}
+            rows={4}
+            placeholder="Add a status note..."
+            className={inputCls}
+          />
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
 /* ─── Order Card ─── */
 const OrderCard = ({ order, index, getActions, onClick, onViewStaff }) => (
   <ManagementCard
@@ -254,8 +451,6 @@ const OrderCard = ({ order, index, getActions, onClick, onViewStaff }) => (
    MAIN COMPONENT
    ═══════════════════════════════════════════════ */
 export default function Orders() {
-  const navigate = useNavigate();
-
   const [orders, setOrders]           = useState([]);
   const [loading, setLoading]         = useState(true);
   const [refreshing, setRefreshing]   = useState(false);
@@ -274,7 +469,10 @@ export default function Orders() {
   const [editStaffModalOpen, setEditStaffModalOpen]       = useState(false);
   const [removeStaffModalOpen, setRemoveStaffModalOpen]   = useState(false);
   const [viewStaffModalOpen, setViewStaffModalOpen]       = useState(false);
+  const [updateOrderModalOpen, setUpdateOrderModalOpen]   = useState(false);
+  const [statusModalOpen, setStatusModalOpen]             = useState(false);
   const [selectedStaffUsernames, setSelectedStaffUsernames] = useState([]);
+  const [staffLoading, setStaffLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const itemsPerPage = 10;
@@ -284,6 +482,7 @@ export default function Orders() {
 
   const ensureStaffFetched = async () => {
     if (!staffFetchedRef.current) {
+      setStaffLoading(true);
       try {
         const res  = await apiCall('/api/admin/staff/list', 'GET');
         const data = await res.json();
@@ -293,6 +492,8 @@ export default function Orders() {
         }
       } catch (err) {
         console.error('Failed to fetch staff', err);
+      } finally {
+        setStaffLoading(false);
       }
     }
   };
@@ -337,28 +538,40 @@ export default function Orders() {
     setViewStaffModalOpen(true);
   };
 
-  const openAssignModal = async (order) => {
+  const openAssignModal = (order) => {
     setSelectedOrder(order);
     setSelectedStaffUsernames([]);
     setDetailModalOpen(false);
-    await ensureStaffFetched();
     setAssignModalOpen(true);
+    ensureStaffFetched();
   };
 
-  const openEditStaffModal = async (order) => {
+  const openUpdateOrderModal = (order) => {
+    setSelectedOrder(order);
+    setDetailModalOpen(false);
+    setUpdateOrderModalOpen(true);
+  };
+
+  const openStatusModal = (order) => {
+    setSelectedOrder(order);
+    setDetailModalOpen(false);
+    setStatusModalOpen(true);
+  };
+
+  const openEditStaffModal = (order) => {
     setSelectedOrder(order);
     setSelectedStaffUsernames(order.assigned_staff ? order.assigned_staff.map(s => s.username) : []);
     setDetailModalOpen(false);
-    await ensureStaffFetched();
     setEditStaffModalOpen(true);
+    ensureStaffFetched();
   };
 
-  const openRemoveStaffModal = async (order) => {
+  const openRemoveStaffModal = (order) => {
     setSelectedOrder(order);
     setSelectedStaffUsernames([]);
     setDetailModalOpen(false);
-    await ensureStaffFetched();
     setRemoveStaffModalOpen(true);
+    ensureStaffFetched();
   };
 
   /* ─── API Handlers ─── */
@@ -404,6 +617,36 @@ export default function Orders() {
     finally { setSaving(false); }
   };
 
+  const handleUpdateOrder = async (payload) => {
+    if (!selectedOrder) return;
+    setSaving(true);
+    try {
+      const res = await apiCall(`/api/admin/orders/update/${selectedOrder.order_id}`, 'PUT', payload);
+      const data = await res.json();
+      if (data.success) {
+        setUpdateOrderModalOpen(false);
+        setSelectedOrder(null);
+        fetchOrders();
+      }
+    } catch (e) { console.error(e); }
+    finally { setSaving(false); }
+  };
+
+  const handleUpdateStatus = async (payload) => {
+    if (!selectedOrder) return;
+    setSaving(true);
+    try {
+      const res = await apiCall(`/api/admin/orders/status/${selectedOrder.order_id}`, 'PUT', payload);
+      const data = await res.json();
+      if (data.success) {
+        setStatusModalOpen(false);
+        setSelectedOrder(null);
+        fetchOrders();
+      }
+    } catch (e) { console.error(e); }
+    finally { setSaving(false); }
+  };
+
   /* ─── Computed Staff Lists ─── */
   const unassignedStaff = allStaff.filter(
     s => !selectedOrder?.assigned_staff?.some(a => a.username === s.username)
@@ -421,6 +664,18 @@ export default function Orders() {
         icon: <Eye size={12} />,
         onClick: () => openDetailModal(order),
         className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300',
+      },
+      {
+        label: 'Update Order',
+        icon: <Edit size={12} />,
+        onClick: () => openUpdateOrderModal(order),
+        className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300',
+      },
+      {
+        label: 'Update Status',
+        icon: <RefreshCw size={12} />,
+        onClick: () => openStatusModal(order),
+        className: 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 dark:text-emerald-400 dark:hover:text-emerald-300',
       },
       {
         label: 'Assign Staff',
@@ -618,6 +873,32 @@ export default function Orders() {
             onAssign={openAssignModal}
             onEditStaff={openEditStaffModal}
             onRemoveStaff={openRemoveStaffModal}
+            onUpdateOrder={openUpdateOrderModal}
+            onUpdateStatus={openStatusModal}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── UPDATE ORDER MODAL ── */}
+      <AnimatePresence>
+        {updateOrderModalOpen && selectedOrder && (
+          <OrderUpdateModal
+            order={selectedOrder}
+            onClose={() => setUpdateOrderModalOpen(false)}
+            onSubmit={handleUpdateOrder}
+            isSubmitting={saving}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── UPDATE STATUS MODAL ── */}
+      <AnimatePresence>
+        {statusModalOpen && selectedOrder && (
+          <OrderStatusModal
+            order={selectedOrder}
+            onClose={() => setStatusModalOpen(false)}
+            onSubmit={handleUpdateStatus}
+            isSubmitting={saving}
           />
         )}
       </AnimatePresence>
@@ -657,12 +938,19 @@ export default function Orders() {
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Select staff members to add to this order. Already-assigned staff are excluded.
               </p>
-              <StaffCheckboxList
-                allStaff={unassignedStaff}
-                selectedUsernames={selectedStaffUsernames}
-                onChange={setSelectedStaffUsernames}
-              />
-              {unassignedStaff.length === 0 && (
+              {staffLoading ? (
+                <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500 dark:text-gray-400">
+                  <RefreshCw size={16} className="animate-spin" />
+                  Loading staff...
+                </div>
+              ) : (
+                <StaffCheckboxList
+                  allStaff={unassignedStaff}
+                  selectedUsernames={selectedStaffUsernames}
+                  onChange={setSelectedStaffUsernames}
+                />
+              )}
+              {!staffLoading && unassignedStaff.length === 0 && (
                 <div className="text-center py-4">
                   <CheckCircle className="text-green-400 mx-auto mb-2" size={32} />
                   <p className="text-sm text-gray-500 dark:text-gray-400">All staff are already assigned to this order.</p>
@@ -685,7 +973,7 @@ export default function Orders() {
             closeText="Cancel"
             footer={
               <button
-                disabled={saving}
+                disabled={saving || staffLoading}
                 onClick={handleEditStaff}
                 className="px-5 py-2.5 rounded-xl bg-amber-500 dark:bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 dark:hover:bg-amber-600 transition-all flex items-center gap-2 disabled:opacity-50"
               >
@@ -698,11 +986,18 @@ export default function Orders() {
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Select who should be assigned. This <span className="font-semibold text-gray-700 dark:text-gray-300">replaces</span> all current assignments.
               </p>
-              <StaffCheckboxList
-                allStaff={allStaff}
-                selectedUsernames={selectedStaffUsernames}
-                onChange={setSelectedStaffUsernames}
-              />
+              {staffLoading ? (
+                <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500 dark:text-gray-400">
+                  <RefreshCw size={16} className="animate-spin" />
+                  Loading staff...
+                </div>
+              ) : (
+                <StaffCheckboxList
+                  allStaff={allStaff}
+                  selectedUsernames={selectedStaffUsernames}
+                  onChange={setSelectedStaffUsernames}
+                />
+              )}
             </div>
           </Modal>
         )}
@@ -733,7 +1028,12 @@ export default function Orders() {
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Choose which staff members to unassign from this order.
               </p>
-              {assignedStaffList.length > 0 ? (
+              {staffLoading ? (
+                <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500 dark:text-gray-400">
+                  <RefreshCw size={16} className="animate-spin" />
+                  Loading staff...
+                </div>
+              ) : assignedStaffList.length > 0 ? (
                 <StaffCheckboxList
                   allStaff={assignedStaffList}
                   selectedUsernames={selectedStaffUsernames}

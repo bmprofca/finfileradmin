@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, X, Eye, User, Building2,
-  Plus, Trash2, Edit, Briefcase, FileText, Hash
+  Plus, Trash2, Edit, FileText, Hash
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ManagementHub from '../components/common/ManagementHub';
