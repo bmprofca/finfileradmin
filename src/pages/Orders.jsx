@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, X, Briefcase, Hash, User, Users, UserPlus, UserMinus,
-  Eye, Calendar, IndianRupee, FileText, Tag, CheckCircle, Edit, RefreshCw
+  Eye, Calendar, IndianRupee, FileText, Tag, CheckCircle, Edit, RefreshCw,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
@@ -18,11 +19,11 @@ import apiCall from '../utils/apiCall';
 
 /* ─── Status Badge ─── */
 const STATUS_COLORS = {
-  'created':                  { pill: 'bg-blue-100 text-blue-800 border border-blue-200',   dot: 'bg-blue-500' },
-  'in process':               { pill: 'bg-amber-100 text-amber-800 border border-amber-200', dot: 'bg-amber-500' },
-  'pending from department':  { pill: 'bg-orange-100 text-orange-800 border border-orange-200', dot: 'bg-orange-500' },
-  'completed':                { pill: 'bg-green-100 text-green-800 border border-green-200', dot: 'bg-green-500' },
-  'cancelled':                { pill: 'bg-red-100 text-red-800 border border-red-200',       dot: 'bg-red-500' },
+  'created': { pill: 'bg-blue-100 text-blue-800 border border-blue-200', dot: 'bg-blue-500' },
+  'in process': { pill: 'bg-amber-100 text-amber-800 border border-amber-200', dot: 'bg-amber-500' },
+  'pending from department': { pill: 'bg-orange-100 text-orange-800 border border-orange-200', dot: 'bg-orange-500' },
+  'completed': { pill: 'bg-green-100 text-green-800 border border-green-200', dot: 'bg-green-500' },
+  'cancelled': { pill: 'bg-red-100 text-red-800 border border-red-200', dot: 'bg-red-500' },
 };
 
 const StatusBadge = ({ status }) => {
@@ -37,42 +38,243 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-/* ─── Staff Checkbox List ─── */
-const StaffCheckboxList = ({ allStaff, selectedUsernames, onChange }) => (
-  <div className="max-h-60 overflow-y-auto space-y-2 border border-gray-100 dark:border-gray-700 rounded-lg p-2 bg-gray-50 dark:bg-gray-900/50">
-    {allStaff.map(staff => (
-      <label
-        key={staff.username}
-        className="flex items-center gap-3 p-3 hover:bg-white dark:hover:bg-gray-800 rounded-lg cursor-pointer transition-colors shadow-sm border border-transparent dark:border-gray-700"
+/* ─── Staff Management Modal ─── */
+const StaffManagementModal = ({ order, allStaff, onClose, onSubmit, isSubmitting }) => {
+  const [leftStaff, setLeftStaff] = useState([]);
+  const [rightStaff, setRightStaff] = useState([]);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [initialRightStaff, setInitialRightStaff] = useState([]);
+
+  useEffect(() => {
+    if (order && allStaff.length > 0) {
+      const assignedUsernames = order.assigned_staff?.map(s => s.username) || [];
+      const left = allStaff.filter(s => !assignedUsernames.includes(s.username));
+      const right = allStaff.filter(s => assignedUsernames.includes(s.username));
+      setLeftStaff(left);
+      setRightStaff(right);
+      setInitialRightStaff(right.map(s => s.username));
+      setHasChanges(false);
+    }
+  }, [order, allStaff]);
+
+  const moveToRight = (staff) => {
+    setLeftStaff(prev => prev.filter(s => s.username !== staff.username));
+    setRightStaff(prev => [...prev, staff]);
+    setHasChanges(true);
+  };
+
+  const moveToLeft = (staff) => {
+    setRightStaff(prev => prev.filter(s => s.username !== staff.username));
+    setLeftStaff(prev => [...prev, staff]);
+    setHasChanges(true);
+  };
+
+  const moveAllToRight = () => {
+    setRightStaff(prev => [...prev, ...leftStaff]);
+    setLeftStaff([]);
+    setHasChanges(true);
+  };
+
+  const moveAllToLeft = () => {
+    setLeftStaff(prev => [...prev, ...rightStaff]);
+    setRightStaff([]);
+    setHasChanges(true);
+  };
+
+  const handleSubmit = () => {
+    const staffUsernames = rightStaff.map(s => s.username);
+    onSubmit({
+      order_id: order.order_id,
+      staff_usernames: staffUsernames
+    });
+  };
+
+  const isInitial = () => {
+    const currentRight = rightStaff.map(s => s.username).sort();
+    const initialRight = initialRightStaff.sort();
+    return JSON.stringify(currentRight) === JSON.stringify(initialRight);
+  };
+
+  const StaffCard = ({ staff, onAction, actionIcon: ActionIcon, actionLabel, direction }) => (
+    <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all group">
+      <div className="flex items-center gap-3 min-w-0">
+        {staff.image ? (
+          <img src={staff.image} alt={staff.name} className="w-8 h-8 rounded-full object-cover shrink-0" />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+            {staff.name?.charAt(0) || '?'}
+          </div>
+        )}
+        <div className="min-w-0">
+          <p className="font-medium text-sm text-gray-800 dark:text-gray-200">{staff.name}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{staff.username}</p>
+        </div>
+      </div>
+      <button
+        onClick={() => onAction(staff)}
+        className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100"
+        title={actionLabel}
       >
-        <input
-          type="checkbox"
-          className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
-          checked={selectedUsernames.includes(staff.username)}
-          onChange={(e) => {
-            if (e.target.checked) onChange([...selectedUsernames, staff.username]);
-            else onChange(selectedUsernames.filter(u => u !== staff.username));
-          }}
-        />
-        <div className="flex items-center gap-3 min-w-0">
-          {staff.image ? (
-            <img src={staff.image} alt={staff.name} className="w-8 h-8 rounded-full object-cover shrink-0" />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-              {staff.name?.charAt(0) || '?'}
+        <ActionIcon size={16} className="text-gray-500 dark:text-gray-400" />
+      </button>
+    </div>
+  );
+
+  return (
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title={`Manage Staff · ${order?.order_name || ''}`}
+      icon={Users}
+      size="3xl"
+      contentClassName="p-5"
+      closeText="Cancel"
+      footer={
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {rightStaff.length} staff assigned
+          </span>
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting || !hasChanges || isInitial()}
+            className="px-5 py-2.5 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Users size={14} />
+            {isSubmitting ? 'Updating...' : 'Update Staff'}
+          </button>
+        </div>
+      }
+    >
+      <div className="space-y-4">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Use the arrow buttons to move staff between available and assigned lists.
+        </p>
+
+        <div className="flex flex-col gap-4 lg:flex-row md:flex-row items-stretch">
+          {/* Left Column - Available Staff */}
+          <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl p-3 bg-gray-50 dark:bg-gray-900/30">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <UserPlus size={14} className="text-indigo-500" />
+                Available ({leftStaff.length})
+              </h4>
+              {leftStaff.length > 0 && (
+                <button
+                  onClick={moveAllToRight}
+                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold flex items-center gap-1"
+                >
+                  <ChevronRight size={14} /> All
+                </button>
+              )}
             </div>
-          )}
-          <div className="min-w-0">
-            <p className="font-medium text-sm text-gray-800 dark:text-gray-200">{staff.name}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{staff.username} · {staff.email}</p>
+            <div className="max-h-96 overflow-y-auto space-y-2 pr-2">
+              {leftStaff.length > 0 ? (
+                leftStaff.map(staff => (
+                  <StaffCard
+                    key={staff.username}
+                    staff={staff}
+                    onAction={moveToRight}
+                    actionIcon={ChevronRight}
+                    actionLabel="Assign"
+                  />
+                ))
+              ) : (
+                <div className="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
+                  <UserPlus className="mx-auto mb-2 text-gray-300 dark:text-gray-600" size={32} />
+                  No available staff
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Center Column - Navigation Arrows (narrow) */}
+          <div className="w-16 mx-auto flex flex-col items-center justify-center gap-4 py-4 flex-shrink-0">
+            <button
+              onClick={moveAllToRight}
+              disabled={leftStaff.length === 0}
+              className="p-2 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all disabled:opacity-30 disabled:cursor-not-allowed border border-indigo-200 dark:border-indigo-700"
+            >
+              <ChevronRight size={20} />
+            </button>
+            <button
+              onClick={moveAllToLeft}
+              disabled={rightStaff.length === 0}
+              className="p-2 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all disabled:opacity-30 disabled:cursor-not-allowed border border-indigo-200 dark:border-indigo-700"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <div className="text-xs text-gray-400 dark:text-gray-500 font-medium text-center">
+              {rightStaff.length} / {allStaff.length}
+            </div>
+          </div>
+
+          {/* Right Column - Assigned Staff */}
+          <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl p-3 bg-gray-50 dark:bg-gray-900/30">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <UserCheck size={14} className="text-green-500" />
+                Assigned ({rightStaff.length})
+              </h4>
+              {rightStaff.length > 0 && (
+                <button
+                  onClick={moveAllToLeft}
+                  className="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-semibold flex items-center gap-1"
+                >
+                  <ChevronLeft size={14} /> All
+                </button>
+              )}
+            </div>
+            <div className="max-h-96 overflow-y-auto space-y-2 pr-2">
+              {rightStaff.length > 0 ? (
+                rightStaff.map(staff => (
+                  <StaffCard
+                    key={staff.username}
+                    staff={staff}
+                    onAction={moveToLeft}
+                    actionIcon={ChevronLeft}
+                    actionLabel="Unassign"
+                  />
+                ))
+              ) : (
+                <div className="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
+                  <UserMinus className="mx-auto mb-2 text-gray-300 dark:text-gray-600" size={32} />
+                  No staff assigned
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </label>
-    ))}
-    {allStaff.length === 0 && (
-      <p className="text-sm text-gray-500 dark:text-gray-400 p-3 text-center">No staff members available.</p>
-    )}
-  </div>
+
+        {hasChanges && !isInitial() && (
+          <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+            <RefreshCw size={14} className="text-amber-600 dark:text-amber-400 animate-spin-slow" />
+            <p className="text-sm text-amber-700 dark:text-amber-300">
+              You have unsaved changes. Click "Update Staff" to save.
+            </p>
+          </div>
+        )}
+      </div>
+    </Modal>
+  );
+};
+
+// Helper component for UserCheck icon
+const UserCheck = ({ size, className }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="8.5" cy="7" r="4" />
+    <polyline points="17 11 19 13 23 9" />
+  </svg>
 );
 
 /* ─── Info Item ─── */
@@ -88,142 +290,117 @@ const InfoItem = ({ icon: Icon, label, value }) => (
   </div>
 );
 
-/* ─── View Assigned Staff Modal ─── */
-const ViewAssignedStaffModal = ({ order, onClose }) => (
-  <Modal
-    isOpen={true}
-    onClose={onClose}
-    title={`Assigned Staff · ${order?.name || ''}`}
-    icon={Users}
-    size="md"
-    footer={null}
-  >
-    <div className="max-h-60 overflow-y-auto space-y-2 border border-gray-100 dark:border-gray-700 rounded-lg p-2 bg-gray-50 dark:bg-gray-900/50">
-      {order.assigned_staff && order.assigned_staff.length > 0 ? (
-        order.assigned_staff.map(staff => (
-          <div key={staff.username} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-              {staff.name?.charAt(0) || '?'}
-            </div>
-            <div className="min-w-0">
-              <p className="font-medium text-sm text-gray-800 dark:text-gray-200">{staff.name}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">@{staff.username}</p>
-            </div>
-          </div>
-        ))
-      ) : (
-        <p className="text-sm text-gray-500 dark:text-gray-400 p-3 text-center">No staff assigned to this order.</p>
-      )}
-    </div>
-  </Modal>
-);
-
 /* ─── View Order Modal ─── */
-const ViewOrderModal = ({ order, onClose, onAssign, onEditStaff, onRemoveStaff, onUpdateOrder, onUpdateStatus }) => (
-  <Modal
-    isOpen={true}
-    onClose={onClose}
-    title="Order Details"
-    icon={Briefcase}
-    size="2xl"
-    contentClassName="p-5 space-y-4"
-    footer={
-      <>
-        <button
-          onClick={() => onUpdateStatus(order)}
-          className="px-4 py-2.5 rounded-xl border border-emerald-200 dark:border-emerald-900/30 bg-emerald-50 dark:bg-emerald-900/20 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all flex items-center gap-2"
-        >
-          <RefreshCw size={14} /> Status
-        </button>
-        <button
-          onClick={() => onUpdateOrder(order)}
-          className="px-4 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-900/30 bg-indigo-50 dark:bg-indigo-900/20 text-sm font-semibold text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-all flex items-center gap-2"
-        >
-          <Edit size={14} /> Update
-        </button>
-        {order.assigned_staff && order.assigned_staff.length > 0 && (
+const ViewOrderModal = ({ order, onClose, onManageStaff, onUpdateOrder, onUpdateStatus }) => {
+  const hasAssignedStaff = order.assigned_staff && order.assigned_staff.length > 0;
+
+  return (
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="Order Details"
+      icon={Briefcase}
+      size="2xl"
+      contentClassName="p-5 space-y-4"
+      footer={
+        <>
           <button
-            onClick={() => onRemoveStaff(order)}
-            className="px-4 py-2.5 rounded-xl border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2"
+            onClick={() => onUpdateStatus(order)}
+            className="px-4 py-2.5 rounded-xl border border-emerald-200 dark:border-emerald-900/30 bg-emerald-50 dark:bg-emerald-900/20 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all flex items-center gap-2"
           >
-            <UserMinus size={14} /> Remove
+            <RefreshCw size={14} /> Status
           </button>
-        )}
-        <button
-          onClick={() => onEditStaff(order)}
-          className="px-4 py-2.5 rounded-xl border border-yellow-200 dark:border-yellow-900/30 bg-yellow-50 dark:bg-yellow-900/20 text-sm font-semibold text-yellow-700 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition-all flex items-center gap-2"
-        >
-          <Users size={14} /> Edit Staff
-        </button>
-        <button
-          onClick={() => onAssign(order)}
-          className="px-4 py-2.5 rounded-xl border border-blue-200 dark:border-blue-900/30 bg-blue-50 dark:bg-blue-900/20 text-sm font-semibold text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all flex items-center gap-2"
-        >
-          <UserPlus size={14} /> Assign Staff
-        </button>
-      </>
-    }
-  >
-    {/* Icon + Name */}
-    <div className="flex items-center gap-4 pb-4 border-b dark:border-gray-700">
-      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-indigo-500/30">
-        <Briefcase size={28} />
-      </div>
-      <div>
-        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{order.name}</h3>
-        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-0.5">{order.service_name}</p>
-        <div className="mt-2 flex gap-2 items-center">
-          <StatusBadge status={order.status} />
-          <span className="text-xs text-gray-500 dark:text-gray-400 font-mono text-[10px]">ID: {order.order_id}</span>
+          <button
+            onClick={() => onUpdateOrder(order)}
+            className="px-4 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-900/30 bg-indigo-50 dark:bg-indigo-900/20 text-sm font-semibold text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-all flex items-center gap-2"
+          >
+            <Edit size={14} /> Update
+          </button>
+          <button
+            onClick={() => onManageStaff(order)}
+            className={`px-4 py-2.5 rounded-xl border transition-all flex items-center gap-2 ${hasAssignedStaff
+              ? 'border-blue-200 dark:border-blue-900/30 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40'
+              : 'border-green-200 dark:border-green-900/30 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40'
+              }`}
+          >
+            {hasAssignedStaff ? (
+              <>
+                <Users size={14} /> Manage Staff
+              </>
+            ) : (
+              <>
+                <UserPlus size={14} /> Assign Staff
+              </>
+            )}
+          </button>
+        </>
+      }
+    >
+      <div className="flex items-center gap-4 pb-4 border-b dark:border-gray-700">
+        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-indigo-500/30">
+          <Briefcase size={28} />
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{order.order_name}</h3>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-0.5">{order.service_name}</p>
+          <div className="mt-2 flex gap-2 items-center">
+            <StatusBadge status={order.status} />
+            <span className="text-xs text-gray-500 dark:text-gray-400 font-mono text-[10px]">ID: {order.order_id}</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    {/* Info Grid */}
-    <div>
-      <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-        <FileText className="text-indigo-500 dark:text-indigo-400" size={15} /> General & Financial Details
-      </h4>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        <InfoItem icon={Hash}         label="Order ID"   value={order.order_id} />
-        <InfoItem icon={FileText}     label="Order Name" value={order.name} />
-        <InfoItem icon={Tag}          label="Service"    value={order.service_name} />
-        <InfoItem icon={User}         label="Client"     value={order.client_name || order.client_username} />
-        <InfoItem icon={IndianRupee}  label="Fees"       value={`₹${Number(order.fees).toLocaleString()}`} />
-        <InfoItem icon={Briefcase}    label="Status"     value={<StatusBadge status={order.status} />} />
-        <InfoItem icon={Calendar}     label="Created"    value={new Date(order.create_date).toLocaleString()} />
+      {/* Info Grid */}
+      <div>
+        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+          <FileText className="text-indigo-500 dark:text-indigo-400" size={15} /> General & Financial Details
+        </h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <InfoItem icon={Hash} label="Order ID" value={order.order_id} />
+          <InfoItem icon={FileText} label="Order Name" value={order.order_name} />
+          <InfoItem icon={Tag} label="Service" value={order.service_name} />
+          <InfoItem icon={User} label="Client" value={order.client_name || order.client_username} />
+          <InfoItem icon={IndianRupee} label="Fees" value={`₹${Number(order.fees).toLocaleString()}`} />
+          <InfoItem icon={Briefcase} label="Status" value={<StatusBadge status={order.status} />} />
+          <InfoItem icon={Calendar} label="Created" value={new Date(order.create_date).toLocaleString()} />
+        </div>
       </div>
-    </div>
 
-    {/* Staff Grid */}
-    <div>
-      <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-        <Users className="text-indigo-500 dark:text-indigo-400" size={15} /> Assigned Staff
-      </h4>
-      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-3">
-        {order.assigned_staff && order.assigned_staff.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {order.assigned_staff.map(s => (
-              <span
-                key={s.username}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white text-indigo-700 border border-gray-200 shadow-sm dark:bg-gray-800 dark:text-indigo-300 dark:border-gray-700"
-              >
-                <User size={12} className="text-indigo-500" /> {s.name}
-              </span>
-            ))}
-          </div>
-        ) : (
-          <span className="text-sm text-gray-500 dark:text-gray-400 italic">No staff currently assigned to this order.</span>
-        )}
+      {/* Staff Grid */}
+      <div>
+        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+          <Users className="text-indigo-500 dark:text-indigo-400" size={15} /> Assigned Staff
+        </h4>
+        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-3">
+          {order.assigned_staff && order.assigned_staff.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {order.assigned_staff.map(s => (
+                <span
+                  key={s.username}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white text-indigo-700 border border-gray-200 shadow-sm dark:bg-gray-800 dark:text-indigo-300 dark:border-gray-700"
+                >
+                  <User size={12} className="text-indigo-500" /> {s.name}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <button
+              onClick={() => onManageStaff(order)}
+              className="text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold flex items-center gap-2"
+            >
+              <UserPlus size={16} /> Click to assign staff
+            </button>
+          )}
+        </div>
       </div>
-    </div>
-  </Modal>
-);
+    </Modal>
+  );
+};
 
 const OrderUpdateModal = ({ order, onClose, onSubmit, isSubmitting }) => {
   const { discountTypeOptions } = useServiceOptions();
   const [form, setForm] = useState({
-    name: order?.name || '',
+    order_name: order?.order_name || '',
     service_id: order?.service_id || '',
     base_price: order?.base_price ?? 1,
     tax_rate: order?.tax_rate ?? 1,
@@ -263,7 +440,7 @@ const OrderUpdateModal = ({ order, onClose, onSubmit, isSubmitting }) => {
     <Modal
       isOpen={true}
       onClose={onClose}
-      title={`Update Order · ${order?.name || ''}`}
+      title={`Update Order · ${order?.order_name || ''}`}
       icon={Edit}
       size="3xl"
       contentClassName="p-5"
@@ -284,7 +461,7 @@ const OrderUpdateModal = ({ order, onClose, onSubmit, isSubmitting }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="sm:col-span-2">
             <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Order Name</label>
-            <input required value={form.name} onChange={setText('name')} className={inputCls} />
+            <input required value={form.order_name} onChange={setText('order_name')} className={inputCls} />
           </div>
           <div className="sm:col-span-2">
             <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Service ID</label>
@@ -347,7 +524,7 @@ const OrderStatusModal = ({ order, onClose, onSubmit, isSubmitting }) => {
     <Modal
       isOpen={true}
       onClose={onClose}
-      title={`Update Status · ${order?.name || ''}`}
+      title={`Update Status · ${order?.order_name || ''}`}
       icon={RefreshCw}
       size="md"
       contentClassName="p-5"
@@ -389,59 +566,70 @@ const OrderStatusModal = ({ order, onClose, onSubmit, isSubmitting }) => {
 };
 
 /* ─── Order Card ─── */
-const OrderCard = ({ order, index, getActions, onClick, onViewStaff }) => (
-  <ManagementCard
-    delay={index * 0.05}
-    accent="indigo"
-    eyebrow={`Date: ${new Date(order.create_date).toLocaleDateString()}`}
-    title={order.name}
-    subtitle={order.service_name}
-    onClick={() => onClick && onClick(order)}
-    icon={
-      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shrink-0">
-        <Briefcase size={20} />
+const OrderCard = ({ order, index, getActions, onClick, onManageStaff }) => {
+  const hasAssignedStaff = order.assigned_staff && order.assigned_staff.length > 0;
+
+  return (
+    <ManagementCard
+      delay={index * 0.05}
+      accent="indigo"
+      eyebrow={`Date: ${new Date(order.create_date).toLocaleDateString()}`}
+      title={order.order_name}
+      subtitle={order.service_name}
+      onClick={() => onClick && onClick(order)}
+      icon={
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shrink-0">
+          <Briefcase size={20} />
+        </div>
+      }
+      badge={<StatusBadge status={order.status} />}
+      menuId={`order-card-${order.order_id}`}
+      actions={getActions ? getActions(order) : undefined}
+      footer={
+        <div className="flex items-center justify-between w-full text-xs text-gray-500 dark:text-gray-400">
+          <span className="flex items-center gap-1">
+            <Hash size={10} className="text-indigo-400 dark:text-indigo-500" /> {order.order_id}
+          </span>
+          <span className="font-semibold text-gray-700 dark:text-gray-300">₹{order.fees}</span>
+        </div>
+      }
+    >
+      <div className="mt-1 space-y-1">
+        <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+          <User size={10} className="text-gray-400 dark:text-gray-500" />
+          Client: {order.client_name || order.client_username}
+        </p>
+        {hasAssignedStaff ? (
+          <button
+            onClick={(e) => { e.stopPropagation(); onManageStaff && onManageStaff(order); }}
+            className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold flex items-center gap-1.5 mt-1"
+          >
+            <Users size={12} /> {order.assigned_staff.length} Staff Assigned
+          </button>
+        ) : (
+          <button
+            onClick={(e) => { e.stopPropagation(); onManageStaff && onManageStaff(order); }}
+            className="text-xs text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold flex items-center gap-1.5 mt-1"
+          >
+            <UserPlus size={12} /> Assign Staff
+          </button>
+        )}
       </div>
-    }
-    badge={<StatusBadge status={order.status} />}
-    menuId={`order-card-${order.order_id}`}
-    actions={getActions ? getActions(order) : undefined}
-    footer={
-      <div className="flex items-center justify-between w-full text-xs text-gray-500 dark:text-gray-400">
-        <span className="flex items-center gap-1">
-          <Hash size={10} className="text-indigo-400 dark:text-indigo-500" /> {order.order_id}
-        </span>
-        <span className="font-semibold text-gray-700 dark:text-gray-300">₹{order.fees}</span>
-      </div>
-    }
-  >
-    <div className="mt-1 space-y-1">
-      <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-        <User size={10} className="text-gray-400 dark:text-gray-500" />
-        Client: {order.client_name || order.client_username}
-      </p>
-      {order.assigned_staff && order.assigned_staff.length > 0 && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onViewStaff && onViewStaff(order); }}
-          className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold flex items-center gap-1.5 mt-1"
-        >
-          <Users size={12} /> {order.assigned_staff.length} Staff Assigned
-        </button>
-      )}
-    </div>
-  </ManagementCard>
-);
+    </ManagementCard>
+  );
+};
 
 /* ═══════════════════════════════════════════════
    MAIN COMPONENT
    ═══════════════════════════════════════════════ */
 export default function Orders() {
   const { orderStatusOptions } = useServiceOptions();
-  const [orders, setOrders]           = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [refreshing, setRefreshing]   = useState(false);
-  const [searchTerm, setSearchTerm]   = useState('');
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [viewMode, setViewMode]       = useState('table');
+  const [viewMode, setViewMode] = useState('table');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
 
@@ -449,15 +637,11 @@ export default function Orders() {
   const [allStaff, setAllStaff] = useState([]);
 
   // Modals
-  const [selectedOrder, setSelectedOrder]                 = useState(null);
-  const [detailModalOpen, setDetailModalOpen]             = useState(false);
-  const [assignModalOpen, setAssignModalOpen]             = useState(false);
-  const [editStaffModalOpen, setEditStaffModalOpen]       = useState(false);
-  const [removeStaffModalOpen, setRemoveStaffModalOpen]   = useState(false);
-  const [viewStaffModalOpen, setViewStaffModalOpen]       = useState(false);
-  const [updateOrderModalOpen, setUpdateOrderModalOpen]   = useState(false);
-  const [statusModalOpen, setStatusModalOpen]             = useState(false);
-  const [selectedStaffUsernames, setSelectedStaffUsernames] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [staffModalOpen, setStaffModalOpen] = useState(false);
+  const [updateOrderModalOpen, setUpdateOrderModalOpen] = useState(false);
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [staffLoading, setStaffLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -470,7 +654,7 @@ export default function Orders() {
     if (!staffFetchedRef.current) {
       setStaffLoading(true);
       try {
-        const res  = await apiCall('/api/admin/staff/list', 'GET');
+        const res = await apiCall('/api/admin/staff/list', 'GET');
         const data = await res.json();
         if (data.success) {
           setAllStaff(data.data.staffs);
@@ -488,13 +672,33 @@ export default function Orders() {
     setLoading(true);
     try {
       const statusParam = statusFilter ? `&status=${encodeURIComponent(statusFilter)}` : '';
-      const res  = await apiCall(
+      const res = await apiCall(
         `/api/admin/orders/list?page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}${statusParam}`,
         'GET'
       );
       const data = await res.json();
       if (data.success) {
-        setOrders(data.data.orders);
+        // Map the API response to match component expectations
+        const mappedOrders = data.data.orders.map(order => ({
+          ...order,
+          // The API returns 'order_name' but components expect 'name'
+          // We'll keep both for backward compatibility
+          name: order.order_name,
+          // Ensure arrays exist
+          assigned_staff: order.assigned_staff || [],
+          payments: order.payments || [],
+          // Ensure numeric values are numbers
+          base_price: Number(order.base_price),
+          tax_rate: Number(order.tax_rate),
+          tax_value: Number(order.tax_value),
+          total_fees: Number(order.total_fees),
+          discount_percentage: Number(order.discount_percentage),
+          discount_value: Number(order.discount_value),
+          fees: Number(order.fees),
+          total_paid: Number(order.total_paid),
+          due_amount: Number(order.due_amount),
+        }));
+        setOrders(mappedOrders);
         setTotalOrders(data.data.pagination.total);
       }
     } catch (err) {
@@ -506,14 +710,14 @@ export default function Orders() {
   };
 
   const lastOrderFetchRef = useRef({ page: null, search: null, status: null });
-  useEffect(() => { 
+  useEffect(() => {
     if (
       lastOrderFetchRef.current.page === currentPage &&
       lastOrderFetchRef.current.search === searchTerm &&
       lastOrderFetchRef.current.status === statusFilter
     ) return;
     lastOrderFetchRef.current = { page: currentPage, search: searchTerm, status: statusFilter };
-    fetchOrders(); 
+    fetchOrders();
   }, [currentPage, searchTerm, statusFilter]);
 
   const handleRefresh = () => { setRefreshing(true); fetchOrders(); };
@@ -524,16 +728,10 @@ export default function Orders() {
     setDetailModalOpen(true);
   };
 
-  const openViewStaffModal = (order) => {
+  const openStaffModal = (order) => {
     setSelectedOrder(order);
-    setViewStaffModalOpen(true);
-  };
-
-  const openAssignModal = (order) => {
-    setSelectedOrder(order);
-    setSelectedStaffUsernames([]);
     setDetailModalOpen(false);
-    setAssignModalOpen(true);
+    setStaffModalOpen(true);
     ensureStaffFetched();
   };
 
@@ -549,61 +747,18 @@ export default function Orders() {
     setStatusModalOpen(true);
   };
 
-  const openEditStaffModal = (order) => {
-    setSelectedOrder(order);
-    setSelectedStaffUsernames(order.assigned_staff ? order.assigned_staff.map(s => s.username) : []);
-    setDetailModalOpen(false);
-    setEditStaffModalOpen(true);
-    ensureStaffFetched();
-  };
-
-  const openRemoveStaffModal = (order) => {
-    setSelectedOrder(order);
-    setSelectedStaffUsernames([]);
-    setDetailModalOpen(false);
-    setRemoveStaffModalOpen(true);
-    ensureStaffFetched();
-  };
-
   /* ─── API Handlers ─── */
-  const handleAssignStaff = async () => {
-    if (!selectedOrder || selectedStaffUsernames.length === 0) return;
-    setSaving(true);
-    try {
-      const res  = await apiCall('/api/admin/orders/assign', 'POST', {
-        order_id: selectedOrder.order_id,
-        staff_usernames: selectedStaffUsernames,
-      });
-      const data = await res.json();
-      if (data.success) { setAssignModalOpen(false); fetchOrders(); }
-    } catch (e) { console.error(e); }
-    finally { setSaving(false); }
-  };
-
-  const handleEditStaff = async () => {
+  const handleUpdateStaff = async (payload) => {
     if (!selectedOrder) return;
     setSaving(true);
     try {
-      const res  = await apiCall('/api/admin/orders/assign/update', 'PUT', {
-        order_id: selectedOrder.order_id,
-        staff_usernames: selectedStaffUsernames,
-      });
+      const res = await apiCall('/api/admin/orders/assign/update', 'PUT', payload);
       const data = await res.json();
-      if (data.success) { setEditStaffModalOpen(false); fetchOrders(); }
-    } catch (e) { console.error(e); }
-    finally { setSaving(false); }
-  };
-
-  const handleRemoveStaff = async () => {
-    if (!selectedOrder || selectedStaffUsernames.length === 0) return;
-    setSaving(true);
-    try {
-      const res  = await apiCall('/api/admin/orders/assign/remove', 'DELETE', {
-        order_id: selectedOrder.order_id,
-        staff_usernames: selectedStaffUsernames,
-      });
-      const data = await res.json();
-      if (data.success) { setRemoveStaffModalOpen(false); fetchOrders(); }
+      if (data.success) {
+        setStaffModalOpen(false);
+        setSelectedOrder(null);
+        fetchOrders();
+      }
     } catch (e) { console.error(e); }
     finally { setSaving(false); }
   };
@@ -638,23 +793,24 @@ export default function Orders() {
     finally { setSaving(false); }
   };
 
-  /* ─── Computed Staff Lists ─── */
-  const unassignedStaff = allStaff.filter(
-    s => !selectedOrder?.assigned_staff?.some(a => a.username === s.username)
-  );
-
-  const assignedStaffList = selectedOrder?.assigned_staff
-    ? allStaff.filter(s => selectedOrder.assigned_staff.some(a => a.username === s.username))
-    : [];
-
-  /* ─── Action Menu (matches Services.jsx shape) ─── */
+  /* ─── Action Menu ─── */
   const getActions = (order) => {
+    const hasAssignedStaff = order.assigned_staff && order.assigned_staff.length > 0;
+
     const actions = [
       {
         label: 'View Details',
         icon: <Eye size={12} />,
         onClick: () => openDetailModal(order),
         className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300',
+      },
+      {
+        label: hasAssignedStaff ? 'Manage Staff' : 'Assign Staff',
+        icon: hasAssignedStaff ? <Users size={12} /> : <UserPlus size={12} />,
+        onClick: () => openStaffModal(order),
+        className: hasAssignedStaff
+          ? 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300'
+          : 'text-green-600 hover:text-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-900/30 dark:text-yellow-400 dark:hover:text-yellow-300',
       },
       {
         label: 'Update Order',
@@ -668,37 +824,17 @@ export default function Orders() {
         onClick: () => openStatusModal(order),
         className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300',
       },
-      {
-        label: 'Assign Staff',
-        icon: <UserPlus size={12} />,
-        onClick: () => openAssignModal(order),
-        className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300',
-      },
-      {
-        label: 'Edit Staff',
-        icon: <Users size={12} />,
-        onClick: () => openEditStaffModal(order),
-        className: 'text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/30 dark:text-amber-400 dark:hover:text-amber-300',
-      },
+      
     ];
-
-    if (order.assigned_staff && order.assigned_staff.length > 0) {
-      actions.push({
-        label: 'Remove Staff',
-        icon: <UserMinus size={12} />,
-        onClick: () => openRemoveStaffModal(order),
-        className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300',
-      });
-    }
 
     return actions;
   };
 
   /* ─── Table Columns ─── */
   const columns = [
-    { key: 'order_id',      label: 'Order ID' },
-    { key: 'name',          label: 'Order Name' },
-    { key: 'service_name',  label: 'Service' },
+    { key: 'order_id', label: 'Order ID' },
+    { key: 'order_name', label: 'Order Name' },
+    { key: 'service_name', label: 'Service' },
     {
       key: 'client', label: 'Client',
       render: (row) => row.client_name || row.client_username,
@@ -709,13 +845,20 @@ export default function Orders() {
         row.assigned_staff && row.assigned_staff.length > 0
           ? (
             <button
-              onClick={(e) => { e.stopPropagation(); openViewStaffModal(row); }}
+              onClick={(e) => { e.stopPropagation(); openStaffModal(row); }}
               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition-colors dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700 dark:hover:bg-indigo-900/50 cursor-pointer"
             >
               <Users size={12} /> {row.assigned_staff.length} Assigned
             </button>
           )
-          : <span className="text-xs text-gray-400 dark:text-gray-500 italic">Unassigned</span>,
+          : (
+            <button
+              onClick={(e) => { e.stopPropagation(); openStaffModal(row); }}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition-colors dark:bg-green-900/30 dark:text-green-300 dark:border-green-700 dark:hover:bg-green-900/50 cursor-pointer"
+            >
+              <UserPlus size={12} /> Unassigned
+            </button>
+          ),
     },
     {
       key: 'fees', label: 'Fees',
@@ -754,9 +897,9 @@ export default function Orders() {
             transition={{ delay: 0.1 }}
             className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm"
           >
-          <div className="flex items-center gap-4 flex-1">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
+            <div className="flex items-center gap-4 flex-1">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
                 <input
                   type="text"
                   placeholder="Search orders..."
@@ -846,7 +989,7 @@ export default function Orders() {
                           index={index}
                           getActions={getActions}
                           onClick={openDetailModal}
-                          onViewStaff={openViewStaffModal}
+                          onManageStaff={openStaffModal}
                         />
                       ))}
                     </AnimatePresence>
@@ -873,11 +1016,22 @@ export default function Orders() {
           <ViewOrderModal
             order={selectedOrder}
             onClose={() => { setDetailModalOpen(false); setSelectedOrder(null); }}
-            onAssign={openAssignModal}
-            onEditStaff={openEditStaffModal}
-            onRemoveStaff={openRemoveStaffModal}
+            onManageStaff={openStaffModal}
             onUpdateOrder={openUpdateOrderModal}
             onUpdateStatus={openStatusModal}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── STAFF MANAGEMENT MODAL ── */}
+      <AnimatePresence>
+        {staffModalOpen && selectedOrder && (
+          <StaffManagementModal
+            order={selectedOrder}
+            allStaff={allStaff}
+            onClose={() => { setStaffModalOpen(false); setSelectedOrder(null); }}
+            onSubmit={handleUpdateStaff}
+            isSubmitting={saving}
           />
         )}
       </AnimatePresence>
@@ -903,153 +1057,6 @@ export default function Orders() {
             onSubmit={handleUpdateStatus}
             isSubmitting={saving}
           />
-        )}
-      </AnimatePresence>
-
-      {/* ── VIEW ASSIGNED STAFF MODAL ── */}
-      <AnimatePresence>
-        {viewStaffModalOpen && selectedOrder && (
-          <ViewAssignedStaffModal
-            order={selectedOrder}
-            onClose={() => { setViewStaffModalOpen(false); setSelectedOrder(null); }}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* ── ASSIGN STAFF MODAL ── */}
-      <AnimatePresence>
-        {assignModalOpen && (
-          <Modal
-            isOpen={true}
-            onClose={() => setAssignModalOpen(false)}
-            title={`Assign Staff · ${selectedOrder?.name || ''}`}
-            icon={UserPlus}
-            size="md"
-            closeText="Cancel"
-            footer={
-              <button
-                disabled={saving || selectedStaffUsernames.length === 0}
-                onClick={handleAssignStaff}
-                className="px-5 py-2.5 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-50"
-              >
-                <UserPlus size={14} />
-                {saving ? 'Assigning…' : `Assign${selectedStaffUsernames.length > 0 ? ` (${selectedStaffUsernames.length})` : ''}`}
-              </button>
-            }
-          >
-            <div className="space-y-3">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Select staff members to add to this order. Already-assigned staff are excluded.
-              </p>
-              {staffLoading ? (
-                <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500 dark:text-gray-400">
-                  <RefreshCw size={16} className="animate-spin" />
-                  Loading staff...
-                </div>
-              ) : (
-                <StaffCheckboxList
-                  allStaff={unassignedStaff}
-                  selectedUsernames={selectedStaffUsernames}
-                  onChange={setSelectedStaffUsernames}
-                />
-              )}
-              {!staffLoading && unassignedStaff.length === 0 && (
-                <div className="text-center py-4">
-                  <CheckCircle className="text-green-400 mx-auto mb-2" size={32} />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">All staff are already assigned to this order.</p>
-                </div>
-              )}
-            </div>
-          </Modal>
-        )}
-      </AnimatePresence>
-
-      {/* ── EDIT STAFF MODAL ── */}
-      <AnimatePresence>
-        {editStaffModalOpen && (
-          <Modal
-            isOpen={true}
-            onClose={() => setEditStaffModalOpen(false)}
-            title={`Edit Staff · ${selectedOrder?.name || ''}`}
-            icon={Users}
-            size="md"
-            closeText="Cancel"
-            footer={
-              <button
-                disabled={saving || staffLoading}
-                onClick={handleEditStaff}
-                className="px-5 py-2.5 rounded-xl bg-amber-500 dark:bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 dark:hover:bg-amber-600 transition-all flex items-center gap-2 disabled:opacity-50"
-              >
-                <Users size={14} />
-                {saving ? 'Saving…' : 'Update Assignments'}
-              </button>
-            }
-          >
-            <div className="space-y-3">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Select who should be assigned. This <span className="font-semibold text-gray-700 dark:text-gray-300">replaces</span> all current assignments.
-              </p>
-              {staffLoading ? (
-                <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500 dark:text-gray-400">
-                  <RefreshCw size={16} className="animate-spin" />
-                  Loading staff...
-                </div>
-              ) : (
-                <StaffCheckboxList
-                  allStaff={allStaff}
-                  selectedUsernames={selectedStaffUsernames}
-                  onChange={setSelectedStaffUsernames}
-                />
-              )}
-            </div>
-          </Modal>
-        )}
-      </AnimatePresence>
-
-      {/* ── REMOVE STAFF MODAL ── */}
-      <AnimatePresence>
-        {removeStaffModalOpen && (
-          <Modal
-            isOpen={true}
-            onClose={() => setRemoveStaffModalOpen(false)}
-            title={`Remove Staff · ${selectedOrder?.name || ''}`}
-            icon={UserMinus}
-            size="md"
-            closeText="Cancel"
-            footer={
-              <button
-                disabled={saving || selectedStaffUsernames.length === 0}
-                onClick={handleRemoveStaff}
-                className="px-5 py-2.5 rounded-xl bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
-              >
-                <UserMinus size={14} />
-                {saving ? 'Removing…' : `Remove${selectedStaffUsernames.length > 0 ? ` (${selectedStaffUsernames.length})` : ''}`}
-              </button>
-            }
-          >
-            <div className="space-y-3">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Choose which staff members to unassign from this order.
-              </p>
-              {staffLoading ? (
-                <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500 dark:text-gray-400">
-                  <RefreshCw size={16} className="animate-spin" />
-                  Loading staff...
-                </div>
-              ) : assignedStaffList.length > 0 ? (
-                <StaffCheckboxList
-                  allStaff={assignedStaffList}
-                  selectedUsernames={selectedStaffUsernames}
-                  onChange={setSelectedStaffUsernames}
-                />
-              ) : (
-                <div className="text-center py-8">
-                  <UserMinus className="text-gray-300 dark:text-gray-600 mx-auto mb-2" size={40} />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">No staff assigned to this order.</p>
-                </div>
-              )}
-            </div>
-          </Modal>
         )}
       </AnimatePresence>
 
