@@ -1,17 +1,19 @@
 import Select from "react-select";
-import { getReactSelectMenuProps, reactSelectStyles } from "../../hooks/reactSelectConfig";
+import { useMemo } from "react";
+import { useTheme } from "../../contexts/ThemeContext";
+import { getReactSelectMenuProps, getReactSelectStyles } from "../../hooks/reactSelectConfig";
 
-const mergeSelectStyles = (styles = {}) => {
+const mergeSelectStyles = (baseStyles, styles = {}, theme = 'light') => {
   const customStyles = styles || {};
-  const keys = new Set([...Object.keys(reactSelectStyles), ...Object.keys(customStyles)]);
+  const keys = new Set([...Object.keys(baseStyles), ...Object.keys(customStyles)]);
 
   const merged = {};
   keys.forEach((key) => {
-    const baseStyle = reactSelectStyles[key];
+    const baseStyle = baseStyles[key];
     const overrideStyle = customStyles[key];
 
     if (baseStyle && overrideStyle) {
-      merged[key] = (provided, state) => overrideStyle(baseStyle(provided, state), state);
+      merged[key] = (provided, state) => overrideStyle(baseStyle(provided, state), state, theme);
     } else {
       merged[key] = overrideStyle || baseStyle;
     }
@@ -21,11 +23,18 @@ const mergeSelectStyles = (styles = {}) => {
 };
 
 const SelectField = ({ styles, ...props }) => {
+  const { theme } = useTheme();
+  const mergedStyles = useMemo(
+    () => mergeSelectStyles(getReactSelectStyles(theme), styles, theme),
+    [theme, styles]
+  );
+
   return (
     <Select
+      key={theme}
       {...getReactSelectMenuProps()}
       {...props}
-      styles={mergeSelectStyles(styles)}
+      styles={mergedStyles}
     />
   );
 };

@@ -1,75 +1,123 @@
-export const reactSelectStyles = {
+export const getReactSelectStyles = (theme = 'light') => {
+  const isDark = theme === 'dark';
+  const colors = {
+    controlBg: isDark ? '#111827' : '#f9fafb',
+    controlBorder: isDark ? '#374151' : '#e5e7eb',
+    controlBorderHover: isDark ? '#4b5563' : '#cbd5e1',
+    controlText: isDark ? '#f3f4f6' : '#111827',
+    placeholder: isDark ? '#9ca3af' : '#64748b',
+    menuBg: isDark ? '#111827' : '#ffffff',
+    menuBorder: isDark ? '#374151' : '#e5e7eb',
+    optionText: isDark ? '#e5e7eb' : '#334155',
+    optionFocused: isDark ? '#1f2937' : '#eef2ff',
+    optionSelected: isDark ? '#4338ca' : '#4f46e5',
+    multiBg: isDark ? '#1f2937' : '#eef2ff',
+    multiText: isDark ? '#c7d2fe' : '#3730a3',
+  };
+
+  return {
   control: (provided, state) => {
-    const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
     return {
       ...provided,
-      backgroundColor: isDark ? '#374151' : 'white', // gray-700
-      borderColor: state.isFocused ? (isDark ? '#3b82f6' : '#3b82f6') : (isDark ? '#4b5563' : '#d1d5db'), // blue-500, gray-600/300
+      backgroundColor: colors.controlBg,
+      borderColor: state.isFocused ? '#6366f1' : colors.controlBorder,
       borderRadius: '0.75rem',
-      boxShadow: state.isFocused ? '0 0 0 2px rgba(59, 130, 246, 0.2)' : 'none',
+      boxShadow: state.isFocused ? '0 0 0 4px rgba(99, 102, 241, 0.12)' : 'none',
       '&:hover': {
-        borderColor: state.isFocused ? '#3b82f6' : (isDark ? '#6b7280' : '#9ca3af') // gray-500/400
+        borderColor: state.isFocused ? '#6366f1' : colors.controlBorderHover,
       },
-      minHeight: '38px',
-      fontSize: '0.875rem'
+      minHeight: '42px',
+      fontSize: '0.875rem',
+      transition: 'border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease',
     };
   },
   option: (provided, state) => {
-    const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
     return {
       ...provided,
       backgroundColor: state.isSelected 
-        ? '#2563eb' // blue-600 
+        ? colors.optionSelected
         : state.isFocused 
-          ? (isDark ? '#4b5563' : '#eff6ff') // gray-600 or blue-50
-          : (isDark ? '#1f2937' : 'white'), // gray-800 or white
-      color: state.isSelected ? 'white' : (isDark ? '#e5e7eb' : '#374151'), // gray-200 or gray-700
+          ? colors.optionFocused
+          : colors.menuBg,
+      color: state.isSelected ? '#ffffff' : colors.optionText,
       cursor: 'pointer',
       fontSize: '0.875rem',
+      fontWeight: state.isSelected ? 600 : 500,
       '&:active': {
-        backgroundColor: state.isSelected ? '#1d4ed8' : (isDark ? '#374151' : '#dbeafe') // blue-700, gray-700, blue-100
+        backgroundColor: state.isSelected ? colors.optionSelected : colors.optionFocused,
       }
     };
   },
   menu: (provided) => {
-    const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
     return {
       ...provided,
-      backgroundColor: isDark ? '#1f2937' : 'white', // gray-800
+      backgroundColor: colors.menuBg,
       borderRadius: '0.75rem',
-      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+      boxShadow: isDark
+        ? '0 18px 40px rgba(0, 0, 0, 0.45)'
+        : '0 18px 40px rgba(15, 23, 42, 0.14)',
       zIndex: 9999,
-      border: isDark ? '1px solid #374151' : 'none',
+      border: `1px solid ${colors.menuBorder}`,
+      overflow: 'hidden',
     };
   },
   menuPortal: base => ({ ...base, zIndex: 9999 }),
   singleValue: (provided) => {
-    const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
     return {
       ...provided,
-      color: isDark ? '#f3f4f6' : '#374151', // gray-100 or gray-700
+      color: colors.controlText,
       fontSize: '0.875rem'
     };
   },
+  input: (provided) => ({
+    ...provided,
+    color: colors.controlText,
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: colors.placeholder,
+  }),
+  multiValue: (provided) => ({
+    ...provided,
+    backgroundColor: colors.multiBg,
+    borderRadius: '0.5rem',
+  }),
+  multiValueLabel: (provided) => ({
+    ...provided,
+    color: colors.multiText,
+    fontWeight: 600,
+  }),
   valueContainer: (provided) => ({
     ...provided,
-    padding: '2px 8px'
+    padding: '2px 10px'
   }),
   indicatorSeparator: () => ({
     display: 'none'
   }),
   dropdownIndicator: (provided) => {
-    const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
     return {
       ...provided,
-      color: isDark ? '#9ca3af' : '#9ca3af', // gray-400
+      color: colors.placeholder,
       padding: '4px 8px',
       '&:hover': {
-        color: isDark ? '#d1d5db' : '#6b7280' // gray-300 or gray-500
+        color: isDark ? '#d1d5db' : '#475569',
+      }
+    };
+  },
+  clearIndicator: (provided) => {
+    return {
+      ...provided,
+      color: colors.placeholder,
+      padding: '4px 8px',
+      '&:hover': {
+        color: isDark ? '#f3f4f6' : '#334155',
       }
     };
   }
 };
+};
+
+export const reactSelectStyles = getReactSelectStyles();
 
 export const getReactSelectMenuProps = () => ({
   menuPortalTarget: typeof document !== 'undefined' ? document.body : null,

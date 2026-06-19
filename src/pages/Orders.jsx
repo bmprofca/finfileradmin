@@ -19,16 +19,16 @@ import apiCall from '../utils/apiCall';
 
 /* ─── Status Badge ─── */
 const STATUS_COLORS = {
-  'created': { pill: 'bg-blue-100 text-blue-800 border border-blue-200', dot: 'bg-blue-500' },
-  'in process': { pill: 'bg-amber-100 text-amber-800 border border-amber-200', dot: 'bg-amber-500' },
-  'pending from department': { pill: 'bg-orange-100 text-orange-800 border border-orange-200', dot: 'bg-orange-500' },
-  'completed': { pill: 'bg-green-100 text-green-800 border border-green-200', dot: 'bg-green-500' },
-  'cancelled': { pill: 'bg-red-100 text-red-800 border border-red-200', dot: 'bg-red-500' },
+  'created': { pill: 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800', dot: 'bg-blue-500 dark:bg-blue-400' },
+  'in process': { pill: 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800', dot: 'bg-amber-500 dark:bg-amber-400' },
+  'pending from department': { pill: 'bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-950/50 dark:text-orange-300 dark:border-orange-800', dot: 'bg-orange-500 dark:bg-orange-400' },
+  'completed': { pill: 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800', dot: 'bg-emerald-500 dark:bg-emerald-400' },
+  'cancelled': { pill: 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/50 dark:text-red-300 dark:border-red-800', dot: 'bg-red-500 dark:bg-red-400' },
 };
 
 const StatusBadge = ({ status }) => {
   const key = (status || '').toString().toLowerCase();
-  const cfg = STATUS_COLORS[key] || { pill: 'bg-gray-100 text-gray-700 border border-gray-200', dot: 'bg-gray-400' };
+  const cfg = STATUS_COLORS[key] || { pill: 'bg-slate-100 text-slate-700 border border-slate-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700', dot: 'bg-slate-400 dark:bg-gray-500' };
   const display = key.replace(/\b\w/g, l => l.toUpperCase());
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${cfg.pill}`}>
@@ -413,7 +413,7 @@ const OrderUpdateModal = ({ order, onClose, onSubmit, isSubmitting }) => {
     partial_payment_allowed: order?.partial_payment_allowed ?? true,
   });
 
-  const inputCls = 'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm dark:text-gray-100';
+  const inputCls = 'w-full px-3 py-2.5 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm';
 
   const setText = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
   const setNumber = (key) => (e) => {
@@ -513,7 +513,7 @@ const OrderStatusModal = ({ order, onClose, onSubmit, isSubmitting }) => {
     remark: order?.remark || '',
   });
 
-  const inputCls = 'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm dark:text-gray-100';
+  const inputCls = 'w-full px-3 py-2.5 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm';
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -802,27 +802,27 @@ export default function Orders() {
         label: 'View Details',
         icon: <Eye size={12} />,
         onClick: () => openDetailModal(order),
-        className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300',
+        className: 'text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:text-emerald-200 dark:hover:bg-emerald-950/40',
       },
       {
         label: hasAssignedStaff ? 'Manage Staff' : 'Assign Staff',
         icon: hasAssignedStaff ? <Users size={12} /> : <UserPlus size={12} />,
         onClick: () => openStaffModal(order),
         className: hasAssignedStaff
-          ? 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300'
-          : 'text-green-600 hover:text-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-900/30 dark:text-yellow-400 dark:hover:text-yellow-300',
+          ? 'text-blue-700 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-300 dark:hover:text-blue-200 dark:hover:bg-blue-950/40'
+          : 'text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:text-emerald-200 dark:hover:bg-emerald-950/40',
       },
       {
         label: 'Update Order',
         icon: <Edit size={12} />,
         onClick: () => openUpdateOrderModal(order),
-        className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300',
+        className: 'text-indigo-700 hover:text-indigo-800 hover:bg-indigo-50 dark:text-indigo-300 dark:hover:text-indigo-200 dark:hover:bg-indigo-950/40',
       },
       {
         label: 'Update Status',
         icon: <RefreshCw size={12} />,
         onClick: () => openStatusModal(order),
-        className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300',
+        className: 'text-violet-700 hover:text-violet-800 hover:bg-violet-50 dark:text-violet-300 dark:hover:text-violet-200 dark:hover:bg-violet-950/40',
       },
       
     ];
@@ -895,7 +895,7 @@ export default function Orders() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm"
+            className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-4 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm dark:shadow-gray-950/30"
           >
             <div className="flex items-center gap-4 flex-1">
               <div className="relative flex-1">
@@ -905,7 +905,7 @@ export default function Orders() {
                   placeholder="Search orders..."
                   value={searchTerm}
                   onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                  className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
+                  className="w-full pl-11 pr-10 py-2 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-950 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm min-h-[42px]"
                 />
                 {searchTerm && (
                   <button

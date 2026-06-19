@@ -52,8 +52,8 @@ const STATUS_FILTER_OPTIONS = [
 ];
 
 const filterSelectStyles = {
-  control: (provided, state) => {
-    const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+  control: (provided, state, theme) => {
+    const isDark = theme === 'dark';
     return {
       ...provided,
       minHeight: '42px',
