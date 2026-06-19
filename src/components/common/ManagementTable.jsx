@@ -118,6 +118,9 @@ export default function ManagementTable({
               const rowActions = typeof getActions === 'function' ? getActions(row, index) : actions;
               const hasRowActions = Array.isArray(rowActions) ? rowActions.length > 0 : Boolean(rowActions);
               const rowId = `row-${String(key)}`;
+              const resolvedRowClassName = typeof rowClassName === 'function'
+                ? rowClassName(row, index)
+                : rowClassName;
 
               return (
                 <tr
@@ -126,7 +129,7 @@ export default function ManagementTable({
                   className={joinClasses(
                     'align-middle text-left transition-all duration-200',
                     onRowClick && 'cursor-pointer hover:bg-slate-50 dark:hover:bg-gray-700/50',
-                    rowClassName
+                    resolvedRowClassName
                   )}
                 >
                   {visibleColumns.map((column) => {

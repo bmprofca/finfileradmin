@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, X, Briefcase, Hash, User
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
 import ManagementCard from '../components/common/ManagementCard';
@@ -37,10 +36,66 @@ const StatusBadge = ({ status }) => {
   );
 };
 
+const formatCurrency = (value) => `₹${Number(value || 0).toLocaleString()}`;
+
+const getPaymentState = (order) => {
+  const fees = Number(order?.fees) || 0;
+  const totalPaid = Number(order?.total_paid) || 0;
+  const dueAmount = Number(order?.due_amount) || Math.max(fees - totalPaid, 0);
+
+  if (dueAmount <= 0 && fees > 0) return 'paid';
+  if (dueAmount > 0) return 'due';
+  return 'unpaid';
+};
+
+const getPaymentHighlightClass = (order) => {
+  const paymentState = getPaymentState(order);
+
+  if (paymentState === 'paid') {
+    return 'bg-emerald-50/70 hover:bg-emerald-100/80 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/30';
+  }
+
+  if (paymentState === 'due') {
+    return 'bg-amber-50/80 hover:bg-amber-100/90 dark:bg-amber-950/20 dark:hover:bg-amber-950/30';
+  }
+
+  return '';
+};
+
+const getPaymentCardClass = (order) => {
+  const paymentState = getPaymentState(order);
+
+  if (paymentState === 'paid') {
+    return 'border-emerald-300 bg-emerald-50/50 shadow-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/20';
+  }
+
+  if (paymentState === 'due') {
+    return 'border-amber-300 bg-amber-50/60 shadow-amber-100 dark:border-amber-800 dark:bg-amber-950/20';
+  }
+
+  return '';
+};
+
+const PaymentText = ({ order }) => {
+  const paymentState = getPaymentState(order);
+  const isPaid = paymentState === 'paid';
+
+  return (
+    <span className={`whitespace-nowrap text-xs font-semibold ${
+      isPaid
+        ? 'text-emerald-700 dark:text-emerald-300'
+        : 'text-amber-700 dark:text-amber-300'
+    }`}>
+      {isPaid ? 'Paid' : `Due ${formatCurrency(order.due_amount)}`}
+    </span>
+  );
+};
+
 const OrderCard = ({ order, index }) => (
   <ManagementCard
     delay={index * 0.05}
     accent="indigo"
+    className={getPaymentCardClass(order)}
     eyebrow={`Date: ${new Date(order.create_date).toLocaleDateString()}`}
     title={order.name}
     subtitle={order.service_name}
@@ -54,13 +109,13 @@ const OrderCard = ({ order, index }) => (
     footer={
       <div className="flex items-center justify-between w-full text-xs text-gray-500 dark:text-gray-400">
         <span className="flex items-center gap-1"><Hash size={10} className="text-indigo-400 dark:text-indigo-500" /> {order.order_id}</span>
-        <span className="font-semibold text-gray-700 dark:text-gray-300">₹{order.fees}</span>
+        <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrency(order.fees)}</span>
       </div>
     }
   >
-    <div className="mt-1">
+    <div className="mt-1 space-y-1">
       <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-        <User size={10} className="text-gray-400 dark:text-gray-500" /> Client: {order.client_username}
+        <User size={10} className="text-gray-400 dark:text-gray-500" /> Client: {order.client_name || order.client_username}
       </p>
     </div>
   </ManagementCard>
@@ -68,7 +123,6 @@ const OrderCard = ({ order, index }) => (
 
 export default function MyOrders() {
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -83,14 +137,25 @@ export default function MyOrders() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      // If the user is a staff member, the backend automatically filters their orders.
-      // If the user is an admin, passing their own username ensures they see orders assigned to them, or we can use the staff_username filter we added earlier.
-      // Actually, if they want "my orders", we use staff_username=their_username just to be safe if they are an admin.
-      const usernameParam = user?.username ? `staff_username=${user.username}&` : '';
       const response = await apiCall(`/api/admin/orders/list?page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`, 'GET');
       const data = await response.json();
       if (data.success) {
-        setOrders(data.data.orders);
+        const mappedOrders = data.data.orders.map(order => ({
+          ...order,
+          name: order.order_name,
+          payments: order.payments || [],
+          assigned_staff: order.assigned_staff || [],
+          base_price: Number(order.base_price),
+          tax_rate: Number(order.tax_rate),
+          tax_value: Number(order.tax_value),
+          total_fees: Number(order.total_fees),
+          discount_percentage: Number(order.discount_percentage),
+          discount_value: Number(order.discount_value),
+          fees: Number(order.fees),
+          total_paid: Number(order.total_paid),
+          due_amount: Number(order.due_amount),
+        }));
+        setOrders(mappedOrders);
         setTotalOrders(data.data.pagination.total);
       }
     } catch (error) {
@@ -118,8 +183,9 @@ export default function MyOrders() {
     { key: 'order_id', label: 'Order ID' },
     { key: 'name', label: 'Order Name' },
     { key: 'service_name', label: 'Service Name' },
-    { key: 'client_username', label: 'Client Username' },
-    { key: 'fees', label: 'Fees', render: (row) => `₹${row.fees}` },
+    { key: 'client', label: 'Client', render: (row) => row.client_name || row.client_username },
+    { key: 'fees', label: 'Fees', render: (row) => formatCurrency(row.fees) },
+    { key: 'payment', label: 'Payment', render: (row) => <PaymentText order={row} /> },
     { key: 'status', label: 'Status', render: (row) => <StatusBadge status={row.status} /> },
     { key: 'create_date', label: 'Date', render: (row) => new Date(row.create_date).toLocaleDateString() },
   ];
@@ -193,6 +259,7 @@ export default function MyOrders() {
                     rows={orders}
                     rowKey="order_id"
                     accent="indigo"
+                    rowClassName={(row) => getPaymentHighlightClass(row)}
                   />
                 )}
 

@@ -38,6 +38,61 @@ const StatusBadge = ({ status }) => {
   );
 };
 
+const formatCurrency = (value) => `₹${Number(value || 0).toLocaleString()}`;
+
+const getPaymentState = (order) => {
+  const fees = Number(order?.fees) || 0;
+  const totalPaid = Number(order?.total_paid) || 0;
+  const dueAmount = Number(order?.due_amount) || Math.max(fees - totalPaid, 0);
+
+  if (dueAmount <= 0 && fees > 0) return 'paid';
+  if (dueAmount > 0) return 'due';
+  return 'unpaid';
+};
+
+const getPaymentHighlightClass = (order) => {
+  const paymentState = getPaymentState(order);
+
+  if (paymentState === 'paid') {
+    return 'bg-emerald-50/70 hover:bg-emerald-100/80 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/30';
+  }
+
+  if (paymentState === 'due') {
+    return 'bg-amber-50/80 hover:bg-amber-100/90 dark:bg-amber-950/20 dark:hover:bg-amber-950/30';
+  }
+
+  return '';
+};
+
+const getPaymentCardClass = (order) => {
+  const paymentState = getPaymentState(order);
+
+  if (paymentState === 'paid') {
+    return 'border-emerald-300 bg-emerald-50/50 shadow-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/20';
+  }
+
+  if (paymentState === 'due') {
+    return 'border-amber-300 bg-amber-50/60 shadow-amber-100 dark:border-amber-800 dark:bg-amber-950/20';
+  }
+
+  return '';
+};
+
+const PaymentText = ({ order }) => {
+  const paymentState = getPaymentState(order);
+  const isPaid = paymentState === 'paid';
+
+  return (
+    <span className={`whitespace-nowrap text-xs font-semibold ${
+      isPaid
+        ? 'text-emerald-700 dark:text-emerald-300'
+        : 'text-amber-700 dark:text-amber-300'
+    }`}>
+      {isPaid ? 'Paid' : `Due ${formatCurrency(order.due_amount)}`}
+    </span>
+  );
+};
+
 /* ─── Staff Management Modal ─── */
 const StaffManagementModal = ({ order, allStaff, onClose, onSubmit, isSubmitting }) => {
   const [leftStaff, setLeftStaff] = useState([]);
@@ -360,7 +415,9 @@ const ViewOrderModal = ({ order, onClose, onManageStaff, onUpdateOrder, onUpdate
           <InfoItem icon={FileText} label="Order Name" value={order.order_name} />
           <InfoItem icon={Tag} label="Service" value={order.service_name} />
           <InfoItem icon={User} label="Client" value={order.client_name || order.client_username} />
-          <InfoItem icon={IndianRupee} label="Fees" value={`₹${Number(order.fees).toLocaleString()}`} />
+          <InfoItem icon={IndianRupee} label="Fees" value={formatCurrency(order.fees)} />
+          <InfoItem icon={IndianRupee} label="Paid" value={formatCurrency(order.total_paid)} />
+          <InfoItem icon={IndianRupee} label="Due" value={<PaymentText order={order} />} />
           <InfoItem icon={Briefcase} label="Status" value={<StatusBadge status={order.status} />} />
           <InfoItem icon={Calendar} label="Created" value={new Date(order.create_date).toLocaleString()} />
         </div>
@@ -573,6 +630,7 @@ const OrderCard = ({ order, index, getActions, onClick, onManageStaff }) => {
     <ManagementCard
       delay={index * 0.05}
       accent="indigo"
+      className={getPaymentCardClass(order)}
       eyebrow={`Date: ${new Date(order.create_date).toLocaleDateString()}`}
       title={order.order_name}
       subtitle={order.service_name}
@@ -590,7 +648,7 @@ const OrderCard = ({ order, index, getActions, onClick, onManageStaff }) => {
           <span className="flex items-center gap-1">
             <Hash size={10} className="text-indigo-400 dark:text-indigo-500" /> {order.order_id}
           </span>
-          <span className="font-semibold text-gray-700 dark:text-gray-300">₹{order.fees}</span>
+          <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrency(order.fees)}</span>
         </div>
       }
     >
@@ -862,7 +920,11 @@ export default function Orders() {
     },
     {
       key: 'fees', label: 'Fees',
-      render: (row) => <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">₹{row.fees}</span>,
+      render: (row) => <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">{formatCurrency(row.fees)}</span>,
+    },
+    {
+      key: 'payment', label: 'Payment',
+      render: (row) => <PaymentText order={row} />,
     },
     {
       key: 'status', label: 'Status',
@@ -975,6 +1037,7 @@ export default function Orders() {
                     accent="indigo"
                     getActions={getActions}
                     onRowClick={(row) => openDetailModal(row)}
+                    rowClassName={(row) => getPaymentHighlightClass(row)}
                   />
                 )}
 

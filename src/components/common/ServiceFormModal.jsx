@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Briefcase } from 'lucide-react';
 import Modal from './Modal';
 import SelectField from './SelectField';
@@ -20,9 +20,51 @@ const FIELD_OPTIONS = [
   { key: 'aadhaar_no', label: 'Aadhaar Number' },
 ];
 
+const DOCUMENT_EXTENSION_OPTIONS = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'];
+const DOCUMENT_SIZE_UNITS = [
+  { value: 'KB', label: 'KB', multiplier: 1024 },
+  { value: 'MB', label: 'MB', multiplier: 1024 * 1024 },
+];
+
+const getSizeUnitMultiplier = (unit) => (
+  DOCUMENT_SIZE_UNITS.find((option) => option.value === unit)?.multiplier || DOCUMENT_SIZE_UNITS[1].multiplier
+);
+
+const bytesToSizeInput = (bytes) => {
+  const numericBytes = Number(bytes);
+  if (!numericBytes) return { value: '', unit: 'KB' };
+
+  const mbMultiplier = getSizeUnitMultiplier('MB');
+  if (numericBytes >= mbMultiplier && numericBytes % mbMultiplier === 0) {
+    return { value: numericBytes / mbMultiplier, unit: 'MB' };
+  }
+
+  return { value: numericBytes / getSizeUnitMultiplier('KB'), unit: 'KB' };
+};
+
+const normalizeExtensions = (extensions) => {
+  const extensionList = Array.isArray(extensions)
+    ? extensions
+    : String(extensions || '').split(',');
+
+  return extensionList
+    .map((extension) => String(extension).trim().replace(/^\./, '').toLowerCase())
+    .filter(Boolean);
+};
+
+const normalizeDocumentForForm = (document) => {
+  const sizeInput = bytesToSizeInput(document.max_size);
+
+  return {
+    ...document,
+    accept_extensions: normalizeExtensions(document.accept_extensions),
+    max_size: sizeInput.value,
+    max_size_unit: sizeInput.unit,
+  };
+};
+
 export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitting }) {
   const { serviceTypeOptions, discountTypeOptions } = useServiceOptions();
-  const isUserEditingDiscountValue = useRef(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -64,7 +106,7 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
         delivery_time: service.delivery_time || "",
         status: service.status !== undefined ? service.status : 1,
         fields: { ...DEFAULT_FIELDS, ...(service.fields || {}) },
-        documents: service.documents || []
+        documents: (service.documents || []).map(normalizeDocumentForForm)
       });
     } else {
       setFormData(prev => ({
@@ -213,18 +255,26 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
       ...prev,
       documents: [
         ...prev.documents,
-        { required_id: `reqdoc${Date.now()}`, name: "", is_required: true, accept_extensions: ["pdf", "jpg", "png"], max_size: 5242880, description: "" }
+    { required_id: `reqdoc${Date.now()}`, name: "", is_required: true, accept_extensions: ["pdf", "jpg", "png"], max_size: 5, max_size_unit: "KB", description: "" }
       ]
     }));
   };
 
   const handleDocumentChange = (index, field, value) => {
     const updatedDocs = [...formData.documents];
-    if (field === 'accept_extensions') {
-      updatedDocs[index][field] = value.split(',').map(ext => ext.trim());
-    } else {
-      updatedDocs[index][field] = value;
-    }
+    updatedDocs[index][field] = value;
+    setFormData(prev => ({ ...prev, documents: updatedDocs }));
+  };
+
+  const handleDocumentExtensionToggle = (index, extension) => {
+    const updatedDocs = [...formData.documents];
+    const currentExtensions = normalizeExtensions(updatedDocs[index].accept_extensions);
+    const hasExtension = currentExtensions.includes(extension);
+
+    updatedDocs[index].accept_extensions = hasExtension
+      ? currentExtensions.filter((item) => item !== extension)
+      : [...currentExtensions, extension];
+
     setFormData(prev => ({ ...prev, documents: updatedDocs }));
   };
 
@@ -242,6 +292,11 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
       ...fields,
       [field.key]: Boolean(formData.fields?.[field.key]),
     }), {});
+    submissionData.documents = formData.documents.map(({ max_size_unit, ...document }) => ({
+      ...document,
+      accept_extensions: normalizeExtensions(document.accept_extensions),
+      max_size: document.max_size === "" ? "" : Math.round(Number(document.max_size) * getSizeUnitMultiplier(max_size_unit)),
+    }));
     onSubmit(submissionData);
   };
 
@@ -521,11 +576,46 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Accepted Extensions</label>
-                    <input type="text" value={doc.accept_extensions?.join(', ') || ''} onChange={(e) => handleDocumentChange(index, 'accept_extensions', e.target.value)} className={inputCls} placeholder="e.g. pdf, jpg, png" />
+                    <div className="flex flex-wrap gap-2">
+                      {DOCUMENT_EXTENSION_OPTIONS.map((extension) => {
+                        const isSelected = normalizeExtensions(doc.accept_extensions).includes(extension);
+                        return (
+                          <button
+                            key={extension}
+                            type="button"
+                            onClick={() => handleDocumentExtensionToggle(index, extension)}
+                            className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold uppercase transition-colors ${
+                              isSelected
+                                ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                : 'border-gray-300 bg-white text-gray-600 hover:border-emerald-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                            }`}
+                            aria-pressed={isSelected}
+                          >
+                            <span className={`h-3 w-3 rounded-full border ${isSelected ? 'border-emerald-500 bg-emerald-500' : 'border-gray-400 dark:border-gray-500'}`} />
+                            {extension}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Max Size (Bytes)</label>
-                    <input type="text" value={doc.max_size || ""} onKeyPress={handleNumberKeyPress} onChange={(e) => handleDocumentChange(index, 'max_size', e.target.value === "" ? "" : Number(e.target.value))} className={inputCls} />
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Max Size</label>
+                    <div className="grid grid-cols-[1fr_110px] gap-2">
+                      <input
+                        type="text"
+                        value={doc.max_size || ""}
+                        onKeyPress={handleNumberKeyPress}
+                        onChange={(e) => handleDocumentChange(index, 'max_size', e.target.value)}
+                        className={inputCls}
+                        placeholder="5"
+                      />
+                      <SelectField
+                        options={DOCUMENT_SIZE_UNITS.map(({ value, label }) => ({ value, label }))}
+                        value={DOCUMENT_SIZE_UNITS.find((option) => option.value === (doc.max_size_unit || 'KB')) || DOCUMENT_SIZE_UNITS[0]}
+                        onChange={(selected) => handleDocumentChange(index, 'max_size_unit', selected.value)}
+                        styles={selectStyles}
+                      />
+                    </div>
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Description</label>
