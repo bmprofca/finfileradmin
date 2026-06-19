@@ -1,31 +1,42 @@
 // components/client/FirmsTab.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { Building2, FileText, Search, RefreshCw, Download } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
+import { Building2, FileText, Search, Download, Calendar } from 'lucide-react';
 import apiCall from '../../utils/apiCall';
 import { formatDate } from '../../utils/helpers';
 import { PageContentSkeleton } from '../../components/SkeletonComponent';
 import ManagementTable from '../../components/common/ManagementTable';
+import ManagementGrid from '../../components/common/ManagementGrid';
+import ManagementCard from '../../components/common/ManagementCard';
+import ManagementViewSwitcher from '../../components/common/ManagementViewSwitcher';
 import Modal from '../../components/common/Modal';
-import Button from '../../components/common/Button';
-import toast from 'react-hot-toast';
+
+const EmptyValue = () => <span className="text-gray-400 dark:text-gray-500">-</span>;
+
+const InfoItem = ({ label, value, mono = false }) => (
+  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+    <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
+    <p className={`mt-1 text-sm font-medium text-gray-800 dark:text-gray-100 break-words ${mono ? 'font-mono' : ''}`}>
+      {value || <EmptyValue />}
+    </p>
+  </div>
+);
 
 export default function FirmsTab({ username, refreshTrigger }) {
   const [loading, setLoading] = useState(true);
   const [firms, setFirms] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Document modal states
+  const [viewMode, setViewMode] = useState('table');
+
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [docModalOpen, setDocModalOpen] = useState(false);
-  const [selectedFirmId, setSelectedFirmId] = useState(null);
-  const [documents, setDocuments] = useState([]);
-  const [loadingDocs, setLoadingDocs] = useState(false);
+  const [selectedFirm, setSelectedFirm] = useState(null);
+
+  const activeFetchRef = useRef(null);
 
   useEffect(() => {
     fetchFirms();
   }, [username, refreshTrigger]);
-
-  const activeFetchRef = useRef(null);
 
   const fetchFirms = async () => {
     const requestKey = `firms|${refreshTrigger || 0}`;
@@ -37,7 +48,7 @@ export default function FirmsTab({ username, refreshTrigger }) {
       const res = await apiCall(`/api/admin/clients/profile/${username}?resource=firms`, 'GET');
       const data = await res.json();
       if (data.success) {
-        setFirms(data.data.firms);
+        setFirms(data.data.firms || []);
       }
     } catch (error) {
       console.error('Failed to fetch firms:', error);
@@ -47,41 +58,17 @@ export default function FirmsTab({ username, refreshTrigger }) {
     }
   };
 
-  const activeDocFetchRef = useRef(null);
-
-  const fetchFirmDocuments = async (firmId) => {
-    const requestKey = `docs|${firmId}`;
-    if (activeDocFetchRef.current === requestKey) return;
-    activeDocFetchRef.current = requestKey;
-
-    setLoadingDocs(true);
-    try {
-      const res = await apiCall(
-        `/api/admin/clients/profile/${username}?resource=firm-documents&firm_id=${firmId}`,
-        'GET'
-      );
-      const data = await res.json();
-      if (data.success) {
-        setDocuments(data.data.documents);
-      }
-    } catch (error) {
-      console.error('Failed to fetch documents:', error);
-      toast.error('Failed to load documents');
-    } finally {
-      setLoadingDocs(false);
-      if (activeDocFetchRef.current === requestKey) activeDocFetchRef.current = null;
-    }
+  const handleViewFirm = (firm) => {
+    setSelectedFirm(firm);
+    setDetailModalOpen(true);
   };
 
-  const handleViewDocuments = (firmId) => {
-    setSelectedFirmId(firmId);
+  const handleViewDocuments = (firm) => {
+    setSelectedFirm(firm);
     setDocModalOpen(true);
-    fetchFirmDocuments(firmId);
   };
 
-
-
-  if (loading) return <PageContentSkeleton rows={3} columns={4} />;
+  if (loading) return <PageContentSkeleton viewMode={viewMode} rows={3} columns={4} />;
 
   const columns = [
     {
@@ -102,22 +89,22 @@ export default function FirmsTab({ username, refreshTrigger }) {
     {
       key: 'pan_no',
       label: 'PAN',
-      render: (row) => row.pan_no || '—'
+      render: (row) => row.pan_no || <EmptyValue />
     },
     {
       key: 'gst_no',
       label: 'GST',
-      render: (row) => row.gst_no || '—'
+      render: (row) => row.gst_no || <EmptyValue />
     },
     {
       key: 'vat_no',
       label: 'VAT',
-      render: (row) => row.vat_no || '—'
+      render: (row) => row.vat_no || <EmptyValue />
     },
     {
       key: 'tan_no',
       label: 'TAN',
-      render: (row) => row.tan_no || '—'
+      render: (row) => row.tan_no || <EmptyValue />
     },
     {
       key: 'create_date',
@@ -129,7 +116,11 @@ export default function FirmsTab({ username, refreshTrigger }) {
       label: 'Actions',
       render: (row) => (
         <button
-          onClick={() => handleViewDocuments(row.firm_id)}
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            handleViewDocuments(row);
+          }}
           className="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 text-sm font-medium flex items-center gap-1"
         >
           <FileText size={14} /> Documents
@@ -138,12 +129,56 @@ export default function FirmsTab({ username, refreshTrigger }) {
     }
   ];
 
-  // Filter firms based on search
-  const filteredFirms = firms.filter(firm =>
-    firm.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    firm.firm_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    firm.type?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredFirms = firms.filter((firm) => {
+    const search = searchTerm.toLowerCase();
+    return (
+      firm.name?.toLowerCase().includes(search) ||
+      firm.firm_id?.toLowerCase().includes(search) ||
+      firm.type?.toLowerCase().includes(search)
+    );
+  });
+
+  const FirmCard = ({ firm }) => (
+    <ManagementCard
+      delay={0}
+      accent="emerald"
+      eyebrow={`Firm: ${firm.firm_id}`}
+      title={firm.name}
+      subtitle={firm.type || 'Unknown type'}
+      icon={<Building2 size={18} />}
+      badge={
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800">
+          <FileText size={10} /> {firm.documents?.length || 0}
+        </span>
+      }
+      onClick={() => handleViewFirm(firm)}
+      hoverable
+      footer={
+        <div className="flex items-center justify-between w-full text-xs text-gray-500 dark:text-gray-400">
+          <span className="flex items-center gap-1">
+            <Calendar size={10} className="text-emerald-400" /> {formatDate(firm.create_date)}
+          </span>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleViewDocuments(firm);
+            }}
+            className="inline-flex items-center gap-1 rounded-md px-2 py-1 font-medium text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/20"
+          >
+            <FileText size={12} /> Documents
+          </button>
+        </div>
+      }
+    >
+      <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-400">
+        <span className="truncate">PAN: {firm.pan_no || '-'}</span>
+        <span className="truncate">GST: {firm.gst_no || '-'}</span>
+      </div>
+    </ManagementCard>
   );
+
+  const selectedDocuments = selectedFirm?.documents || [];
 
   return (
     <div className="space-y-3">
@@ -158,51 +193,118 @@ export default function FirmsTab({ username, refreshTrigger }) {
             className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
           />
         </div>
+        <div className="w-auto">
+          <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} />
+        </div>
       </div>
 
-      {filteredFirms?.length === 0 ? (
+      {filteredFirms.length === 0 ? (
         <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
           <Building2 className="text-gray-300 dark:text-gray-600 mx-auto mb-3" size={48} />
           <p className="text-gray-500 dark:text-gray-400">No firms registered</p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <ManagementTable columns={columns} rows={filteredFirms || []} rowKey="firm_id" accent="emerald" onRowClick={(row) => handleViewDocuments(row.firm_id)} />
-        </div>
+        <>
+          {viewMode === 'table' ? (
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <ManagementTable
+                columns={columns}
+                rows={filteredFirms}
+                rowKey="firm_id"
+                accent="emerald"
+                onRowClick={(row) => handleViewFirm(row)}
+              />
+            </div>
+          ) : (
+            <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+              <AnimatePresence>
+                {filteredFirms.map((firm) => (
+                  <FirmCard key={firm.firm_id} firm={firm} />
+                ))}
+              </AnimatePresence>
+            </ManagementGrid>
+          )}
+        </>
       )}
 
-      {/* Documents Modal */}
+      <Modal
+        isOpen={detailModalOpen}
+        onClose={() => {
+          setDetailModalOpen(false);
+          setSelectedFirm(null);
+        }}
+        title="Firm Details"
+        icon={Building2}
+        size="xl"
+      >
+        {selectedFirm && (
+          <div className="space-y-4">
+            <div className="flex items-start justify-between gap-3 pb-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shrink-0">
+                  <Building2 size={24} />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 truncate">{selectedFirm.name}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">{selectedFirm.type || 'Unknown type'}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setDetailModalOpen(false);
+                  setDocModalOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/20"
+              >
+                <FileText size={15} /> Documents
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <InfoItem label="Firm ID" value={selectedFirm.firm_id} mono />
+              <InfoItem label="Created" value={formatDate(selectedFirm.create_date)} />
+              <InfoItem label="PAN Number" value={selectedFirm.pan_no} />
+              <InfoItem label="GST Number" value={selectedFirm.gst_no} />
+              <InfoItem label="VAT Number" value={selectedFirm.vat_no} />
+              <InfoItem label="TAN Number" value={selectedFirm.tan_no} />
+            </div>
+          </div>
+        )}
+      </Modal>
+
       <Modal
         isOpen={docModalOpen}
-        onClose={() => setDocModalOpen(false)}
-        title="Firm Documents"
+        onClose={() => {
+          setDocModalOpen(false);
+          setSelectedFirm(null);
+        }}
+        title={selectedFirm ? `Documents - ${selectedFirm.name}` : 'Firm Documents'}
         icon={FileText}
         size="lg"
       >
-        {loadingDocs ? (
-          <div className="py-8 text-center">
-            <RefreshCw className="animate-spin mx-auto text-emerald-500" size={32} />
-            <p className="mt-2 text-gray-500 dark:text-gray-400">Loading documents...</p>
-          </div>
-        ) : documents.length === 0 ? (
+        {selectedDocuments.length === 0 ? (
           <div className="py-8 text-center">
             <FileText className="text-gray-300 dark:text-gray-600 mx-auto mb-3" size={48} />
             <p className="text-gray-500 dark:text-gray-400">No documents found</p>
           </div>
         ) : (
           <div className="space-y-2">
-            {documents.map((doc) => (
+            {selectedDocuments.map((doc) => (
               <div
                 key={doc.document_id}
-                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                className="flex items-center justify-between gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
               >
-                <div>
-                  <p className="font-medium text-gray-800 dark:text-gray-100">{doc.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {doc.file_name} • {(doc.size / 1024).toFixed(1)} KB
+                <div className="min-w-0">
+                  <p className="font-medium text-gray-800 dark:text-gray-100 truncate">{doc.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {doc.file_name} - {(doc.size / 1024).toFixed(1)} KB
                   </p>
                 </div>
-                <button className="p-2 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors">
+                <button
+                  type="button"
+                  className="p-2 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
+                >
                   <Download size={18} />
                 </button>
               </div>
