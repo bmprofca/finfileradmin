@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import apiCall from "../utils/apiCall";
 
-const ServiceOptionsContext = createContext();
+const ConstantOptionsContext = createContext();
 
 const CONSTANTS_CACHE_KEY = "admin_constants_cache_v1";
 
@@ -72,12 +72,12 @@ const fetchConstantsOnce = async () => {
   return constantsRequest;
 };
 
-export const useServiceOptions = () => {
-  const context = useContext(ServiceOptionsContext);
+export const ConstantOptions = () => {
+  const context = useContext(ConstantOptionsContext);
 
   if (!context) {
     throw new Error(
-      "useServiceOptions must be used within ServiceOptionsProvider"
+      "ConstantOptions must be used within ServiceOptionsProvider"
     );
   }
 
@@ -145,8 +145,8 @@ export const ServiceOptionsProvider = ({ children }) => {
   );
 
   return (
-    <ServiceOptionsContext.Provider value={value}>
+    <ConstantOptionsContext.Provider value={value}>
       {children}
-    </ServiceOptionsContext.Provider>
+    </ConstantOptionsContext.Provider>
   );
 };

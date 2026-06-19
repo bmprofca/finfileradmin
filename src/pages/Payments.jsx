@@ -4,7 +4,7 @@ import {
   Search, X, Eye, User, CreditCard,
   CheckCircle, XCircle, Clock, AlertCircle,
   RefreshCw, IndianRupee, Hash, Calendar, Layers,
-  Building2, Wallet, TrendingUp, TrendingDown
+  Building2, Wallet, TrendingUp, TrendingDown, Filter
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ManagementHub from '../components/common/ManagementHub';
@@ -15,16 +15,18 @@ import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher'
 import PaginationComponent from '../components/common/PaginationComponent';
 import Modal from '../components/common/Modal';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
+import AdvancedDateFilter from '../components/common/AdvancedDateFilter';
 import apiCall from '../utils/apiCall';
+import { ConstantOptions } from '../contexts/ConstantOptionsContext';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const formatAmount = (amount) => {
   if (amount === null || amount === undefined) return '₹0';
-  return new Intl.NumberFormat('en-IN', { 
-    style: 'currency', 
-    currency: 'INR', 
-    maximumFractionDigits: 0 
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0
   }).format(amount);
 };
 
@@ -36,20 +38,20 @@ const formatDate = (dateStr) =>
 // ─── Status Badges ────────────────────────────────────────────────────────────
 
 const PAYMENT_STATUS_MAP = {
-  'paid': { 
-    color: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700', 
-    icon: CheckCircle, 
-    label: 'Paid' 
+  'paid': {
+    color: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700',
+    icon: CheckCircle,
+    label: 'Paid'
   },
-  'created': { 
-    color: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700', 
-    icon: Clock, 
-    label: 'Pending' 
+  'created': {
+    color: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
+    icon: Clock,
+    label: 'Pending'
   },
-  'failed': { 
-    color: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700', 
-    icon: XCircle, 
-    label: 'Failed' 
+  'failed': {
+    color: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
+    icon: XCircle,
+    label: 'Failed'
   },
 };
 
@@ -144,7 +146,6 @@ const PaymentDetailsTable = ({ payments }) => {
 // ─── View Payment Modal ─────────────────────────────────────────────────────────
 
 const ViewPaymentModal = ({ payment, onClose }) => {
-  // Calculate totals from payments array if it exists
   const totalPaid = payment.payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || payment.amount || 0;
   const paymentCount = payment.payments?.length || 0;
   const isPartial = payment.is_partial || paymentCount > 1;
@@ -258,11 +259,11 @@ const PaymentCard = ({ payment, index, onView }) => {
       onClick={() => onView(payment)}
       hoverable
       actions={[
-        { 
-          label: 'View Details', 
-          icon: <Eye size={12} />, 
-          onClick: () => onView(payment), 
-          className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400' 
+        {
+          label: 'View Details',
+          icon: <Eye size={12} />,
+          onClick: () => onView(payment),
+          className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400'
         },
       ]}
       menuId={`payment-card-${payment.id || payment.payment_id}`}
@@ -291,9 +292,40 @@ const PaymentCard = ({ payment, index, onView }) => {
   );
 };
 
+// ─── Filter Select Component ────────────────────────────────────────────────
+
+const FilterSelect = ({ options, value, onChange, placeholder, icon: Icon, label }) => {
+  return (
+    <div className="relative">
+      <select
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value || null)}
+        className="appearance-none w-full pl-9 pr-8 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100 cursor-pointer"
+      >
+        <option value="">{placeholder}</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      {Icon && (
+        <Icon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" />
+      )}
+      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M6 8L1 3h10L6 8z" fill="currentColor" />
+        </svg>
+      </div>
+    </div>
+  );
+};
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Payments() {
+  const { paymentStatusOptions, paymentGatewayOptions, loadingConstants } = ConstantOptions();
+
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('table');
@@ -302,6 +334,11 @@ export default function Payments() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Filter states
+  const [statusFilter, setStatusFilter] = useState(null);
+  const [gatewayFilter, setGatewayFilter] = useState(null);
+  const [dateFilter, setDateFilter] = useState(null);
+
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
@@ -309,28 +346,54 @@ export default function Payments() {
   const lastFetchRef = useRef(null);
   const activeFetchRef = useRef(null);
 
+  // ── Build query params ──────────────────────────────────────────────────────
+  const buildQueryParams = () => {
+    const params = new URLSearchParams();
+    params.append('page_no', currentPage);
+    params.append('limit', itemsPerPage);
+
+    if (searchTerm) params.append('search', searchTerm);
+    if (statusFilter) params.append('status', statusFilter);
+    if (gatewayFilter) params.append('gateway', gatewayFilter);
+
+    // Date filter
+    if (dateFilter) {
+      if (dateFilter.date) {
+        params.append('date', dateFilter.date);
+      } else if (dateFilter.month && dateFilter.year) {
+        params.append('month', dateFilter.month);
+        params.append('year', dateFilter.year);
+      } else if (dateFilter.from_date && dateFilter.to_date) {
+        params.append('from_date', dateFilter.from_date);
+        params.append('to_date', dateFilter.to_date);
+      }
+    }
+
+    return params.toString();
+  };
+
   // ── Fetch ────────────────────────────────────────────────────────────────────
   const fetchPayments = async ({ force = false } = {}) => {
-    const requestKey = `${currentPage}|${itemsPerPage}|${searchTerm}`;
+    const queryString = buildQueryParams();
+    const requestKey = queryString;
+
     if (activeFetchRef.current === requestKey) { setRefreshing(false); return; }
     if (!force && lastFetchRef.current === requestKey) return;
 
     lastFetchRef.current = requestKey;
     activeFetchRef.current = requestKey;
     setLoading(true);
+
     try {
       const response = await apiCall(
-        `/api/admin/payments/list?page_no=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(searchTerm)}`,
+        `/api/admin/payments/list?${queryString}`,
         'GET'
       );
       const data = await response.json();
       if (data.success) {
-        // Map API response to component expectations
         const mappedPayments = data.data.payments.map(payment => ({
           ...payment,
-          // Ensure all fields exist
-          payments: payment.payments || [], // If API includes all payments for order
-          // For backward compatibility
+          payments: payment.payments || [],
           order_name: payment.order_name,
           client_name: payment.client_name,
           username: payment.username,
@@ -361,26 +424,34 @@ export default function Payments() {
     }
   };
 
-  useEffect(() => { 
-    fetchPayments(); 
-  }, [currentPage, searchTerm]);
+  // ── Effects ─────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    fetchPayments();
+  }, [currentPage, searchTerm, statusFilter, gatewayFilter, dateFilter]);
 
-  const handleRefresh = () => { 
-    setRefreshing(true); 
-    fetchPayments({ force: true }); 
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchPayments({ force: true });
   };
-  
-  const handleView = (payment) => { 
-    // Fetch all payments for this order if not already loaded
+
+  const handleView = (payment) => {
     if (!payment.payments || payment.payments.length === 0) {
-      // You might want to fetch payment details here
-      // For now, just show the current payment
-      setSelectedPayment(payment); 
+      setSelectedPayment(payment);
     } else {
       setSelectedPayment(payment);
     }
-    setIsViewModalOpen(true); 
+    setIsViewModalOpen(true);
   };
+
+  const clearAllFilters = () => {
+    setStatusFilter(null);
+    setGatewayFilter(null);
+    setDateFilter(null);
+    setSearchTerm('');
+    setCurrentPage(1);
+  };
+
+  const hasActiveFilters = statusFilter || gatewayFilter || dateFilter || searchTerm;
 
   // ── Table Columns ─────────────────────────────────────────────────────────
   const columns = [
@@ -491,35 +562,109 @@ export default function Payments() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm"
+          className="flex flex-col gap-3 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm"
         >
-          <div className="flex items-center gap-4 flex-1">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
-              <input
-                type="text"
-                placeholder="Search by order name, client, or payment ID..."
-                value={searchTerm}
-                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
-              />
-              {searchTerm && (
-                <button 
-                  onClick={() => { setSearchTerm(''); setCurrentPage(1); }} 
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
+          {/* Row 1: Search and View Switcher */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-1">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
+                <input
+                  type="text"
+                  placeholder="Search by order name, client, or payment ID..."
+                  value={searchTerm}
+                  onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                  className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 hidden xl:block whitespace-nowrap">
+                <span className="font-semibold text-gray-800 dark:text-gray-200">{totalItems}</span> payment{totalItems !== 1 ? 's' : ''}
+                {searchTerm && <span className="ml-1 text-emerald-600 dark:text-emerald-400">· "{searchTerm}"</span>}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {hasActiveFilters && (
+                <button
+                  onClick={clearAllFilters}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 rounded-lg transition-colors whitespace-nowrap"
                 >
-                  <X size={14} />
+                  <X size={14} /> Clear All
                 </button>
               )}
+              <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="emerald" />
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 hidden xl:block whitespace-nowrap">
-              <span className="font-semibold text-gray-800 dark:text-gray-200">{totalItems}</span> payment{totalItems !== 1 ? 's' : ''}
-              {searchTerm && <span className="ml-1 text-emerald-600 dark:text-emerald-400">· "{searchTerm}"</span>}
-            </p>
           </div>
 
-          <div className="flex items-center gap-2 w-full lg:w-auto justify-end">
-            <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="emerald" />
+          {/* Row 2: Filter Selects */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Status Filter */}
+            <div className="flex-1 min-w-[150px] max-w-[200px]">
+              <FilterSelect
+                options={paymentStatusOptions}
+                value={statusFilter}
+                onChange={(val) => { setStatusFilter(val); setCurrentPage(1); }}
+                placeholder="Status"
+                icon={Filter}
+              />
+            </div>
+
+            {/* Gateway Filter */}
+            <div className="flex-1 min-w-[150px] max-w-[200px]">
+              <FilterSelect
+                options={paymentGatewayOptions}
+                value={gatewayFilter}
+                onChange={(val) => { setGatewayFilter(val); setCurrentPage(1); }}
+                placeholder="Gateway"
+                icon={Building2}
+              />
+            </div>
+
+            {/* Date Filter */}
+            <div className="flex-1 min-w-[180px] max-w-[260px]">
+              <AdvancedDateFilter
+                value={dateFilter}
+                onChange={(val) => { setDateFilter(val); setCurrentPage(1); }}
+                placeholder="Date or range"
+                tabOptions={['date', 'month', 'range']}
+                showDateStepper
+                buttonClassName="h-full min-h-[42px] w-full bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm font-semibold text-slate-700 dark:text-gray-100  transition-colors"
+              />
+            </div>
+
+            {/* Active filters summary */}
+            {hasActiveFilters && (
+              <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+                <span className="hidden sm:inline">·</span>
+                <span className="flex items-center gap-1">
+                  <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                    {(() => {
+                      let count = 0;
+                      if (statusFilter) count++;
+                      if (gatewayFilter) count++;
+                      if (dateFilter) count++;
+                      if (searchTerm) count++;
+                      return count;
+                    })()}
+                  </span>
+                  filter{(() => {
+                    let count = 0;
+                    if (statusFilter) count++;
+                    if (gatewayFilter) count++;
+                    if (dateFilter) count++;
+                    if (searchTerm) count++;
+                    return count !== 1 ? 's' : '';
+                  })()} applied
+                </span>
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -528,26 +673,34 @@ export default function Payments() {
 
         {/* Empty State */}
         {!loading && payments.length === 0 && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }} 
-            animate={{ opacity: 1, scale: 1 }} 
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
             className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-950/50"
           >
             <CreditCard className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
             <p className="text-xl text-gray-500 dark:text-gray-400">No payments found</p>
             <p className="text-gray-400 dark:text-gray-500 mt-2">
-              {searchTerm ? 'Try adjusting your search' : 'No payment records yet'}
+              {hasActiveFilters ? 'Try adjusting your filters' : 'No payment records yet'}
             </p>
+            {hasActiveFilters && (
+              <button
+                onClick={clearAllFilters}
+                className="mt-4 text-sm text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 font-medium"
+              >
+                Clear all filters
+              </button>
+            )}
           </motion.div>
         )}
 
         {/* Content */}
         {!loading && payments.length > 0 && (
           <>
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ delay: 0.2 }} 
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
               className="rounded-xl bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50"
             >
               {/* Table View */}
@@ -558,11 +711,11 @@ export default function Payments() {
                   rowKey="id"
                   onRowClick={(row) => handleView(row)}
                   getActions={(row) => [
-                    { 
-                      label: 'View Details', 
-                      icon: <Eye size={12} />, 
-                      onClick: () => handleView(row), 
-                      className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' 
+                    {
+                      label: 'View Details',
+                      icon: <Eye size={12} />,
+                      onClick: () => handleView(row),
+                      className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300'
                     },
                   ]}
                   accent="emerald"

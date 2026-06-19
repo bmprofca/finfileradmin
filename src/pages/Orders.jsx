@@ -14,7 +14,7 @@ import PaginationComponent from '../components/common/PaginationComponent';
 import Modal from '../components/common/Modal';
 import SelectField from '../components/common/SelectField';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
-import { useServiceOptions } from '../contexts/ServiceOptionsContext';
+import { ConstantOptions } from '../contexts/ConstantOptionsContext';
 import apiCall from '../utils/apiCall';
 
 /* ─── Status Badge ─── */
@@ -83,11 +83,10 @@ const PaymentText = ({ order }) => {
   const isPaid = paymentState === 'paid';
 
   return (
-    <span className={`whitespace-nowrap text-xs font-semibold ${
-      isPaid
-        ? 'text-emerald-700 dark:text-emerald-300'
-        : 'text-amber-700 dark:text-amber-300'
-    }`}>
+    <span className={`whitespace-nowrap text-xs font-semibold ${isPaid
+      ? 'text-emerald-700 dark:text-emerald-300'
+      : 'text-amber-700 dark:text-amber-300'
+      }`}>
       {isPaid ? 'Paid' : `Due ${formatCurrency(order.due_amount)}`}
     </span>
   );
@@ -455,7 +454,7 @@ const ViewOrderModal = ({ order, onClose, onManageStaff, onUpdateOrder, onUpdate
 };
 
 const OrderUpdateModal = ({ order, onClose, onSubmit, isSubmitting }) => {
-  const { discountTypeOptions } = useServiceOptions();
+  const { discountTypeOptions } = ConstantOptions();
   const [form, setForm] = useState({
     order_name: order?.order_name || '',
     service_id: order?.service_id || '',
@@ -564,7 +563,7 @@ const OrderUpdateModal = ({ order, onClose, onSubmit, isSubmitting }) => {
 };
 
 const OrderStatusModal = ({ order, onClose, onSubmit, isSubmitting }) => {
-  const { orderStatusOptions } = useServiceOptions();
+  const { orderStatusOptions } = ConstantOptions();
   const [form, setForm] = useState({
     status: (order?.status || 'created').toString().toLowerCase(),
     remark: order?.remark || '',
@@ -681,7 +680,7 @@ const OrderCard = ({ order, index, getActions, onClick, onManageStaff }) => {
    MAIN COMPONENT
    ═══════════════════════════════════════════════ */
 export default function Orders() {
-  const { orderStatusOptions } = useServiceOptions();
+  const { orderStatusOptions } = ConstantOptions();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -882,7 +881,7 @@ export default function Orders() {
         onClick: () => openStatusModal(order),
         className: 'text-violet-700 hover:text-violet-800 hover:bg-violet-50 dark:text-violet-300 dark:hover:text-violet-200 dark:hover:bg-violet-950/40',
       },
-      
+
     ];
 
     return actions;

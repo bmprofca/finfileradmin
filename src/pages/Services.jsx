@@ -16,7 +16,7 @@ import Modal from '../components/common/Modal';
 import SelectField from '../components/common/SelectField';
 import ServiceFormModal from '../components/common/ServiceFormModal';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
-import { useServiceOptions } from '../contexts/ServiceOptionsContext';
+import { ConstantOptions } from '../contexts/ConstantOptionsContext';
 import { apiCall } from '../utils/apiCall';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -238,7 +238,7 @@ const ActiveFilters = ({ searchTerm, typeFilter, statusFilter, onClearSearch, on
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Services() {
-  const { serviceTypeOptions } = useServiceOptions();
+  const { serviceTypeOptions } = ConstantOptions();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);

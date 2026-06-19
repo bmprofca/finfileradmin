@@ -2,7 +2,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
-import { ServiceOptionsProvider } from "./contexts/ServiceOptionsContext";
+import { ServiceOptionsProvider } from "./contexts/ConstantOptionsContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
 
@@ -28,53 +28,53 @@ import Profile from "./pages/Profile";
 function App() {
   return (
     <ThemeProvider>
-    <BrowserRouter>
-      <AuthProvider>
-        <ServiceOptionsProvider>
-        <ToastProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <ServiceOptionsProvider>
+            <ToastProvider>
 
-          
-          <Routes>
-            {/* Public Routes */}
-            <Route
-              path="/login"
-              element={
-                <PublicRoute>
-                  <Login />
-                </PublicRoute>
-              }
-            />
 
-            {/* Server Unreachable - Public Route */}
-            <Route path="/server-error" element={<ServerUnreachable />} />
+              <Routes>
+                {/* Public Routes */}
+                <Route
+                  path="/login"
+                  element={
+                    <PublicRoute>
+                      <Login />
+                    </PublicRoute>
+                  }
+                />
 
-            {/* Protected Routes with MainLayout */}
-            <Route element={<ProtectedRoute />}>
-              <Route element={<MainLayout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="clients" element={<RoleRoute allowedRoles={['admin']}><Clients /></RoleRoute>} />
-                <Route path="staffs" element={<RoleRoute allowedRoles={['admin']}><Staffs /></RoleRoute>} />
-                <Route path="staffs/:username" element={<RoleRoute allowedRoles={['admin']}><StaffProfile /></RoleRoute>} />
-                <Route path="my-orders" element={<RoleRoute allowedRoles={['staff']}><MyOrders /></RoleRoute>} />
-                <Route path="orders" element={<RoleRoute allowedRoles={['admin']}><Orders /></RoleRoute>} />
-                <Route path="services" element={<RoleRoute allowedRoles={['admin']}><Services /></RoleRoute>} />
-                <Route path="firms" element={<RoleRoute allowedRoles={['admin']}><Firms /></RoleRoute>} /> 
-                <Route path="payments" element={<RoleRoute allowedRoles={['admin']}><Payments /></RoleRoute>} />
-                <Route path="profile" element={<Profile />} />
-              </Route>
-            </Route>
+                {/* Server Unreachable - Public Route */}
+                <Route path="/server-error" element={<ServerUnreachable />} />
 
-            {/* 404 Not Found Route */}
-            <Route path="/404" element={<NotFound />} />
-            
-            {/* Catch all route - redirect to 404 */}
-            <Route path="*" element={<Navigate to="/404" replace />} />
-          </Routes>
-        </ToastProvider>
-        </ServiceOptionsProvider>
-      </AuthProvider>
-    </BrowserRouter>
+                {/* Protected Routes with MainLayout */}
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<MainLayout />}>
+                    <Route index element={<Dashboard />} />
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="clients" element={<RoleRoute allowedRoles={['admin']}><Clients /></RoleRoute>} />
+                    <Route path="staffs" element={<RoleRoute allowedRoles={['admin']}><Staffs /></RoleRoute>} />
+                    <Route path="staffs/:username" element={<RoleRoute allowedRoles={['admin']}><StaffProfile /></RoleRoute>} />
+                    <Route path="my-orders" element={<RoleRoute allowedRoles={['staff']}><MyOrders /></RoleRoute>} />
+                    <Route path="orders" element={<RoleRoute allowedRoles={['admin']}><Orders /></RoleRoute>} />
+                    <Route path="services" element={<RoleRoute allowedRoles={['admin']}><Services /></RoleRoute>} />
+                    <Route path="firms" element={<RoleRoute allowedRoles={['admin']}><Firms /></RoleRoute>} />
+                    <Route path="payments" element={<RoleRoute allowedRoles={['admin']}><Payments /></RoleRoute>} />
+                    <Route path="profile" element={<Profile />} />
+                  </Route>
+                </Route>
+
+                {/* 404 Not Found Route */}
+                <Route path="/404" element={<NotFound />} />
+
+                {/* Catch all route - redirect to 404 */}
+                <Route path="*" element={<Navigate to="/404" replace />} />
+              </Routes>
+            </ToastProvider>
+          </ServiceOptionsProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </ThemeProvider>
   );
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Briefcase } from 'lucide-react';
 import Modal from './Modal';
 import SelectField from './SelectField';
-import { useServiceOptions } from '../../contexts/ServiceOptionsContext';
+import { ConstantOptions } from '../../contexts/ConstantOptionsContext';
 import { uploadFile } from '../../utils/apiCall';
 import toast from 'react-hot-toast';
 
@@ -64,7 +64,7 @@ const normalizeDocumentForForm = (document) => {
 };
 
 export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitting }) {
-  const { serviceTypeOptions, discountTypeOptions } = useServiceOptions();
+  const { serviceTypeOptions, discountTypeOptions } = ConstantOptions();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -255,7 +255,7 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
       ...prev,
       documents: [
         ...prev.documents,
-    { required_id: `reqdoc${Date.now()}`, name: "", is_required: true, accept_extensions: ["pdf", "jpg", "png"], max_size: 5, max_size_unit: "KB", description: "" }
+        { required_id: `reqdoc${Date.now()}`, name: "", is_required: true, accept_extensions: ["pdf", "jpg", "png"], max_size: 5, max_size_unit: "KB", description: "" }
       ]
     }));
   };
@@ -479,8 +479,8 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
                   isPercentageDiscount
                     ? "Auto-calculated: Total Fees × Discount % / 100"
                     : !isDiscountApplicable
-                    ? "Select a discount type to enable"
-                    : ""
+                      ? "Select a discount type to enable"
+                      : ""
                 }
               />
             </div>
@@ -584,11 +584,10 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
                             key={extension}
                             type="button"
                             onClick={() => handleDocumentExtensionToggle(index, extension)}
-                            className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold uppercase transition-colors ${
-                              isSelected
-                                ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-                                : 'border-gray-300 bg-white text-gray-600 hover:border-emerald-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300'
-                            }`}
+                            className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold uppercase transition-colors ${isSelected
+                              ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                              : 'border-gray-300 bg-white text-gray-600 hover:border-emerald-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                              }`}
                             aria-pressed={isSelected}
                           >
                             <span className={`h-3 w-3 rounded-full border ${isSelected ? 'border-emerald-500 bg-emerald-500' : 'border-gray-400 dark:border-gray-500'}`} />
