@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom'; // Added
 import {
   Search, X, Eye, User, Phone, Mail,
   Plus, Trash2, Edit, CheckCircle, XCircle, Users, Calendar
@@ -58,66 +59,6 @@ const ClientAvatar = ({ client, size = 'md' }) => {
     </div>
   );
 };
-
-// ─── View Client Modal ────────────────────────────────────────────────────────
-
-const ViewClientModal = ({ client, onClose, onEdit, onDelete }) => (
-  <Modal
-    isOpen={true}
-    onClose={onClose}
-    title="Client Details"
-    icon={User}
-    size="2xl"
-    contentClassName="p-5 space-y-4"
-    footer={
-      <>
-        <button
-          onClick={() => onDelete(client)}
-          className="px-5 py-2.5 rounded-xl border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2"
-        >
-          <Trash2 size={16} /> Delete
-        </button>
-        <button
-          onClick={() => onEdit(client)}
-          className="px-5 py-2.5 rounded-xl bg-violet-600 dark:bg-violet-500 text-white text-sm font-semibold hover:bg-violet-700 dark:hover:bg-violet-600 transition-all flex items-center gap-2"
-        >
-          <Edit size={16} /> Edit Client
-        </button>
-      </>
-    }
-  >
-    {/* Avatar + Name */}
-    <div className="flex items-center gap-4 pb-4 border-b dark:border-gray-700">
-      <ClientAvatar client={client} size="lg" />
-      <div>
-        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">{client.full_name}</h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">@{client.username}</p>
-        <div className="mt-1.5 flex gap-2 items-center">
-          <ClientStatusBadge status={client.status} />
-        </div>
-      </div>
-    </div>
-
-    {/* Info Grid */}
-    <div>
-      <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-        <User className="text-violet-500 dark:text-violet-400" size={15} /> Contact & Personal Details
-      </h4>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        <InfoItem icon={User} label="Full Name" value={client.full_name} />
-        <InfoItem icon={User} label="Username" value={`@${client.username}`} />
-        <InfoItem icon={Mail} label="Email" value={client.email} />
-        <InfoItem icon={Phone} label="Mobile" value={client.mobile} />
-        {client.first_name && <InfoItem icon={User} label="First Name" value={client.first_name} />}
-        {client.middle_name && <InfoItem icon={User} label="Middle Name" value={client.middle_name} />}
-        {client.last_name && <InfoItem icon={User} label="Last Name" value={client.last_name} />}
-        {client.create_date && (
-          <InfoItem icon={Calendar} label="Joined" value={new Date(client.create_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} />
-        )}
-      </div>
-    </div>
-  </Modal>
-);
 
 // ─── Client Form Modal ────────────────────────────────────────────────────────
 
@@ -319,7 +260,7 @@ const ClientManagementCard = ({ client, index, onView, onEdit, onDelete }) => (
     onClick={() => onView(client)}
     hoverable
     actions={[
-      { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(client), className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300' },
+      { label: 'View Profile', icon: <User size={12} />, onClick: () => onView(client), className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300' },
       { label: 'Edit Client', icon: <Edit size={12} />, onClick: () => onEdit(client), className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300' },
       { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => onDelete(client), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
     ]}
@@ -338,6 +279,7 @@ const ClientManagementCard = ({ client, index, onView, onEdit, onDelete }) => (
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Clients() {
+  const navigate = useNavigate(); // Added
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('table');
@@ -346,8 +288,6 @@ export default function Clients() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -401,10 +341,24 @@ export default function Clients() {
   };
 
   // ── Handlers ──────────────────────────────────────────────────────────────
-  const handleView = (client) => { setSelectedClient(client); setIsViewModalOpen(true); };
-  const handleEdit = (client) => { setEditingClient(client); setIsFormModalOpen(true); setIsViewModalOpen(false); };
-  const handleCreateNew = () => { setEditingClient(null); setIsFormModalOpen(true); };
-  const handleDeleteRequest = (client) => { setClientToDelete(client); setIsDeleteModalOpen(true); setIsViewModalOpen(false); };
+  const handleViewProfile = (client) => {
+    navigate(`/clients/${client.username}`);
+  };
+  
+  const handleEdit = (client) => { 
+    setEditingClient(client); 
+    setIsFormModalOpen(true); 
+  };
+  
+  const handleCreateNew = () => { 
+    setEditingClient(null); 
+    setIsFormModalOpen(true); 
+  };
+  
+  const handleDeleteRequest = (client) => { 
+    setClientToDelete(client); 
+    setIsDeleteModalOpen(true); 
+  };
 
   const confirmDelete = async () => {
     if (!clientToDelete) return;
@@ -488,7 +442,7 @@ export default function Clients() {
       onRefresh={handleRefresh}
       refreshing={refreshing}
       actions={
-        <Button onClick={handleCreateNew} ariant="primary" className="flex items-center gap-2 text-sm py-1.5 bg-blue-600 hover:bg-blue-700">
+        <Button onClick={handleCreateNew} variant="primary" className="flex items-center gap-2 text-sm py-1.5 bg-blue-600 hover:bg-blue-700">
           <Plus size={16} /> Add Client
         </Button>
       }
@@ -563,11 +517,26 @@ export default function Clients() {
                   columns={columns}
                   rows={clients}
                   rowKey="username"
-                  onRowClick={(row) => handleView(row)}
+                  onRowClick={(row) => navigate(`/clients/${row.username}`)}
                   getActions={(row) => [
-                    { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300' },
-                    { label: 'Edit Client', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300' },
-                    { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
+                    { 
+                      label: 'View Profile', 
+                      icon: <User size={12} />, 
+                      onClick: () => navigate(`/clients/${row.username}`), 
+                      className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300' 
+                    },
+                    { 
+                      label: 'Edit Client', 
+                      icon: <Edit size={12} />, 
+                      onClick: () => handleEdit(row), 
+                      className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300' 
+                    },
+                    { 
+                      label: 'Delete', 
+                      icon: <Trash2 size={12} />, 
+                      onClick: () => handleDeleteRequest(row), 
+                      className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' 
+                    },
                   ]}
                   accent="violet"
                 />
@@ -582,7 +551,7 @@ export default function Clients() {
                         key={client.username}
                         client={client}
                         index={index}
-                        onView={handleView}
+                        onView={() => navigate(`/clients/${client.username}`)}
                         onEdit={handleEdit}
                         onDelete={handleDeleteRequest}
                       />
@@ -603,18 +572,6 @@ export default function Clients() {
           </>
         )}
       </div>
-
-      {/* View Client Modal */}
-      <AnimatePresence>
-        {isViewModalOpen && selectedClient && (
-          <ViewClientModal
-            client={selectedClient}
-            onClose={() => { setIsViewModalOpen(false); setSelectedClient(null); }}
-            onEdit={handleEdit}
-            onDelete={handleDeleteRequest}
-          />
-        )}
-      </AnimatePresence>
 
       {/* Create / Edit Form Modal */}
       <AnimatePresence>

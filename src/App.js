@@ -5,7 +5,6 @@ import { ToastProvider } from "./contexts/ToastContext";
 import { ServiceOptionsProvider } from "./contexts/ConstantOptionsContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
-
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleRoute from "./components/RoleRoute";
 import PublicRoute from "./components/PublicRoute";
@@ -15,6 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import Services from "./pages/Services";
 import Staffs from "./pages/Staffs";
 import StaffProfile from "./pages/StaffProfile";
+import ClientProfile from "./pages/ClientProfile"; // Import ClientProfile
 import MyOrders from "./pages/MyOrders";
 import Orders from "./pages/Orders";
 import NotFound from "./pages/NotFound";
@@ -24,7 +24,6 @@ import Firms from "./pages/Firms";
 import Payments from "./pages/Payments";
 import Profile from "./pages/Profile";
 
-
 function App() {
   return (
     <ThemeProvider>
@@ -32,8 +31,6 @@ function App() {
         <AuthProvider>
           <ServiceOptionsProvider>
             <ToastProvider>
-
-
               <Routes>
                 {/* Public Routes */}
                 <Route
@@ -53,9 +50,16 @@ function App() {
                   <Route element={<MainLayout />}>
                     <Route index element={<Dashboard />} />
                     <Route path="dashboard" element={<Dashboard />} />
+                    
+                    {/* Clients Routes */}
                     <Route path="clients" element={<RoleRoute allowedRoles={['admin']}><Clients /></RoleRoute>} />
+                    <Route path="clients/:username" element={<RoleRoute allowedRoles={['admin']}><ClientProfile /></RoleRoute>} />
+                    
+                    {/* Staff Routes */}
                     <Route path="staffs" element={<RoleRoute allowedRoles={['admin']}><Staffs /></RoleRoute>} />
                     <Route path="staffs/:username" element={<RoleRoute allowedRoles={['admin']}><StaffProfile /></RoleRoute>} />
+                    
+                    {/* Other Routes */}
                     <Route path="my-orders" element={<RoleRoute allowedRoles={['staff']}><MyOrders /></RoleRoute>} />
                     <Route path="orders" element={<RoleRoute allowedRoles={['admin']}><Orders /></RoleRoute>} />
                     <Route path="services" element={<RoleRoute allowedRoles={['admin']}><Services /></RoleRoute>} />
