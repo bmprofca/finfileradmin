@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Briefcase, Plus, FileText, CheckCircle, XCircle,
@@ -13,8 +13,10 @@ import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher'
 import PaginationComponent from '../components/common/PaginationComponent';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
+import SelectField from '../components/common/SelectField';
 import ServiceFormModal from '../components/common/ServiceFormModal';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
+import { useServiceOptions } from '../contexts/ServiceOptionsContext';
 import { apiCall } from '../utils/apiCall';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -23,13 +25,10 @@ const ServiceStatusBadge = ({ status }) => {
   const isActive = status === 1 || status === true || status === 'Active';
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${isActive
-        ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-        : 'bg-gray-100 text-gray-600 border-gray-200'
+      ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+      : 'bg-gray-100 text-gray-600 border-gray-200'
       }`}>
-      {isActive
-        ? <CheckCircle size={10} />
-        : <XCircle size={10} />
-      }
+      {isActive ? <CheckCircle size={10} /> : <XCircle size={10} />}
       {isActive ? 'Active' : 'Inactive'}
     </span>
   );
@@ -47,12 +46,33 @@ const InfoItem = ({ icon: Icon, label, value }) => (
   </div>
 );
 
+const STATUS_FILTER_OPTIONS = [
+  { value: '1', label: 'Active' },
+  { value: '0', label: 'Inactive' },
+];
+
+const filterSelectStyles = {
+  control: (provided, state) => {
+    const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+    return {
+      ...provided,
+      minHeight: '42px',
+      backgroundColor: isDark ? '#111827' : '#f9fafb',
+      borderColor: state.isFocused ? '#10b981' : (isDark ? '#374151' : '#e5e7eb'),
+      boxShadow: state.isFocused ? '0 0 0 4px rgba(16, 185, 129, 0.1)' : 'none',
+      '&:hover': {
+        borderColor: state.isFocused ? '#10b981' : (isDark ? '#4b5563' : '#d1d5db'),
+      },
+    };
+  },
+};
+
 // ─── View Service Modal ───────────────────────────────────────────────────────
 
 const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
-  <Modal 
-    isOpen={true} 
-    onClose={onClose} 
+  <Modal
+    isOpen={true}
+    onClose={onClose}
     title="Service Details"
     icon={Briefcase}
     size="2xl"
@@ -68,7 +88,6 @@ const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
       </>
     }
   >
-    {/* Icon + Name */}
     <div className="flex items-center gap-4 pb-4 border-b dark:border-gray-700">
       {service.image ? (
         <img src={service.image} alt={service.name} className="w-16 h-16 rounded-xl object-cover" />
@@ -87,13 +106,11 @@ const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
       </div>
     </div>
 
-    {/* Description */}
     <div className="p-3 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/50">
       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Description</p>
-      <p className="text-sm text-gray-700 dark:text-gray-300">{service.description || "No description provided."}</p>
+      <p className="text-sm text-gray-700 dark:text-gray-300">{service.description || 'No description provided.'}</p>
     </div>
 
-    {/* Info Grid */}
     <div>
       <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
         <FileText className="text-emerald-500 dark:text-emerald-400" size={15} /> Financial & General Details
@@ -110,7 +127,6 @@ const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
       </div>
     </div>
 
-    {/* Fields and Documents */}
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
@@ -147,7 +163,6 @@ const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
         </div>
       </div>
     </div>
-
   </Modal>
 );
 
@@ -172,7 +187,7 @@ const ServiceManagementCard = ({ service, index, onView, onEdit, onDelete }) => 
     menuId={`service-card-${service.service_id}`}
   >
     <div className="py-1.5">
-      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{service.description || "No description."}</p>
+      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{service.description || 'No description.'}</p>
     </div>
     <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
       <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
@@ -186,14 +201,58 @@ const ServiceManagementCard = ({ service, index, onView, onEdit, onDelete }) => 
   </ManagementCard>
 );
 
+// ─── Active Filter Pills ──────────────────────────────────────────────────────
+
+const ActiveFilters = ({ searchTerm, typeFilter, statusFilter, onClearSearch, onClearType, onClearStatus, onClearAll }) => {
+  const hasFilters = searchTerm || typeFilter || statusFilter;
+  if (!hasFilters) return null;
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">Active filters:</span>
+      {searchTerm && (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+          Search: "{searchTerm}"
+          <button onClick={onClearSearch} className="ml-0.5 hover:text-emerald-900 dark:hover:text-emerald-200"><X size={11} /></button>
+        </span>
+      )}
+      {typeFilter && (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 text-xs font-medium text-blue-700 dark:text-blue-400">
+          Type: {typeFilter}
+          <button onClick={onClearType} className="ml-0.5 hover:text-blue-900 dark:hover:text-blue-200"><X size={11} /></button>
+        </span>
+      )}
+      {statusFilter && (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800/50 text-xs font-medium text-purple-700 dark:text-purple-400">
+          Status: {statusFilter === '1' ? 'Active' : 'Inactive'}
+          <button onClick={onClearStatus} className="ml-0.5 hover:text-purple-900 dark:hover:text-purple-200"><X size={11} /></button>
+        </span>
+      )}
+      <button onClick={onClearAll} className="text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 underline underline-offset-2 transition-colors">
+        Clear all
+      </button>
+    </div>
+  );
+};
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Services() {
+  const { serviceTypeOptions } = useServiceOptions();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Filters
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
+  // UI
   const [viewMode, setViewMode] = useState('table');
+
+  // Modals
   const [selectedService, setSelectedService] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -202,79 +261,78 @@ export default function Services() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalServices, setTotalServices] = useState(0);
+  const lastFetchRef = useRef(null);
+  const activeFetchRef = useRef(null);
 
-  // Fetch Services
-  const fetchServices = async ({ silent = false } = {}) => {
-    if (silent) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
+  // Debounce search input — 400ms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [typeFilter, statusFilter]);
+
+  // ─── Fetch ──────────────────────────────────────────────────────────────────
+
+  const fetchServices = useCallback(async ({ silent = false, force = false } = {}) => {
+    const params = new URLSearchParams({
+      page_no: currentPage,
+      limit: itemsPerPage,
+    });
+    if (debouncedSearch) params.set('search', debouncedSearch);
+    if (typeFilter) params.set('type', typeFilter);
+    if (statusFilter) params.set('status', statusFilter);
+
+    const requestKey = params.toString();
+    if (activeFetchRef.current === requestKey) {
+      setRefreshing(false);
+      return;
     }
+    if (!force && lastFetchRef.current === requestKey) return;
+
+    activeFetchRef.current = requestKey;
+    silent ? setRefreshing(true) : setLoading(true);
     try {
-      const response = await apiCall(`/api/admin/services/list?page_no=${currentPage}&limit=${itemsPerPage}`);
+      const response = await apiCall(`/api/admin/services/list?${params.toString()}`);
       const json = await response.json();
       if (json.success) {
         setServices(json.data.services || []);
-        const pagination = json.data.pagination || {};
-        setTotalServices(pagination.total || 0);
+        setTotalServices(json.data.pagination?.total || 0);
+        lastFetchRef.current = requestKey;
       } else {
         toast.error('Failed to fetch services.');
       }
-    } catch (error) {
+    } catch {
       toast.error('Error connecting to server.');
     } finally {
       setLoading(false);
       setRefreshing(false);
+      if (activeFetchRef.current === requestKey) activeFetchRef.current = null;
     }
-  };
+  }, [currentPage, itemsPerPage, debouncedSearch, typeFilter, statusFilter]);
 
-  const lastFetchRef = useRef({ page: null, limit: null });
   useEffect(() => {
-    if (
-      lastFetchRef.current.page === currentPage &&
-      lastFetchRef.current.limit === itemsPerPage
-    ) {
-      return;
-    }
-
-    lastFetchRef.current = { page: currentPage, limit: itemsPerPage };
     fetchServices();
-  }, [currentPage, itemsPerPage]);
+  }, [fetchServices]);
 
-  const filtered = useMemo(() =>
-    services.filter((s) =>
-      [s.name, s.type, s.status === 1 ? 'Active' : 'Inactive'].some((v) => v?.toLowerCase().includes(searchTerm.toLowerCase()))
-    ),
-    [services, searchTerm]
-  );
+  // ─── Handlers ───────────────────────────────────────────────────────────────
 
-  const handleView = (service) => {
-    setSelectedService(service);
-    setIsViewModalOpen(true);
-  };
-
-  const handleEdit = (service) => {
-    setEditingService(service);
-    setIsFormModalOpen(true);
-    setIsViewModalOpen(false);
-  };
-
-  const handleCreateNew = () => {
-    setEditingService(null);
-    setIsFormModalOpen(true);
-  };
-
-  const handleRefresh = () => {
-    fetchServices({ silent: true });
-  };
-
-  const handleLimitChange = (limit) => {
-    setItemsPerPage(limit);
-    setCurrentPage(1);
-  };
+  const handleView = (service) => { setSelectedService(service); setIsViewModalOpen(true); };
+  const handleEdit = (service) => { setEditingService(service); setIsFormModalOpen(true); setIsViewModalOpen(false); };
+  const handleCreateNew = () => { setEditingService(null); setIsFormModalOpen(true); };
+  const handleRefresh = () => fetchServices({ silent: true, force: true });
+  const handleLimitChange = (limit) => { setItemsPerPage(limit); setCurrentPage(1); };
 
   const handleDeleteRequest = (service) => {
     setServiceToDelete(service);
@@ -292,11 +350,11 @@ export default function Services() {
         toast.success('Service deleted successfully.');
         setIsDeleteModalOpen(false);
         setServiceToDelete(null);
-        fetchServices({ silent: true });
+        fetchServices({ silent: true, force: true });
       } else {
         toast.error(json.message || 'Failed to delete service.');
       }
-    } catch (error) {
+    } catch {
       toast.error('Error connecting to server.');
     } finally {
       setIsDeleting(false);
@@ -307,24 +365,32 @@ export default function Services() {
     setIsSubmitting(true);
     try {
       const endpoint = editingService ? '/api/admin/services/update' : '/api/admin/services/create';
-      const method = 'POST'; // Assuming POST for both create and update based on prompt payload
-      
-      const response = await apiCall(endpoint, method, formData);
+      const response = await apiCall(endpoint, 'POST', formData);
       const json = await response.json();
-      
       if (json.success) {
         toast.success(editingService ? 'Service updated successfully!' : 'Service created successfully!');
         setIsFormModalOpen(false);
-        fetchServices({ silent: true });
+        fetchServices({ silent: true, force: true });
       } else {
         toast.error(json.message || 'Operation failed.');
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setTypeFilter('');
+    setStatusFilter('');
+    setCurrentPage(1);
+  };
+
+  const hasActiveFilters = debouncedSearch || typeFilter || statusFilter;
+
+  // ─── Table Columns ───────────────────────────────────────────────────────────
 
   const tableColumns = [
     {
@@ -350,9 +416,7 @@ export default function Services() {
     { key: 'fees', label: 'Final Fees', render: (row) => <span className="text-sm font-semibold whitespace-nowrap text-gray-800 dark:text-gray-100">₹{row.fees}</span> },
     { key: 'delivery_time', label: 'Delivery', render: (row) => <span className="text-xs whitespace-nowrap text-gray-600 dark:text-gray-300">{row.delivery_time}</span> },
     { key: 'docs', label: 'Docs', render: (row) => <span className="text-[11px] whitespace-nowrap bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-1.5 py-0.5 rounded-md font-medium border border-gray-200 dark:border-gray-700">{row.documents?.length || 0} req</span> },
-    {
-      key: 'status', label: 'Status', render: (row) => <ServiceStatusBadge status={row.status} />,
-    },
+    { key: 'status', label: 'Status', render: (row) => <ServiceStatusBadge status={row.status} /> },
   ];
 
   return (
@@ -374,62 +438,109 @@ export default function Services() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm"
+          className="flex flex-col gap-3 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm"
         >
-          <div className="flex items-center gap-4 flex-1">
+          {/* Top row: search + dropdowns + view switcher */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            {/* Search */}
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={16} />
               <input
                 type="text"
-                placeholder="Search services by name, category, or status..."
+                placeholder="Search by name, category..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
+                className="w-full pl-10 pr-10 py-2 h-[42px] bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm dark:text-gray-100"
               />
               {searchTerm && (
                 <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1">
-                  <X size={14} />
+                  <X size={13} />
                 </button>
               )}
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 hidden xl:block whitespace-nowrap">
-              <span className="font-semibold text-gray-800 dark:text-gray-200">{filtered.length}</span> services
-              {searchTerm && <span className="ml-1 text-emerald-600 dark:text-emerald-400">· "{searchTerm}"</span>}
-            </p>
+
+            {/* Right controls */}
+            <div className="flex items-start md:items-center lg:items-center flex-col md:flex-row lg:flex-row gap-2">
+              {/* Type filter */}
+              <div className="min-w-[190px] w-full md:w-auto">
+                <SelectField
+                  value={serviceTypeOptions.find((option) => option.value === typeFilter) || null}
+                  onChange={(selected) => setTypeFilter(selected?.value || '')}
+                  options={serviceTypeOptions}
+                  placeholder="All Types"
+                  isClearable
+                  styles={filterSelectStyles}
+                />
+              </div>
+
+              {/* Status filter */}
+              <div className="min-w-[160px] w-full md:w-auto">
+                <SelectField
+                  value={STATUS_FILTER_OPTIONS.find((option) => option.value === statusFilter) || null}
+                  onChange={(selected) => setStatusFilter(selected?.value || '')}
+                  options={STATUS_FILTER_OPTIONS}
+                  placeholder="All Status"
+                  isClearable
+                  styles={filterSelectStyles}
+                />
+              </div>
+
+              {/* Divider */}
+              <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block" />
+
+              {/* Count */}
+              <p className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap hidden xl:block">
+                <span className="font-semibold text-gray-800 dark:text-gray-200">{totalServices}</span> services
+              </p>
+              <div className="flex items-center gap-2 justify-end w-full">
+                <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="emerald" />
+              </div>
+            </div>
           </div>
 
-          <div className="flex w-full lg:w-auto justify-end">
-            <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="emerald" />
-          </div>
+          {/* Active filter pills */}
+          <ActiveFilters
+            searchTerm={debouncedSearch}
+            typeFilter={typeFilter}
+            statusFilter={statusFilter}
+            onClearSearch={() => setSearchTerm('')}
+            onClearType={() => setTypeFilter('')}
+            onClearStatus={() => setStatusFilter('')}
+            onClearAll={clearAllFilters}
+          />
         </motion.div>
 
-        {/* Loading state */}
-        {loading && (
-          <PageContentSkeleton viewMode={viewMode} rows={6} columns={8} />
-        )}
+        {/* Loading */}
+        {loading && <PageContentSkeleton viewMode={viewMode} rows={6} columns={8} />}
 
         {/* Empty state */}
-        {!loading && filtered.length === 0 && (
+        {!loading && services.length === 0 && (
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-950/50">
             <Briefcase className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
             <p className="text-xl text-gray-500 dark:text-gray-400">No services found</p>
-            <p className="text-gray-400 dark:text-gray-500 mt-2">{searchTerm ? 'Try adjusting your search' : 'No services available'}</p>
+            <p className="text-gray-400 dark:text-gray-500 mt-2">
+              {hasActiveFilters ? 'Try adjusting your filters' : 'No services available'}
+            </p>
+            {hasActiveFilters && (
+              <button onClick={clearAllFilters} className="mt-4 text-sm text-emerald-600 dark:text-emerald-400 hover:underline">
+                Clear all filters
+              </button>
+            )}
           </motion.div>
         )}
 
         {/* Content */}
-        {!loading && filtered.length > 0 && (
+        {!loading && services.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
-            {/* Card View (default) */}
             {viewMode === 'card' && (
               <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4">
                 <AnimatePresence>
-                  {filtered.map((service, index) => (
-                    <ServiceManagementCard 
-                      key={service.service_id} 
-                      service={service} 
-                      index={index} 
-                      onView={handleView} 
+                  {services.map((service, index) => (
+                    <ServiceManagementCard
+                      key={service.service_id}
+                      service={service}
+                      index={index}
+                      onView={handleView}
                       onEdit={handleEdit}
                       onDelete={handleDeleteRequest}
                     />
@@ -438,11 +549,10 @@ export default function Services() {
               </ManagementGrid>
             )}
 
-            {/* Table View */}
             {viewMode === 'table' && (
               <ManagementTable
                 columns={tableColumns}
-                rows={filtered}
+                rows={services}
                 rowKey="service_id"
                 onRowClick={(row) => handleView(row)}
                 getActions={(row) => [
@@ -456,7 +566,7 @@ export default function Services() {
           </motion.div>
         )}
 
-        {!loading && totalServices > 0 && !searchTerm && (
+        {!loading && totalServices > 0 && (
           <PaginationComponent
             currentPage={currentPage}
             totalItems={totalServices}
@@ -468,7 +578,7 @@ export default function Services() {
         )}
       </div>
 
-      {/* View Service Modal */}
+      {/* View Modal */}
       <AnimatePresence>
         {isViewModalOpen && selectedService && (
           <ViewServiceModal
@@ -480,7 +590,7 @@ export default function Services() {
         )}
       </AnimatePresence>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Modal */}
       <AnimatePresence>
         {isDeleteModalOpen && serviceToDelete && (
           <Modal
@@ -507,10 +617,10 @@ export default function Services() {
         )}
       </AnimatePresence>
 
-      {/* Create/Edit Form Modal */}
+      {/* Create / Edit Modal */}
       <AnimatePresence>
         {isFormModalOpen && (
-          <ServiceFormModal 
+          <ServiceFormModal
             service={editingService}
             onClose={() => setIsFormModalOpen(false)}
             onSubmit={handleFormSubmit}

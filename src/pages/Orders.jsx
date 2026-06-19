@@ -13,6 +13,7 @@ import PaginationComponent from '../components/common/PaginationComponent';
 import Modal from '../components/common/Modal';
 import SelectField from '../components/common/SelectField';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
+import { useServiceOptions } from '../contexts/ServiceOptionsContext';
 import apiCall from '../utils/apiCall';
 
 /* ─── Status Badge ─── */
@@ -23,25 +24,6 @@ const STATUS_COLORS = {
   'completed':                { pill: 'bg-green-100 text-green-800 border border-green-200', dot: 'bg-green-500' },
   'cancelled':                { pill: 'bg-red-100 text-red-800 border border-red-200',       dot: 'bg-red-500' },
 };
-
-const ORDER_STATUS_OPTIONS = [
-  'created',
-  'in process',
-  'pending from department',
-  'completed',
-  'cancelled',
-];
-
-const ORDER_STATUS_SELECT_OPTIONS = ORDER_STATUS_OPTIONS.map((status) => ({
-  value: status,
-  label: status.replace(/\b\w/g, l => l.toUpperCase()),
-}));
-
-const DISCOUNT_TYPE_OPTIONS = [
-  { value: 'not applicable', label: 'Not Applicable' },
-  { value: 'percentage', label: 'Percentage' },
-  { value: 'flat', label: 'Flat' },
-];
 
 const StatusBadge = ({ status }) => {
   const key = (status || '').toString().toLowerCase();
@@ -239,6 +221,7 @@ const ViewOrderModal = ({ order, onClose, onAssign, onEditStaff, onRemoveStaff, 
 );
 
 const OrderUpdateModal = ({ order, onClose, onSubmit, isSubmitting }) => {
+  const { discountTypeOptions } = useServiceOptions();
   const [form, setForm] = useState({
     name: order?.name || '',
     service_id: order?.service_id || '',
@@ -324,8 +307,8 @@ const OrderUpdateModal = ({ order, onClose, onSubmit, isSubmitting }) => {
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Discount Type</label>
             <SelectField
-              options={DISCOUNT_TYPE_OPTIONS}
-              value={DISCOUNT_TYPE_OPTIONS.find((option) => option.value === form.discount_type) || DISCOUNT_TYPE_OPTIONS[0]}
+              options={discountTypeOptions}
+              value={discountTypeOptions.find((option) => option.value === form.discount_type) || discountTypeOptions[0]}
               onChange={(selected) => setForm((prev) => ({ ...prev, discount_type: selected?.value || 'not applicable' }))}
             />
           </div>
@@ -347,6 +330,7 @@ const OrderUpdateModal = ({ order, onClose, onSubmit, isSubmitting }) => {
 };
 
 const OrderStatusModal = ({ order, onClose, onSubmit, isSubmitting }) => {
+  const { orderStatusOptions } = useServiceOptions();
   const [form, setForm] = useState({
     status: (order?.status || 'created').toString().toLowerCase(),
     remark: order?.remark || '',
@@ -384,8 +368,8 @@ const OrderStatusModal = ({ order, onClose, onSubmit, isSubmitting }) => {
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Status</label>
           <SelectField
-            options={ORDER_STATUS_SELECT_OPTIONS}
-            value={ORDER_STATUS_SELECT_OPTIONS.find((option) => option.value === form.status) || ORDER_STATUS_SELECT_OPTIONS[0]}
+            options={orderStatusOptions}
+            value={orderStatusOptions.find((option) => option.value === form.status) || orderStatusOptions[0]}
             onChange={(selected) => setForm((prev) => ({ ...prev, status: selected?.value || 'created' }))}
           />
         </div>
@@ -451,10 +435,12 @@ const OrderCard = ({ order, index, getActions, onClick, onViewStaff }) => (
    MAIN COMPONENT
    ═══════════════════════════════════════════════ */
 export default function Orders() {
+  const { orderStatusOptions } = useServiceOptions();
   const [orders, setOrders]           = useState([]);
   const [loading, setLoading]         = useState(true);
   const [refreshing, setRefreshing]   = useState(false);
   const [searchTerm, setSearchTerm]   = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [viewMode, setViewMode]       = useState('table');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
@@ -501,8 +487,9 @@ export default function Orders() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
+      const statusParam = statusFilter ? `&status=${encodeURIComponent(statusFilter)}` : '';
       const res  = await apiCall(
-        `/api/admin/orders/list?page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`,
+        `/api/admin/orders/list?page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}${statusParam}`,
         'GET'
       );
       const data = await res.json();
@@ -518,12 +505,16 @@ export default function Orders() {
     }
   };
 
-  const lastOrderFetchRef = useRef({ page: null, search: null });
+  const lastOrderFetchRef = useRef({ page: null, search: null, status: null });
   useEffect(() => { 
-    if (lastOrderFetchRef.current.page === currentPage && lastOrderFetchRef.current.search === searchTerm) return;
-    lastOrderFetchRef.current = { page: currentPage, search: searchTerm };
+    if (
+      lastOrderFetchRef.current.page === currentPage &&
+      lastOrderFetchRef.current.search === searchTerm &&
+      lastOrderFetchRef.current.status === statusFilter
+    ) return;
+    lastOrderFetchRef.current = { page: currentPage, search: searchTerm, status: statusFilter };
     fetchOrders(); 
-  }, [currentPage, searchTerm]);
+  }, [currentPage, searchTerm, statusFilter]);
 
   const handleRefresh = () => { setRefreshing(true); fetchOrders(); };
 
@@ -763,9 +754,9 @@ export default function Orders() {
             transition={{ delay: 0.1 }}
             className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm"
           >
-            <div className="flex items-center gap-4 flex-1">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
+          <div className="flex items-center gap-4 flex-1">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
                 <input
                   type="text"
                   placeholder="Search orders..."
@@ -781,6 +772,18 @@ export default function Orders() {
                     <X size={14} />
                   </button>
                 )}
+              </div>
+              <div className="min-w-[180px] w-full sm:w-auto">
+                <SelectField
+                  options={orderStatusOptions}
+                  value={orderStatusOptions.find((option) => option.value === statusFilter) || null}
+                  onChange={(selected) => {
+                    setStatusFilter(selected?.value || '');
+                    setCurrentPage(1);
+                  }}
+                  placeholder="All Status"
+                  isClearable
+                />
               </div>
               <p className="text-sm text-gray-500 dark:text-gray-400 hidden xl:block whitespace-nowrap">
                 <span className="font-semibold text-gray-800 dark:text-gray-200">{totalOrders}</span> orders
