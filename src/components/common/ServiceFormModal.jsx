@@ -146,8 +146,7 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
+  const uploadImageFile = async (file) => {
     if (!file) return;
     setIsUploadingImage(true);
     try {
@@ -159,6 +158,17 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
     } finally {
       setIsUploadingImage(false);
     }
+  };
+
+  const handleImageUpload = (e) => {
+    uploadImageFile(e.target.files?.[0]);
+    e.target.value = '';
+  };
+
+  const handleImageDrop = (e) => {
+    e.preventDefault();
+    if (isUploadingImage) return;
+    uploadImageFile(e.dataTransfer.files?.[0]);
   };
 
   const handleSelectChange = (name, selectedOption) => {
@@ -535,7 +545,12 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
         {/* ── Service Image ────────────────────────────────────────────────── */}
         <section>
           <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 border-b pb-2 dark:border-gray-700">Service Banner / Image</h3>
-          <div className={`mt-2 flex justify-center rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 px-6 py-8 bg-gray-50 dark:bg-gray-800/50 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 ${isUploadingImage ? 'opacity-50' : ''}`}>
+          <label
+            htmlFor="service-image-upload"
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleImageDrop}
+            className={`mt-2 flex cursor-pointer justify-center rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 px-6 py-8 bg-gray-50 dark:bg-gray-800/50 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus-within:ring-4 focus-within:ring-emerald-500/10 ${isUploadingImage ? 'pointer-events-none opacity-50' : ''}`}
+          >
             <div className="text-center flex flex-col items-center">
               {formData.image && !isUploadingImage ? (
                 <div className="mb-4">
@@ -549,14 +564,14 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
                 </div>
               )}
               <div className="flex text-sm text-gray-600 dark:text-gray-400 justify-center">
-                <label htmlFor="service-image-upload" className="relative cursor-pointer rounded-md font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-emerald-600 focus-within:ring-offset-2">
-                  <span>{isUploadingImage ? 'Uploading image...' : formData.image ? 'Change banner image' : 'Upload a banner image'}</span>
-                  <input id="service-image-upload" type="file" accept="image/*" className="sr-only" onChange={handleImageUpload} disabled={isUploadingImage} />
-                </label>
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                  {isUploadingImage ? 'Uploading image...' : formData.image ? 'Change banner image' : 'Upload a banner image'}
+                </span>
+                <input id="service-image-upload" type="file" accept="image/*" className="sr-only" onChange={handleImageUpload} disabled={isUploadingImage} />
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">PNG, JPG, GIF up to 5MB (16:9 recommended)</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Click anywhere or drag and drop. PNG, JPG, GIF up to 5MB (16:9 recommended)</p>
             </div>
-          </div>
+          </label>
         </section>
 
       </form>

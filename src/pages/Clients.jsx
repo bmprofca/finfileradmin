@@ -138,8 +138,7 @@ const ClientFormModal = ({ client, onClose, onSubmit, isSubmitting }) => {
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
   const setStatus = (val) => setForm((f) => ({ ...f, status: val }));
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
+  const uploadImageFile = async (file) => {
     if (!file) return;
     setIsUploading(true);
     try {
@@ -151,6 +150,17 @@ const ClientFormModal = ({ client, onClose, onSubmit, isSubmitting }) => {
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const handleImageUpload = (e) => {
+    uploadImageFile(e.target.files?.[0]);
+    e.target.value = '';
+  };
+
+  const handleImageDrop = (e) => {
+    e.preventDefault();
+    if (isUploading) return;
+    uploadImageFile(e.dataTransfer.files?.[0]);
   };
 
   const handleSubmit = (e) => {
@@ -260,7 +270,12 @@ const ClientFormModal = ({ client, onClose, onSubmit, isSubmitting }) => {
         {/* Profile Image */}
         <div>
           <h4 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3">Profile Image</h4>
-          <div className={`mt-2 flex justify-center rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 px-6 py-8 bg-gray-50 dark:bg-gray-800/50 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 ${isUploading ? 'opacity-50' : ''}`}>
+          <label
+            htmlFor="client-image-upload"
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleImageDrop}
+            className={`mt-2 flex cursor-pointer justify-center rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 px-6 py-8 bg-gray-50 dark:bg-gray-800/50 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus-within:ring-4 focus-within:ring-violet-500/10 ${isUploading ? 'pointer-events-none opacity-50' : ''}`}
+          >
             <div className="text-center flex flex-col items-center">
               {form.image && !isUploading ? (
                 <div className="mb-4">
@@ -274,14 +289,14 @@ const ClientFormModal = ({ client, onClose, onSubmit, isSubmitting }) => {
                 </div>
               )}
               <div className="flex text-sm text-gray-600 dark:text-gray-400 justify-center">
-                <label htmlFor="client-image-upload" className="relative cursor-pointer rounded-md font-semibold text-violet-600 dark:text-violet-400 hover:text-violet-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-violet-600 focus-within:ring-offset-2">
-                  <span>{isUploading ? 'Uploading image...' : form.image ? 'Change profile image' : 'Upload a profile image'}</span>
-                  <input id="client-image-upload" type="file" accept="image/*" className="sr-only" onChange={handleImageUpload} disabled={isUploading} />
-                </label>
+                <span className="font-semibold text-violet-600 dark:text-violet-400">
+                  {isUploading ? 'Uploading image...' : form.image ? 'Change profile image' : 'Upload a profile image'}
+                </span>
+                <input id="client-image-upload" type="file" accept="image/*" className="sr-only" onChange={handleImageUpload} disabled={isUploading} />
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">PNG, JPG, GIF up to 5MB</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Click anywhere or drag and drop. PNG, JPG, GIF up to 5MB</p>
             </div>
-          </div>
+          </label>
         </div>
 
       </form>
