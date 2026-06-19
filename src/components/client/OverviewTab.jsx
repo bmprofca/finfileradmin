@@ -20,7 +20,7 @@ const getStatusColor = (status) => {
     'pending': 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400',
     'suspended': 'text-orange-600 bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400',
   };
-  return map[status?.toLowerCase()] || 'text-gray-600 bg-gray-100 dark:bg-gray-700/30 dark:text-gray-400';
+  return map[status] || 'text-gray-600 bg-gray-100 dark:bg-gray-700/30 dark:text-gray-400';
 };
 
 export default function OverviewTab({ username }) {
@@ -35,7 +35,7 @@ export default function OverviewTab({ username }) {
   const fetchOverview = async () => {
     setLoading(true);
     try {
-      const res = await apiCall(`/api/admin/profile/${username}`, 'GET');
+      const res = await apiCall(`/api/admin/clients/profile/${username}`, 'GET');
       const data = await res.json();
       if (data.success) {
         setClient(data.data.client);

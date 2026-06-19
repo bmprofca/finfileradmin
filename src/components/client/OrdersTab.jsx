@@ -67,7 +67,7 @@ export default function OrdersTab({ username }) {
     setLoading(true);
     try {
       const res = await apiCall(
-        `/api/admin/profile/${username}?resource=orders&page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`,
+        `/api/admin/clients/profile/${username}?resource=orders&page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`,
         'GET'
       );
       const data = await res.json();
@@ -87,7 +87,7 @@ export default function OrdersTab({ username }) {
     setLoadingOrder(true);
     try {
       const res = await apiCall(
-        `/api/admin/profile/${username}?resource=order&order_id=${orderId}`,
+        `/api/admin/clients/profile/${username}?resource=order&order_id=${orderId}`,
         'GET'
       );
       const data = await res.json();

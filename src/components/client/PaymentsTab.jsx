@@ -70,7 +70,7 @@ export default function PaymentsTab({ username }) {
     setLoading(true);
     try {
       const res = await apiCall(
-        `/api/admin/profile/${username}?resource=payments&page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`,
+        `/api/admin/clients/profile/${username}?resource=payments&page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`,
         'GET'
       );
       const data = await res.json();
