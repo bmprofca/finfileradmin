@@ -17,6 +17,11 @@ export default function ClientProfile() {
   const { username } = useParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const handleRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   const tabs = [
     { key: 'overview', label: 'Overview', icon: User },
@@ -29,15 +34,15 @@ export default function ClientProfile() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <OverviewTab username={username} />;
+        return <OverviewTab username={username} refreshTrigger={refreshTrigger} />;
       case 'sessions':
-        return <SessionsTab username={username} />;
+        return <SessionsTab username={username} refreshTrigger={refreshTrigger} />;
       case 'firms':
-        return <FirmsTab username={username} />;
+        return <FirmsTab username={username} refreshTrigger={refreshTrigger} />;
       case 'orders':
-        return <OrdersTab username={username} />;
+        return <OrdersTab username={username} refreshTrigger={refreshTrigger} />;
       case 'payments':
-        return <PaymentsTab username={username} />;
+        return <PaymentsTab username={username} refreshTrigger={refreshTrigger} />;
       default:
         return null;
     }
@@ -48,6 +53,7 @@ export default function ClientProfile() {
       title="Client Profile"
       description={`Viewing details for @${username}`}
       accent="emerald"
+      onRefresh={handleRefresh}
       actions={
         <Button variant="outline" onClick={() => navigate('/clients')} className="flex items-center gap-2 text-sm py-1.5">
           <ChevronLeft size={16} /> Back to Clients
@@ -67,7 +73,7 @@ export default function ClientProfile() {
                 className={`
                   flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
                   ${isActive 
-                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25' 
+                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25' 
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }
                 `}

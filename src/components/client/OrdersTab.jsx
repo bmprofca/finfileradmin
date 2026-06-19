@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShoppingBag, Search, Eye, RefreshCw, User,
   Calendar, Hash, Briefcase, Layers, CheckCircle,
-  XCircle, Clock, AlertCircle
+  XCircle, Clock, AlertCircle, Filter, X
 } from 'lucide-react';
 import apiCall from '../../utils/apiCall';
 import { formatDate } from '../../utils/helpers';
@@ -16,6 +16,8 @@ import ManagementViewSwitcher from '../../components/common/ManagementViewSwitch
 import PaginationComponent from '../../components/common/PaginationComponent';
 import Modal from '../../components/common/Modal';
 import Button from '../../components/common/Button';
+import AdvancedDateFilter from '../../components/common/AdvancedDateFilter';
+import { ConstantOptions } from '../../contexts/ConstantOptionsContext';
 import toast from 'react-hot-toast';
 
 // Order Status Map
@@ -43,7 +45,37 @@ const OrderStatusBadge = ({ status }) => {
   );
 };
 
-export default function OrdersTab({ username }) {
+// ─── Filter Select Component ────────────────────────────────────────────────
+const FilterSelect = ({ options, value, onChange, placeholder, icon: Icon }) => {
+  return (
+    <div className="relative">
+      <select
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value || null)}
+        className="appearance-none w-full pl-8 pr-7 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm min-h-[36px] dark:text-gray-100 cursor-pointer"
+      >
+        <option value="">{placeholder}</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      {Icon && (
+        <Icon size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" />
+      )}
+      <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+          <path d="M6 8L1 3h10L6 8z" fill="currentColor" />
+        </svg>
+      </div>
+    </div>
+  );
+};
+
+export default function OrdersTab({ username, refreshTrigger }) {
+  const { orderStatusOptions } = ConstantOptions();
+
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState([]);
   const [totalOrders, setTotalOrders] = useState(0);
@@ -51,6 +83,10 @@ export default function OrdersTab({ username }) {
   const [viewMode, setViewMode] = useState('table');
   const [currentPage, setCurrentPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Filter states
+  const [statusFilter, setStatusFilter] = useState(null);
+  const [dateFilter, setDateFilter] = useState({ date: new Date().toLocaleDateString('en-CA') });
 
   // Order details modal
   const [orderModalOpen, setOrderModalOpen] = useState(false);
@@ -61,13 +97,39 @@ export default function OrdersTab({ username }) {
 
   useEffect(() => {
     fetchOrders();
-  }, [username, currentPage]);
+  }, [username, currentPage, statusFilter, dateFilter, refreshTrigger]);
+
+  const buildQueryParams = () => {
+    const params = new URLSearchParams();
+    params.append('resource', 'orders');
+    params.append('page_no', currentPage);
+    params.append('limit', itemsPerPage);
+
+    if (searchTerm) params.append('search', searchTerm);
+    if (statusFilter) params.append('status', statusFilter);
+
+    // Date filter
+    if (dateFilter) {
+      if (dateFilter.date) {
+        params.append('date', dateFilter.date);
+      } else if (dateFilter.month && dateFilter.year) {
+        params.append('month', dateFilter.month);
+        params.append('year', dateFilter.year);
+      } else if (dateFilter.from_date && dateFilter.to_date) {
+        params.append('from_date', dateFilter.from_date);
+        params.append('to_date', dateFilter.to_date);
+      }
+    }
+
+    return params.toString();
+  };
 
   const fetchOrders = async () => {
     setLoading(true);
     try {
+      const queryString = buildQueryParams();
       const res = await apiCall(
-        `/api/admin/clients/profile/${username}?resource=orders&page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`,
+        `/api/admin/clients/profile/${username}?${queryString}`,
         'GET'
       );
       const data = await res.json();
@@ -103,13 +165,19 @@ export default function OrdersTab({ username }) {
     }
   };
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    fetchOrders();
-  };
+
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const hasActiveFilters = statusFilter || dateFilter;
+
+  const clearAllFilters = () => {
+    setStatusFilter(null);
+    setDateFilter(null);
+    setSearchTerm('');
     setCurrentPage(1);
   };
 
@@ -189,22 +257,56 @@ export default function OrdersTab({ username }) {
   return (
     <div className="space-y-3">
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-200 dark:border-gray-700">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-          <input
-            type="text"
-            placeholder="Search orders..."
-            value={searchTerm}
-            onChange={handleSearch}
-            className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
-          />
+      <div className="flex flex-col gap-3 bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-200 dark:border-gray-700">
+        {/* Row 1: Search + Actions */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+            <input
+              type="text"
+              placeholder="Search orders..."
+              value={searchTerm}
+              onChange={handleSearch}
+              className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            {hasActiveFilters && (
+              <button
+                onClick={clearAllFilters}
+                className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 rounded-lg transition-colors whitespace-nowrap"
+              >
+                <X size={12} /> Clear
+              </button>
+            )}
+            <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="emerald" />
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleRefresh} className="flex items-center gap-2 text-sm py-2">
-            <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} /> Refresh
-          </Button>
-          <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="emerald" />
+
+        {/* Row 2: Filters */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Status Filter */}
+          <div className="flex-1 min-w-[130px] max-w-[180px]">
+            <FilterSelect
+              options={orderStatusOptions}
+              value={statusFilter}
+              onChange={(val) => { setStatusFilter(val); setCurrentPage(1); }}
+              placeholder="Status"
+              icon={Filter}
+            />
+          </div>
+
+          {/* Date Filter */}
+          <div className="flex-1 min-w-[160px] max-w-[220px]">
+            <AdvancedDateFilter
+              value={dateFilter}
+              onChange={(val) => { setDateFilter(val); setCurrentPage(1); }}
+              placeholder="Date or range"
+              tabOptions={['date', 'month', 'range']}
+              showDateStepper
+              buttonClassName="h-full min-h-[36px] w-full bg-gray-50 dark:bg-gray-900  px-3 py-2 text-sm font-medium text-slate-700 dark:text-gray-100 transition-colors"
+            />
+          </div>
         </div>
       </div>
 
@@ -212,7 +314,9 @@ export default function OrdersTab({ username }) {
         <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
           <ShoppingBag className="text-gray-300 dark:text-gray-600 mx-auto mb-3" size={48} />
           <p className="text-gray-500 dark:text-gray-400">No orders found</p>
-          {searchTerm && <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Try adjusting your search</p>}
+          {(searchTerm || hasActiveFilters) && (
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Try adjusting your filters</p>
+          )}
         </div>
       ) : (
         <>

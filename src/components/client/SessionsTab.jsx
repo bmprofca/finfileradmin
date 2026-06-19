@@ -9,7 +9,7 @@ import ManagementTable from '../../components/common/ManagementTable';
 import PaginationComponent from '../../components/common/PaginationComponent';
 import Button from '../../components/common/Button';
 
-export default function SessionsTab({ username }) {
+export default function SessionsTab({ username, refreshTrigger }) {
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -19,7 +19,7 @@ export default function SessionsTab({ username }) {
 
   useEffect(() => {
     fetchSessions();
-  }, [username, currentPage]);
+  }, [username, currentPage, refreshTrigger]);
 
   const fetchSessions = async () => {
     setLoading(true);
@@ -40,9 +40,7 @@ export default function SessionsTab({ username }) {
     }
   };
 
-  const handleRefresh = () => {
-    fetchSessions();
-  };
+
 
   if (loading) return <PageContentSkeleton rows={4} columns={2} />;
 
@@ -106,9 +104,6 @@ export default function SessionsTab({ username }) {
             className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
           />
         </div>
-        <Button variant="outline" onClick={handleRefresh} className="flex items-center gap-2 text-sm py-2">
-          <RefreshCw size={14} /> Refresh
-        </Button>
       </div>
 
       {sessions?.length === 0 ? (

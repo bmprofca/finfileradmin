@@ -23,14 +23,14 @@ const getStatusColor = (status) => {
   return map[status] || 'text-gray-600 bg-gray-100 dark:bg-gray-700/30 dark:text-gray-400';
 };
 
-export default function OverviewTab({ username }) {
+export default function OverviewTab({ username, refreshTrigger }) {
   const [loading, setLoading] = useState(true);
   const [client, setClient] = useState(null);
   const [counts, setCounts] = useState({});
 
   useEffect(() => {
     fetchOverview();
-  }, [username]);
+  }, [username, refreshTrigger]);
 
   const fetchOverview = async () => {
     setLoading(true);

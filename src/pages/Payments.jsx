@@ -337,7 +337,7 @@ export default function Payments() {
   // Filter states
   const [statusFilter, setStatusFilter] = useState(null);
   const [gatewayFilter, setGatewayFilter] = useState(null);
-  const [dateFilter, setDateFilter] = useState(null);
+  const [dateFilter, setDateFilter] = useState({ date: new Date().toLocaleDateString('en-CA') });
 
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);

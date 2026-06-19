@@ -10,7 +10,7 @@ import Modal from '../../components/common/Modal';
 import Button from '../../components/common/Button';
 import toast from 'react-hot-toast';
 
-export default function FirmsTab({ username }) {
+export default function FirmsTab({ username, refreshTrigger }) {
   const [loading, setLoading] = useState(true);
   const [firms, setFirms] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,7 +23,7 @@ export default function FirmsTab({ username }) {
 
   useEffect(() => {
     fetchFirms();
-  }, [username]);
+  }, [username, refreshTrigger]);
 
   const fetchFirms = async () => {
     setLoading(true);
@@ -65,9 +65,7 @@ export default function FirmsTab({ username }) {
     fetchFirmDocuments(firmId);
   };
 
-  const handleRefresh = () => {
-    fetchFirms();
-  };
+
 
   if (loading) return <PageContentSkeleton rows={3} columns={4} />;
 
@@ -146,9 +144,6 @@ export default function FirmsTab({ username }) {
             className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
           />
         </div>
-        <Button variant="outline" onClick={handleRefresh} className="flex items-center gap-2 text-sm py-2">
-          <RefreshCw size={14} /> Refresh
-        </Button>
       </div>
 
       {filteredFirms?.length === 0 ? (
