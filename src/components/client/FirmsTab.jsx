@@ -1,5 +1,5 @@
 // components/client/FirmsTab.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Building2, FileText, Search, RefreshCw, Download } from 'lucide-react';
 import apiCall from '../../utils/apiCall';
@@ -25,7 +25,13 @@ export default function FirmsTab({ username, refreshTrigger }) {
     fetchFirms();
   }, [username, refreshTrigger]);
 
+  const activeFetchRef = useRef(null);
+
   const fetchFirms = async () => {
+    const requestKey = `firms|${refreshTrigger || 0}`;
+    if (activeFetchRef.current === requestKey) return;
+    activeFetchRef.current = requestKey;
+
     setLoading(true);
     try {
       const res = await apiCall(`/api/admin/clients/profile/${username}?resource=firms`, 'GET');
@@ -37,10 +43,17 @@ export default function FirmsTab({ username, refreshTrigger }) {
       console.error('Failed to fetch firms:', error);
     } finally {
       setLoading(false);
+      if (activeFetchRef.current === requestKey) activeFetchRef.current = null;
     }
   };
 
+  const activeDocFetchRef = useRef(null);
+
   const fetchFirmDocuments = async (firmId) => {
+    const requestKey = `docs|${firmId}`;
+    if (activeDocFetchRef.current === requestKey) return;
+    activeDocFetchRef.current = requestKey;
+
     setLoadingDocs(true);
     try {
       const res = await apiCall(
@@ -56,6 +69,7 @@ export default function FirmsTab({ username, refreshTrigger }) {
       toast.error('Failed to load documents');
     } finally {
       setLoadingDocs(false);
+      if (activeDocFetchRef.current === requestKey) activeDocFetchRef.current = null;
     }
   };
 
@@ -153,7 +167,7 @@ export default function FirmsTab({ username, refreshTrigger }) {
         </div>
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <ManagementTable columns={columns} rows={filteredFirms || []} rowKey="firm_id" accent="emerald" />
+          <ManagementTable columns={columns} rows={filteredFirms || []} rowKey="firm_id" accent="emerald" onRowClick={(row) => handleViewDocuments(row.firm_id)} />
         </div>
       )}
 

@@ -1,5 +1,5 @@
 // components/client/OrdersTab.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShoppingBag, Search, Eye, RefreshCw, User,
@@ -17,6 +17,7 @@ import PaginationComponent from '../../components/common/PaginationComponent';
 import Modal from '../../components/common/Modal';
 import Button from '../../components/common/Button';
 import AdvancedDateFilter from '../../components/common/AdvancedDateFilter';
+import SelectField from '../../components/common/SelectField';
 import { ConstantOptions } from '../../contexts/ConstantOptionsContext';
 import toast from 'react-hot-toast';
 
@@ -45,33 +46,6 @@ const OrderStatusBadge = ({ status }) => {
   );
 };
 
-// ─── Filter Select Component ────────────────────────────────────────────────
-const FilterSelect = ({ options, value, onChange, placeholder, icon: Icon }) => {
-  return (
-    <div className="relative">
-      <select
-        value={value || ''}
-        onChange={(e) => onChange(e.target.value || null)}
-        className="appearance-none w-full pl-8 pr-7 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm min-h-[36px] dark:text-gray-100 cursor-pointer"
-      >
-        <option value="">{placeholder}</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      {Icon && (
-        <Icon size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" />
-      )}
-      <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
-        <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-          <path d="M6 8L1 3h10L6 8z" fill="currentColor" />
-        </svg>
-      </div>
-    </div>
-  );
-};
 
 export default function OrdersTab({ username, refreshTrigger }) {
   const { orderStatusOptions } = ConstantOptions();
@@ -124,10 +98,20 @@ export default function OrdersTab({ username, refreshTrigger }) {
     return params.toString();
   };
 
+  const activeFetchRef = useRef(null);
+
   const fetchOrders = async () => {
+    const queryString = buildQueryParams();
+    const requestKey = queryString + '&refresh=' + (refreshTrigger || 0);
+
+    if (activeFetchRef.current === requestKey) {
+      setRefreshing(false);
+      return;
+    }
+    activeFetchRef.current = requestKey;
+
     setLoading(true);
     try {
-      const queryString = buildQueryParams();
       const res = await apiCall(
         `/api/admin/clients/profile/${username}?${queryString}`,
         'GET'
@@ -142,6 +126,9 @@ export default function OrdersTab({ username, refreshTrigger }) {
     } finally {
       setLoading(false);
       setRefreshing(false);
+      if (activeFetchRef.current === requestKey) {
+        activeFetchRef.current = null;
+      }
     }
   };
 
@@ -257,20 +244,48 @@ export default function OrdersTab({ username, refreshTrigger }) {
   return (
     <div className="space-y-3">
       {/* Filters */}
-      <div className="flex flex-col gap-3 bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-200 dark:border-gray-700">
-        {/* Row 1: Search + Actions */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-            <input
-              type="text"
-              placeholder="Search orders..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
+      {/* Filters */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-200 dark:border-gray-700">
+        
+        {/* Search */}
+        <div className="relative flex-1 w-full shrink-0">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+          <input
+            type="text"
+            placeholder="Search orders..."
+            value={searchTerm}
+            onChange={handleSearch}
+            className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
+          />
+        </div>
+
+        {/* Filters & Actions */}
+        <div className="flex flex-wrap lg:flex-nowrap items-center gap-2 w-full lg:w-auto">
+          {/* Status Filter */}
+          <div className="flex-1 min-w-[130px] lg:w-[150px] max-w-[180px]">
+            <SelectField
+              options={orderStatusOptions}
+              value={orderStatusOptions.find(o => o.value === statusFilter) || null}
+              onChange={(selected) => { setStatusFilter(selected ? selected.value : null); setCurrentPage(1); }}
+              placeholder="Status"
+              isClearable
             />
           </div>
-          <div className="flex items-center gap-2">
+
+          {/* Date Filter */}
+          <div className="flex-1 min-w-[160px] lg:w-[220px] max-w-[220px]">
+            <AdvancedDateFilter
+              value={dateFilter}
+              onChange={(val) => { setDateFilter(val); setCurrentPage(1); }}
+              placeholder="Date or range"
+              tabOptions={['date', 'month', 'range']}
+              showDateStepper
+              buttonClassName="h-full min-h-[36px] w-full bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm font-medium text-slate-700 dark:text-gray-100 transition-colors"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2 ml-auto lg:ml-0 shrink-0">
             {hasActiveFilters && (
               <button
                 onClick={clearAllFilters}
@@ -280,32 +295,6 @@ export default function OrdersTab({ username, refreshTrigger }) {
               </button>
             )}
             <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="emerald" />
-          </div>
-        </div>
-
-        {/* Row 2: Filters */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Status Filter */}
-          <div className="flex-1 min-w-[130px] max-w-[180px]">
-            <FilterSelect
-              options={orderStatusOptions}
-              value={statusFilter}
-              onChange={(val) => { setStatusFilter(val); setCurrentPage(1); }}
-              placeholder="Status"
-              icon={Filter}
-            />
-          </div>
-
-          {/* Date Filter */}
-          <div className="flex-1 min-w-[160px] max-w-[220px]">
-            <AdvancedDateFilter
-              value={dateFilter}
-              onChange={(val) => { setDateFilter(val); setCurrentPage(1); }}
-              placeholder="Date or range"
-              tabOptions={['date', 'month', 'range']}
-              showDateStepper
-              buttonClassName="h-full min-h-[36px] w-full bg-gray-50 dark:bg-gray-900  px-3 py-2 text-sm font-medium text-slate-700 dark:text-gray-100 transition-colors"
-            />
           </div>
         </div>
       </div>
@@ -322,7 +311,7 @@ export default function OrdersTab({ username, refreshTrigger }) {
         <>
           {viewMode === 'table' ? (
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <ManagementTable columns={columns} rows={orders || []} rowKey="order_id" accent="emerald" />
+              <ManagementTable columns={columns} rows={orders || []} rowKey="order_id" accent="emerald" onRowClick={(row) => fetchOrderDetails(row.order_id)} />
             </div>
           ) : (
             <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
