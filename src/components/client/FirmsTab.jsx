@@ -28,7 +28,7 @@ export default function FirmsTab({ username }) {
   const fetchFirms = async () => {
     setLoading(true);
     try {
-      const res = await apiCall(`/api/admin/profile/${username}?resource=firms`, 'GET');
+      const res = await apiCall(`/api/admin/clients/profile/${username}?resource=firms`, 'GET');
       const data = await res.json();
       if (data.success) {
         setFirms(data.data.firms);
@@ -44,7 +44,7 @@ export default function FirmsTab({ username }) {
     setLoadingDocs(true);
     try {
       const res = await apiCall(
-        `/api/admin/profile/${username}?resource=firm-documents&firm_id=${firmId}`,
+        `/api/admin/clients/profile/${username}?resource=firm-documents&firm_id=${firmId}`,
         'GET'
       );
       const data = await res.json();

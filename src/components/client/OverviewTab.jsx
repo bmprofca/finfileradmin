@@ -35,7 +35,7 @@ export default function OverviewTab({ username }) {
   const fetchOverview = async () => {
     setLoading(true);
     try {
-      const res = await apiCall(`/api/admin/profile/${username}`, 'GET');
+      const res = await apiCall(`/api/admin/clients/profile/${username}`, 'GET');
       const data = await res.json();
       if (data.success) {
         setClient(data.data.client);

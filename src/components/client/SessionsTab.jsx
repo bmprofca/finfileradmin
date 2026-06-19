@@ -25,7 +25,7 @@ export default function SessionsTab({ username }) {
     setLoading(true);
     try {
       const res = await apiCall(
-        `/api/admin/profile/${username}?resource=sessions&page_no=${currentPage}&limit=${itemsPerPage}`,
+        `/api/admin/clients/profile/${username}?resource=sessions&page_no=${currentPage}&limit=${itemsPerPage}`,
         'GET'
       );
       const data = await res.json();
