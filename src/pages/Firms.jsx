@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, X, Eye, User, Building2,
-  Plus, Trash2, Edit, FileText, Hash, Download
+  Plus, Trash2, Edit, FileText, Hash, Download, Calendar
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ManagementHub from '../components/common/ManagementHub';
@@ -81,7 +81,7 @@ const FirmAvatar = ({ firm, size = 'md' }) => {
 
 // ─── View Firm Modal ──────────────────────────────────────────────────────────
 
-const ViewFirmModal = ({ firm, onClose, onEdit, onDelete }) => (
+const ViewFirmModal = ({ firm, onClose, onEdit, onDelete, onDocuments }) => (
   <Modal
     isOpen={true}
     onClose={onClose}
@@ -107,15 +107,27 @@ const ViewFirmModal = ({ firm, onClose, onEdit, onDelete }) => (
     }
   >
     {/* Avatar + Name */}
-    <div className="flex items-center gap-4 pb-4 border-b dark:border-gray-700">
-      <FirmAvatar firm={firm} size="lg" />
-      <div>
-        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">{firm.name}</h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Client: {firm.client_name}</p>
-        <div className="mt-1.5 flex gap-2 items-center">
-          <FirmTypeBadge type={firm.type} />
+    <div className="flex items-start justify-between gap-4 pb-4 border-b dark:border-gray-700">
+      <div className="flex items-center gap-4">
+        <FirmAvatar firm={firm} size="lg" />
+        <div>
+          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">{firm.name}</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Client: {firm.client_name}</p>
+          <div className="mt-1.5 flex gap-2 items-center">
+            <FirmTypeBadge type={firm.type} />
+          </div>
         </div>
       </div>
+      <button
+        type="button"
+        onClick={() => {
+          onClose();
+          onDocuments(firm);
+        }}
+        className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-violet-600 hover:bg-violet-50 dark:text-violet-400 dark:hover:bg-violet-900/20"
+      >
+        <FileText size={15} /> Documents
+      </button>
     </div>
 
     {/* Firm Info */}
@@ -303,7 +315,11 @@ const FirmManagementCard = ({ firm, index, onView, onEdit, onDelete, onDocuments
     title={firm.name}
     subtitle={firm.pan_no ? `PAN: ${firm.pan_no}` : 'No PAN on file'}
     icon={<FirmAvatar firm={firm} size="sm" />}
-    badge={<FirmTypeBadge type={firm.type} />}
+    badge={
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-violet-50 text-violet-700 border border-violet-100 dark:bg-violet-900/20 dark:text-violet-300 dark:border-violet-800">
+        <FileText size={10} /> {firm.documents?.length || 0}
+      </span>
+    }
     onClick={() => onView(firm)}
     hoverable
     actions={[
@@ -313,8 +329,28 @@ const FirmManagementCard = ({ firm, index, onView, onEdit, onDelete, onDocuments
       { label: 'Delete',       icon: <Trash2 size={12} />, onClick: () => onDelete(firm), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
     ]}
     menuId={`firm-card-${firm.firm_id}`}
+    footer={
+      <div className="flex items-center justify-between w-full text-xs text-gray-500 dark:text-gray-400">
+        <span className="flex items-center gap-1">
+          <Calendar size={10} className="text-violet-400" /> {firm.create_date ? new Date(firm.create_date).toLocaleDateString() : '—'}
+        </span>
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onDocuments(firm);
+          }}
+          className="inline-flex items-center gap-1 rounded-md px-2 py-1 font-medium text-violet-600 hover:bg-violet-50 hover:text-violet-700 dark:text-violet-400 dark:hover:bg-violet-900/20"
+        >
+          <FileText size={12} /> Documents
+        </button>
+      </div>
+    }
   >
-    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5">
+    <div className="mt-1 flex flex-col gap-1.5">
+      <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+        <FirmTypeBadge type={firm.type} />
+      </div>
       {firm.gst_no && (
         <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
           <FileText size={10} className="text-gray-400 dark:text-gray-500" /> GST: {firm.gst_no}
@@ -351,9 +387,20 @@ export default function Firms() {
   const lastFetchRef = useRef(null);
   const activeFetchRef = useRef(null);
 
+  // ── Build query params ──────────────────────────────────────────────────────
+  const buildQueryParams = () => {
+    const params = new URLSearchParams();
+    params.append('page_no', currentPage);
+    params.append('limit', itemsPerPage);
+    if (searchTerm) params.append('search', searchTerm);
+    return params.toString();
+  };
+
   // ── Fetch ─────────────────────────────────────────────────────────────────
   const fetchFirms = async ({ force = false } = {}) => {
-    const requestKey = `${currentPage}|${itemsPerPage}|${searchTerm}`;
+    const queryString = buildQueryParams();
+    const requestKey = queryString;
+
     if (activeFetchRef.current === requestKey) {
       setRefreshing(false);
       return;
@@ -364,14 +411,11 @@ export default function Firms() {
     activeFetchRef.current = requestKey;
     setLoading(true);
     try {
-      const response = await apiCall(
-        `/api/admin/firms/list?page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`,
-        'GET'
-      );
+      const response = await apiCall(`/api/admin/firms/list?${queryString}`, 'GET');
       const data = await response.json();
       if (data.success) {
         setFirms(data.data.firms);
-        setTotalItems(data.pagination?.total || 0);
+        setTotalItems(data.pagination?.total_records || data.pagination?.total || 0);
       } else {
         toast.error('Failed to fetch firms.');
       }
@@ -458,6 +502,19 @@ export default function Firms() {
     { key: 'gst_no',      label: 'GST',        render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">{row.gst_no || '—'}</span> },
     { key: 'vat_no',      label: 'VAT',        render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">{row.vat_no || '—'}</span> },
     { key: 'tan_no',      label: 'TAN',        render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">{row.tan_no || '—'}</span> },
+    { key: 'documents',   label: 'Documents',  render: (row) => (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            handleViewDocuments(row);
+          }}
+          className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300 text-sm font-medium flex items-center gap-1"
+        >
+          <FileText size={14} /> Documents
+        </button>
+      )
+    },
     { key: 'create_date', label: 'Created',    render: (row) => <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{row.create_date ? new Date(row.create_date).toLocaleDateString() : '—'}</span> },
   ];
 
@@ -593,6 +650,7 @@ export default function Firms() {
             onClose={() => { setIsViewModalOpen(false); setSelectedFirm(null); }}
             onEdit={handleEdit}
             onDelete={handleDeleteRequest}
+            onDocuments={handleViewDocuments}
           />
         )}
       </AnimatePresence>
