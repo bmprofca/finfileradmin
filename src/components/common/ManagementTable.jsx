@@ -104,8 +104,10 @@ export default function ManagementTable({
                   </th>
                 ))}
                 {showActionsColumn && (actions || getActions) && (
-                  <th className={joinClasses(densityClasses, 'w-12 pr-4 text-right', actionsClassName)}>
-                    {actionsHeader}
+                  <th className={joinClasses(densityClasses, 'w-16 text-center', actionsClassName)}>
+                    <div className="flex items-center justify-center">
+                      {actionsHeader}
+                    </div>
                   </th>
                 )}
               </tr>
@@ -153,15 +155,17 @@ export default function ManagementTable({
                   })}
 
                   {showActionsColumn && (actions || getActions) && (
-                    <td className="w-12 pr-4 text-right" onClick={(event) => event.stopPropagation()}>
-                      {hasRowActions && (
-                        <ActionMenu
-                          menuId={rowId}
-                          activeId={activeId}
-                          onToggle={onToggleAction}
-                          actions={rowActions}
-                        />
-                      )}
+                    <td className={joinClasses(densityClasses, 'w-16 text-center', actionsClassName)} onClick={(event) => event.stopPropagation()}>
+                      <div className="flex items-center justify-center">
+                        {hasRowActions && (
+                          <ActionMenu
+                            menuId={rowId}
+                            activeId={activeId}
+                            onToggle={onToggleAction}
+                            actions={rowActions}
+                          />
+                        )}
+                      </div>
                     </td>
                   )}
                 </tr>
