@@ -114,8 +114,7 @@ export default function Documents() {
       title={title}
       description={subtitle}
       accent="emerald"
-    >
-      <div className="space-y-4">
+      actions={<>
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -123,7 +122,9 @@ export default function Documents() {
         >
           <ArrowLeft size={16} /> Back
         </button>
-
+      </>}
+    >
+      <div className="space-y-4">
         <div className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <div className="flex flex-wrap gap-2">
             {TABS.map(({ key, label, icon: Icon }) => {
@@ -133,11 +134,10 @@ export default function Documents() {
                   key={key}
                   type="button"
                   onClick={() => setActiveTab(key)}
-                  className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
-                    isActive
+                  className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${isActive
                       ? 'bg-emerald-600 text-white shadow-sm dark:bg-emerald-500'
                       : 'bg-gray-50 text-gray-600 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-700'
-                  }`}
+                    }`}
                 >
                   <Icon size={15} />
                   {label}
