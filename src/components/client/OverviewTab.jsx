@@ -1,5 +1,5 @@
 // components/client/OverviewTab.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
   User, Mail, Phone, Calendar, Building2, CreditCard,
@@ -28,11 +28,17 @@ export default function OverviewTab({ username, refreshTrigger }) {
   const [client, setClient] = useState(null);
   const [counts, setCounts] = useState({});
 
+  const activeFetchRef = useRef(null);
+
   useEffect(() => {
     fetchOverview();
   }, [username, refreshTrigger]);
 
   const fetchOverview = async () => {
+    const requestKey = `overview|${refreshTrigger || 0}`;
+    if (activeFetchRef.current === requestKey) return;
+    activeFetchRef.current = requestKey;
+
     setLoading(true);
     try {
       const res = await apiCall(`/api/admin/clients/profile/${username}`, 'GET');
@@ -45,6 +51,7 @@ export default function OverviewTab({ username, refreshTrigger }) {
       console.error('Failed to fetch overview:', error);
     } finally {
       setLoading(false);
+      if (activeFetchRef.current === requestKey) activeFetchRef.current = null;
     }
   };
 

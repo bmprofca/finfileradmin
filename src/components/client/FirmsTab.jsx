@@ -1,7 +1,7 @@
 // components/client/FirmsTab.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { Building2, FileText, Search, Download, Calendar } from 'lucide-react';
+import { Building2, FileText, Search, Download, Calendar, Eye } from 'lucide-react';
 import apiCall from '../../utils/apiCall';
 import { formatDate } from '../../utils/helpers';
 import { PageContentSkeleton } from '../../components/SkeletonComponent';
@@ -68,6 +68,21 @@ export default function FirmsTab({ username, refreshTrigger }) {
     setDocModalOpen(true);
   };
 
+  const getActions = (row) => [
+    {
+      label: 'View Details',
+      icon: <Eye size={12} />,
+      onClick: () => handleViewFirm(row),
+      className: 'text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:text-emerald-200 dark:hover:bg-emerald-950/40',
+    },
+    {
+      label: 'Documents',
+      icon: <FileText size={12} />,
+      onClick: () => handleViewDocuments(row),
+      className: 'text-blue-700 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-300 dark:hover:text-blue-200 dark:hover:bg-blue-950/40',
+    }
+  ];
+
   if (loading) return <PageContentSkeleton viewMode={viewMode} rows={3} columns={4} />;
 
   const columns = [
@@ -110,22 +125,6 @@ export default function FirmsTab({ username, refreshTrigger }) {
       key: 'create_date',
       label: 'Created',
       render: (row) => formatDate(row.create_date)
-    },
-    {
-      key: 'actions',
-      label: 'Actions',
-      render: (row) => (
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            handleViewDocuments(row);
-          }}
-          className="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 text-sm font-medium flex items-center gap-1"
-        >
-          <FileText size={14} /> Documents
-        </button>
-      )
     }
   ];
 
@@ -153,21 +152,13 @@ export default function FirmsTab({ username, refreshTrigger }) {
       }
       onClick={() => handleViewFirm(firm)}
       hoverable
+      menuId={`firm-card-${firm.firm_id}`}
+      actions={getActions(firm)}
       footer={
         <div className="flex items-center justify-between w-full text-xs text-gray-500 dark:text-gray-400">
           <span className="flex items-center gap-1">
             <Calendar size={10} className="text-emerald-400" /> {formatDate(firm.create_date)}
           </span>
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              handleViewDocuments(firm);
-            }}
-            className="inline-flex items-center gap-1 rounded-md px-2 py-1 font-medium text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/20"
-          >
-            <FileText size={12} /> Documents
-          </button>
         </div>
       }
     >
@@ -212,6 +203,7 @@ export default function FirmsTab({ username, refreshTrigger }) {
                 rows={filteredFirms}
                 rowKey="firm_id"
                 accent="emerald"
+                getActions={getActions}
                 onRowClick={(row) => handleViewFirm(row)}
               />
             </div>

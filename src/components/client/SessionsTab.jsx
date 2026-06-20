@@ -1,5 +1,5 @@
 // components/client/SessionsTab.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Search, RefreshCw, Key } from 'lucide-react';
 import apiCall from '../../utils/apiCall';
@@ -17,11 +17,17 @@ export default function SessionsTab({ username, refreshTrigger }) {
   const [totalSessions, setTotalSessions] = useState(0);
   const itemsPerPage = 10;
 
+  const activeFetchRef = useRef(null);
+
   useEffect(() => {
     fetchSessions();
   }, [username, currentPage, refreshTrigger]);
 
   const fetchSessions = async () => {
+    const requestKey = `sessions|${currentPage}|${refreshTrigger || 0}`;
+    if (activeFetchRef.current === requestKey) return;
+    activeFetchRef.current = requestKey;
+
     setLoading(true);
     try {
       const res = await apiCall(
@@ -37,6 +43,7 @@ export default function SessionsTab({ username, refreshTrigger }) {
       console.error('Failed to fetch sessions:', error);
     } finally {
       setLoading(false);
+      if (activeFetchRef.current === requestKey) activeFetchRef.current = null;
     }
   };
 

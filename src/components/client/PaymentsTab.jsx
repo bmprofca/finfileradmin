@@ -149,6 +149,15 @@ export default function PaymentsTab({ username, refreshTrigger }) {
     setPaymentModalOpen(true);
   };
 
+  const getActions = (row) => [
+    {
+      label: 'View Details',
+      icon: <Eye size={12} />,
+      onClick: () => handleViewPayment(row),
+      className: 'text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:text-emerald-200 dark:hover:bg-emerald-950/40',
+    }
+  ];
+
   const hasActiveFilters = statusFilter || gatewayFilter || dateFilter;
 
   const clearAllFilters = () => {
@@ -191,18 +200,6 @@ export default function PaymentsTab({ username, refreshTrigger }) {
       key: 'create_date',
       label: 'Date',
       render: (row) => formatDate(row.create_date)
-    },
-    {
-      key: 'actions',
-      label: 'Actions',
-      render: (row) => (
-        <button
-          onClick={() => handleViewPayment(row)}
-          className="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 text-sm font-medium flex items-center gap-1"
-        >
-          <Eye size={14} /> View
-        </button>
-      )
     }
   ];
 
@@ -221,6 +218,8 @@ export default function PaymentsTab({ username, refreshTrigger }) {
       badge={<PaymentStatusBadge status={payment.status} />}
       onClick={() => handleViewPayment(payment)}
       hoverable
+      menuId={`payment-card-${payment.payment_id}`}
+      actions={getActions(payment)}
       footer={
         <div className="flex items-center justify-between w-full text-xs text-gray-500 dark:text-gray-400">
           <span className="flex items-center gap-1">
@@ -312,7 +311,7 @@ export default function PaymentsTab({ username, refreshTrigger }) {
         <>
           {viewMode === 'table' ? (
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <ManagementTable columns={columns} rows={payments || []} rowKey="payment_id" accent="emerald" onRowClick={(row) => handleViewPayment(row)} />
+              <ManagementTable columns={columns} rows={payments || []} rowKey="payment_id" accent="emerald" getActions={getActions} onRowClick={(row) => handleViewPayment(row)} />
             </div>
           ) : (
             <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">

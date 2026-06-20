@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShoppingBag, Search, Eye, RefreshCw, User,
   Calendar, Hash, Briefcase, Layers, CheckCircle,
-  XCircle, Clock, AlertCircle, Filter, X
+  XCircle, Clock, AlertCircle, Filter, X, FileText, Download
 } from 'lucide-react';
 import apiCall from '../../utils/apiCall';
 import { formatDate } from '../../utils/helpers';
@@ -66,6 +66,10 @@ export default function OrdersTab({ username, refreshTrigger }) {
   const [orderModalOpen, setOrderModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loadingOrder, setLoadingOrder] = useState(false);
+  
+  // Document modal
+  const [docModalOpen, setDocModalOpen] = useState(false);
+  const [selectedOrderDocs, setSelectedOrderDocs] = useState([]);
 
   const itemsPerPage = 10;
 
@@ -159,6 +163,26 @@ export default function OrdersTab({ username, refreshTrigger }) {
     setCurrentPage(1);
   };
 
+  const handleViewDocuments = (order) => {
+    setSelectedOrderDocs(order.documents || []);
+    setDocModalOpen(true);
+  };
+
+  const getActions = (row) => [
+    {
+      label: 'View Details',
+      icon: <Eye size={12} />,
+      onClick: () => fetchOrderDetails(row.order_id),
+      className: 'text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:text-emerald-200 dark:hover:bg-emerald-950/40',
+    },
+    {
+      label: 'Documents',
+      icon: <FileText size={12} />,
+      onClick: () => handleViewDocuments(row),
+      className: 'text-blue-700 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-300 dark:hover:text-blue-200 dark:hover:bg-blue-950/40',
+    }
+  ];
+
   const hasActiveFilters = statusFilter || dateFilter;
 
   const clearAllFilters = () => {
@@ -200,18 +224,6 @@ export default function OrdersTab({ username, refreshTrigger }) {
       key: 'create_date',
       label: 'Created',
       render: (row) => formatDate(row.create_date)
-    },
-    {
-      key: 'actions',
-      label: 'Actions',
-      render: (row) => (
-        <button
-          onClick={() => fetchOrderDetails(row.order_id)}
-          className="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 text-sm font-medium flex items-center gap-1"
-        >
-          <Eye size={14} /> View
-        </button>
-      )
     }
   ];
 
@@ -230,6 +242,8 @@ export default function OrdersTab({ username, refreshTrigger }) {
       badge={<OrderStatusBadge status={order.status} />}
       onClick={() => fetchOrderDetails(order.order_id)}
       hoverable
+      menuId={`order-card-${order.order_id}`}
+      actions={getActions(order)}
       footer={
         <div className="flex items-center justify-between w-full text-xs text-gray-500 dark:text-gray-400">
           <span className="flex items-center gap-1">
@@ -311,7 +325,7 @@ export default function OrdersTab({ username, refreshTrigger }) {
         <>
           {viewMode === 'table' ? (
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <ManagementTable columns={columns} rows={orders || []} rowKey="order_id" accent="emerald" onRowClick={(row) => fetchOrderDetails(row.order_id)} />
+              <ManagementTable columns={columns} rows={orders || []} rowKey="order_id" accent="emerald" getActions={getActions} onRowClick={(row) => fetchOrderDetails(row.order_id)} />
             </div>
           ) : (
             <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
@@ -431,6 +445,47 @@ export default function OrdersTab({ username, refreshTrigger }) {
             )}
           </div>
         ) : null}
+      </Modal>
+
+      {/* Documents Modal */}
+      <Modal
+        isOpen={docModalOpen}
+        onClose={() => {
+          setDocModalOpen(false);
+          setSelectedOrderDocs([]);
+        }}
+        title="Order Documents"
+        icon={FileText}
+        size="lg"
+      >
+        {selectedOrderDocs.length === 0 ? (
+          <div className="py-8 text-center">
+            <FileText className="text-gray-300 dark:text-gray-600 mx-auto mb-3" size={48} />
+            <p className="text-gray-500 dark:text-gray-400">No documents found</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {selectedOrderDocs.map((doc) => (
+              <div
+                key={doc.document_id}
+                className="flex items-center justify-between gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+              >
+                <div className="min-w-0">
+                  <p className="font-medium text-gray-800 dark:text-gray-100 truncate">{doc.document_name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {doc.file_name} - {(doc.size / 1024).toFixed(1)} KB
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="p-2 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
+                >
+                  <Download size={18} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </Modal>
     </div>
   );
