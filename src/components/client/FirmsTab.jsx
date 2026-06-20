@@ -128,6 +128,22 @@ export default function FirmsTab({ username, refreshTrigger }) {
       render: (row) => row.tan_no || <EmptyValue />
     },
     {
+      key: 'documents',
+      label: 'Documents',
+      render: (row) => (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            handleViewDocuments(row);
+          }}
+          className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium flex items-center gap-1"
+        >
+          <FileText size={14} /> Documents
+        </button>
+      )
+    },
+    {
       key: 'create_date',
       label: 'Created',
       render: (row) => formatDate(row.create_date)

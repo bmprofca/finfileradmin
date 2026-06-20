@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -142,11 +142,25 @@ export default function MyOrders() {
   const [totalOrders, setTotalOrders] = useState(0);
 
   const itemsPerPage = 10;
+  const lastFetchRef = useRef(null);
+  const activeFetchRef = useRef(null);
 
-  const fetchOrders = async () => {
+  const fetchOrders = async ({ force = false } = {}) => {
+    const queryString = `page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`;
+    const requestKey = queryString;
+
+    if (activeFetchRef.current === requestKey) {
+      setRefreshing(false);
+      return;
+    }
+    if (!force && lastFetchRef.current === requestKey) return;
+
+    lastFetchRef.current = requestKey;
+    activeFetchRef.current = requestKey;
+
     setLoading(true);
     try {
-      const response = await apiCall(`/api/admin/orders/list?page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`, 'GET');
+      const response = await apiCall(`/api/admin/orders/list?${queryString}`, 'GET');
       const data = await response.json();
       if (data.success) {
         const mappedOrders = data.data.orders.map(order => ({
@@ -173,6 +187,9 @@ export default function MyOrders() {
     } finally {
       setLoading(false);
       setRefreshing(false);
+      if (activeFetchRef.current === requestKey) {
+        activeFetchRef.current = null;
+      }
     }
   };
 
@@ -186,7 +203,7 @@ export default function MyOrders() {
 
   const handleRefresh = () => {
     setRefreshing(true);
-    fetchOrders();
+    fetchOrders({ force: true });
   };
 
   const openDocumentsPage = (order) => {
@@ -217,15 +234,19 @@ export default function MyOrders() {
     { key: 'payment', label: 'Payment', render: (row) => <PaymentText order={row} /> },
     {
       key: 'documents',
-      label: 'Docs',
+      label: 'Documents',
       render: (row) => (
         <button
-          onClick={(e) => { e.stopPropagation(); openDocumentsPage(row); }}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700 dark:hover:bg-blue-900/50"
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            openDocumentsPage(row);
+          }}
+          className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium flex items-center gap-1"
         >
-          <FileText size={12} /> {row.documents?.length || 0}
+          <FileText size={14} /> Documents
         </button>
-      ),
+      )
     },
     { key: 'status', label: 'Status', render: (row) => <StatusBadge status={row.status} /> },
     { key: 'create_date', label: 'Date', render: (row) => new Date(row.create_date).toLocaleDateString() },
