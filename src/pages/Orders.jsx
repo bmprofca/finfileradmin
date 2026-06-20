@@ -50,32 +50,18 @@ const getPaymentState = (order) => {
   return 'unpaid';
 };
 
-const getPaymentHighlightClass = (order) => {
-  const paymentState = getPaymentState(order);
-
-  if (paymentState === 'paid') {
-    return 'bg-emerald-50/70 hover:bg-emerald-100/80 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/30';
-  }
-
-  if (paymentState === 'due') {
-    return 'bg-amber-50/80 hover:bg-amber-100/90 dark:bg-amber-950/20 dark:hover:bg-amber-950/30';
-  }
-
-  return '';
+const getRowHighlightClass = (order) => {
+  const hasAssignedStaff = order.assigned_staff && order.assigned_staff.length > 0;
+  return hasAssignedStaff
+    ? 'bg-blue-50/40 hover:bg-blue-100/50 dark:bg-blue-900/10 dark:hover:bg-blue-900/20'
+    : 'bg-yellow-50/60 hover:bg-yellow-100/70 dark:bg-yellow-900/10 dark:hover:bg-yellow-900/20';
 };
 
-const getPaymentCardClass = (order) => {
-  const paymentState = getPaymentState(order);
-
-  if (paymentState === 'paid') {
-    return 'border-emerald-300 bg-emerald-50/50 shadow-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/20';
-  }
-
-  if (paymentState === 'due') {
-    return 'border-amber-300 bg-amber-50/60 shadow-amber-100 dark:border-amber-800 dark:bg-amber-950/20';
-  }
-
-  return '';
+const getCardHighlightClass = (order) => {
+  const hasAssignedStaff = order.assigned_staff && order.assigned_staff.length > 0;
+  return hasAssignedStaff
+    ? 'border-blue-200 bg-blue-50/30 shadow-blue-100/50 dark:border-blue-800/50 dark:bg-blue-900/20'
+    : 'border-yellow-300 bg-yellow-50/50 shadow-yellow-100/50 dark:border-yellow-700/50 dark:bg-yellow-900/20';
 };
 
 const PaymentText = ({ order }) => {
@@ -374,7 +360,7 @@ const ViewOrderModal = ({ order, onClose, onManageStaff, onUpdateOrder, onUpdate
             onClick={() => onManageStaff(order)}
             className={`px-4 py-2.5 rounded-xl border transition-all flex items-center gap-2 ${hasAssignedStaff
               ? 'border-blue-200 dark:border-blue-900/30 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40'
-              : 'border-green-200 dark:border-green-900/30 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40'
+              : 'border-yellow-200 dark:border-yellow-900/30 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/40'
               }`}
           >
             {hasAssignedStaff ? (
@@ -629,7 +615,7 @@ const OrderCard = ({ order, index, getActions, onClick, onManageStaff }) => {
     <ManagementCard
       delay={index * 0.05}
       accent="indigo"
-      className={getPaymentCardClass(order)}
+      className={getCardHighlightClass(order)}
       eyebrow={`Date: ${new Date(order.create_date).toLocaleDateString()}`}
       title={order.order_name}
       subtitle={order.service_name}
@@ -809,7 +795,7 @@ export default function Orders() {
     if (!selectedOrder) return;
     setSaving(true);
     try {
-      const res = await apiCall('/api/admin/orders/assign/update', 'PUT', payload);
+      const res = await apiCall('/api/admin/orders/assign', 'POST', payload);
       const data = await res.json();
       if (data.success) {
         setStaffModalOpen(false);
@@ -867,7 +853,7 @@ export default function Orders() {
         onClick: () => openStaffModal(order),
         className: hasAssignedStaff
           ? 'text-blue-700 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-300 dark:hover:text-blue-200 dark:hover:bg-blue-950/40'
-          : 'text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:text-emerald-200 dark:hover:bg-emerald-950/40',
+          : 'text-yellow-700 hover:text-yellow-800 hover:bg-yellow-50 dark:text-yellow-300 dark:hover:text-yellow-200 dark:hover:bg-yellow-950/40',
       },
       {
         label: 'Update Order',
@@ -879,7 +865,7 @@ export default function Orders() {
         label: 'Update Status',
         icon: <RefreshCw size={12} />,
         onClick: () => openStatusModal(order),
-        className: 'text-violet-700 hover:text-violet-800 hover:bg-violet-50 dark:text-violet-300 dark:hover:text-violet-200 dark:hover:bg-violet-950/40',
+        className: 'text-red-700 hover:text-red-800 hover:bg-red-50 dark:text-red-300 dark:hover:text-red-200 dark:hover:bg-red-950/40',
       },
 
     ];
@@ -1036,7 +1022,7 @@ export default function Orders() {
                     accent="indigo"
                     getActions={getActions}
                     onRowClick={(row) => openDetailModal(row)}
-                    rowClassName={(row) => getPaymentHighlightClass(row)}
+                    rowClassName={(row) => getRowHighlightClass(row)}
                   />
                 )}
 

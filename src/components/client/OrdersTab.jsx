@@ -183,6 +183,20 @@ export default function OrdersTab({ username, refreshTrigger }) {
     }
   ];
 
+  const getRowHighlightClass = (order) => {
+    const hasAssignedStaff = order.assigned_staffs && order.assigned_staffs.length > 0;
+    return hasAssignedStaff
+      ? 'bg-blue-50/40 hover:bg-blue-100/50 dark:bg-blue-900/10 dark:hover:bg-blue-900/20'
+      : 'bg-yellow-50/60 hover:bg-yellow-100/70 dark:bg-yellow-900/10 dark:hover:bg-yellow-900/20';
+  };
+
+  const getCardHighlightClass = (order) => {
+    const hasAssignedStaff = order.assigned_staffs && order.assigned_staffs.length > 0;
+    return hasAssignedStaff
+      ? 'border-blue-200 bg-blue-50/30 shadow-blue-100/50 dark:border-blue-800/50 dark:bg-blue-900/20'
+      : 'border-yellow-300 bg-yellow-50/50 shadow-yellow-100/50 dark:border-yellow-700/50 dark:bg-yellow-900/20';
+  };
+
   const hasActiveFilters = statusFilter || dateFilter;
 
   const clearAllFilters = () => {
@@ -229,6 +243,7 @@ export default function OrdersTab({ username, refreshTrigger }) {
 
   const OrderCard = ({ order }) => (
     <ManagementCard
+      className={getCardHighlightClass(order)}
       delay={0}
       accent="emerald"
       eyebrow={`Order: ${order.order_id}`}
@@ -325,7 +340,7 @@ export default function OrdersTab({ username, refreshTrigger }) {
         <>
           {viewMode === 'table' ? (
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <ManagementTable columns={columns} rows={orders || []} rowKey="order_id" accent="emerald" getActions={getActions} onRowClick={(row) => fetchOrderDetails(row.order_id)} />
+              <ManagementTable columns={columns} rows={orders || []} rowKey="order_id" accent="emerald" getActions={getActions} onRowClick={(row) => fetchOrderDetails(row.order_id)} rowClassName={getRowHighlightClass} />
             </div>
           ) : (
             <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
