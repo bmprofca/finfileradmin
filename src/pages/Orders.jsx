@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Search, X, Briefcase, Hash, User, Users, UserPlus, UserMinus,
   Eye, Calendar, IndianRupee, FileText, Tag, Edit, RefreshCw,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, Upload
 } from 'lucide-react';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';

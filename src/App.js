@@ -24,6 +24,7 @@ import Firms from "./pages/Firms";
 import Payments from "./pages/Payments";
 import Profile from "./pages/Profile";
 import Documents from "./pages/Documents";
+import OrderDocumentUpload from "./pages/OrderDocumentUpload";
 
 function App() {
   return (
@@ -63,6 +64,7 @@ function App() {
                     {/* Other Routes */}
                     <Route path="my-orders" element={<RoleRoute allowedRoles={['staff']}><MyOrders /></RoleRoute>} />
                     <Route path="orders" element={<RoleRoute allowedRoles={['admin']}><Orders /></RoleRoute>} />
+                    <Route path="orders/:orderId/upload-documents" element={<RoleRoute allowedRoles={['admin']}><OrderDocumentUpload /></RoleRoute>} />
                     <Route path="documents" element={<Documents />} />
                     <Route path="services" element={<RoleRoute allowedRoles={['admin']}><Services /></RoleRoute>} />
                     <Route path="firms" element={<RoleRoute allowedRoles={['admin']}><Firms /></RoleRoute>} />
