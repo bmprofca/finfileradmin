@@ -68,7 +68,7 @@ export default function ManagementHub({
                   {eyebrow}
                 </div>
               )}
-              {title && <h1 className="mt-1 text-lg font-bold text-slate-900 dark:text-gray-100 md:text-xl">{title}</h1>}
+              {title && <h1 className="mt-1 text-lg font-bold flex-wrap whitespace-nowrap text-slate-900 dark:text-gray-100 md:text-xl">{title}</h1>}
               {description && <p className="mt-0.5 text-xs text-slate-500 dark:text-gray-400">{description}</p>}
             </div>
 

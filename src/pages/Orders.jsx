@@ -893,8 +893,16 @@ export default function Orders() {
         onClick: () => openDocumentsPage(order),
         className: 'text-blue-700 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-300 dark:hover:text-blue-200 dark:hover:bg-blue-950/40',
       },
-
     ];
+
+    if (order.status?.toLowerCase() === 'completed') {
+      actions.push({
+        label: 'Compilation Docs',
+        icon: <Upload size={12} />,
+        onClick: () => navigate(`/orders/${order.order_id}/upload-documents`, { state: { order } }),
+        className: 'text-purple-700 hover:text-purple-800 hover:bg-purple-50 dark:text-purple-300 dark:hover:text-purple-200 dark:hover:bg-purple-950/40',
+      });
+    }
 
     return actions;
   };
