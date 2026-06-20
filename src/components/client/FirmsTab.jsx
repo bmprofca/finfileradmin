@@ -1,7 +1,8 @@
 // components/client/FirmsTab.jsx
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { Building2, FileText, Search, Download, Calendar, Eye } from 'lucide-react';
+import { Building2, FileText, Search, Calendar, Eye } from 'lucide-react';
 import apiCall from '../../utils/apiCall';
 import { formatDate } from '../../utils/helpers';
 import { PageContentSkeleton } from '../../components/SkeletonComponent';
@@ -23,13 +24,13 @@ const InfoItem = ({ label, value, mono = false }) => (
 );
 
 export default function FirmsTab({ username, refreshTrigger }) {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [firms, setFirms] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('table');
 
   const [detailModalOpen, setDetailModalOpen] = useState(false);
-  const [docModalOpen, setDocModalOpen] = useState(false);
   const [selectedFirm, setSelectedFirm] = useState(null);
 
   const activeFetchRef = useRef(null);
@@ -64,8 +65,13 @@ export default function FirmsTab({ username, refreshTrigger }) {
   };
 
   const handleViewDocuments = (firm) => {
-    setSelectedFirm(firm);
-    setDocModalOpen(true);
+    navigate('/documents', {
+      state: {
+        documents: firm.documents || [],
+        title: `Documents - ${firm.name || firm.firm_id}`,
+        subtitle: `Firm ${firm.firm_id || ''} · Client ${username}`,
+      },
+    });
   };
 
   const getActions = (row) => [
@@ -169,8 +175,6 @@ export default function FirmsTab({ username, refreshTrigger }) {
     </ManagementCard>
   );
 
-  const selectedDocuments = selectedFirm?.documents || [];
-
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3">
@@ -245,7 +249,7 @@ export default function FirmsTab({ username, refreshTrigger }) {
                 type="button"
                 onClick={() => {
                   setDetailModalOpen(false);
-                  setDocModalOpen(true);
+                  handleViewDocuments(selectedFirm);
                 }}
                 className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/20"
               >
@@ -261,46 +265,6 @@ export default function FirmsTab({ username, refreshTrigger }) {
               <InfoItem label="VAT Number" value={selectedFirm.vat_no} />
               <InfoItem label="TAN Number" value={selectedFirm.tan_no} />
             </div>
-          </div>
-        )}
-      </Modal>
-
-      <Modal
-        isOpen={docModalOpen}
-        onClose={() => {
-          setDocModalOpen(false);
-          setSelectedFirm(null);
-        }}
-        title={selectedFirm ? `Documents - ${selectedFirm.name}` : 'Firm Documents'}
-        icon={FileText}
-        size="lg"
-      >
-        {selectedDocuments.length === 0 ? (
-          <div className="py-8 text-center">
-            <FileText className="text-gray-300 dark:text-gray-600 mx-auto mb-3" size={48} />
-            <p className="text-gray-500 dark:text-gray-400">No documents found</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {selectedDocuments.map((doc) => (
-              <div
-                key={doc.document_id}
-                className="flex items-center justify-between gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
-              >
-                <div className="min-w-0">
-                  <p className="font-medium text-gray-800 dark:text-gray-100 truncate">{doc.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                    {doc.file_name} - {(doc.size / 1024).toFixed(1)} KB
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className="p-2 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
-                >
-                  <Download size={18} />
-                </button>
-              </div>
-            ))}
           </div>
         )}
       </Modal>

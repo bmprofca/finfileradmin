@@ -1,10 +1,10 @@
 // components/client/OrdersTab.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   ShoppingBag, Search, Eye, RefreshCw, User,
-  Calendar, Hash, Briefcase, Layers, CheckCircle,
-  XCircle, Clock, AlertCircle, Filter, X, FileText, Download
+  Calendar, Briefcase, Clock, X, FileText
 } from 'lucide-react';
 import apiCall from '../../utils/apiCall';
 import { formatDate } from '../../utils/helpers';
@@ -15,7 +15,6 @@ import ManagementCard from '../../components/common/ManagementCard';
 import ManagementViewSwitcher from '../../components/common/ManagementViewSwitcher';
 import PaginationComponent from '../../components/common/PaginationComponent';
 import Modal from '../../components/common/Modal';
-import Button from '../../components/common/Button';
 import AdvancedDateFilter from '../../components/common/AdvancedDateFilter';
 import SelectField from '../../components/common/SelectField';
 import { ConstantOptions } from '../../contexts/ConstantOptionsContext';
@@ -49,6 +48,7 @@ const OrderStatusBadge = ({ status }) => {
 
 export default function OrdersTab({ username, refreshTrigger }) {
   const { orderStatusOptions } = ConstantOptions();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState([]);
@@ -67,10 +67,6 @@ export default function OrdersTab({ username, refreshTrigger }) {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loadingOrder, setLoadingOrder] = useState(false);
   
-  // Document modal
-  const [docModalOpen, setDocModalOpen] = useState(false);
-  const [selectedOrderDocs, setSelectedOrderDocs] = useState([]);
-
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -164,8 +160,13 @@ export default function OrdersTab({ username, refreshTrigger }) {
   };
 
   const handleViewDocuments = (order) => {
-    setSelectedOrderDocs(order.documents || []);
-    setDocModalOpen(true);
+    navigate('/documents', {
+      state: {
+        documents: order.documents || [],
+        title: `Documents - ${order.name || order.order_name || order.order_id}`,
+        subtitle: `Client ${username}`,
+      },
+    });
   };
 
   const getActions = (row) => [
@@ -233,6 +234,18 @@ export default function OrdersTab({ username, refreshTrigger }) {
       key: 'status',
       label: 'Status',
       render: (row) => <OrderStatusBadge status={row.status} />
+    },
+    {
+      key: 'documents',
+      label: 'Docs',
+      render: (row) => (
+        <button
+          onClick={(e) => { e.stopPropagation(); handleViewDocuments(row); }}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700 dark:hover:bg-blue-900/50"
+        >
+          <FileText size={12} /> {row.documents?.length || 0}
+        </button>
+      )
     },
     {
       key: 'create_date',
@@ -463,45 +476,6 @@ export default function OrdersTab({ username, refreshTrigger }) {
       </Modal>
 
       {/* Documents Modal */}
-      <Modal
-        isOpen={docModalOpen}
-        onClose={() => {
-          setDocModalOpen(false);
-          setSelectedOrderDocs([]);
-        }}
-        title="Order Documents"
-        icon={FileText}
-        size="lg"
-      >
-        {selectedOrderDocs.length === 0 ? (
-          <div className="py-8 text-center">
-            <FileText className="text-gray-300 dark:text-gray-600 mx-auto mb-3" size={48} />
-            <p className="text-gray-500 dark:text-gray-400">No documents found</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {selectedOrderDocs.map((doc) => (
-              <div
-                key={doc.document_id}
-                className="flex items-center justify-between gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
-              >
-                <div className="min-w-0">
-                  <p className="font-medium text-gray-800 dark:text-gray-100 truncate">{doc.document_name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                    {doc.file_name} - {(doc.size / 1024).toFixed(1)} KB
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className="p-2 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
-                >
-                  <Download size={18} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </Modal>
     </div>
   );
 }

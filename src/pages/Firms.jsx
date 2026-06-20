@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   Search, X, Eye, User, Building2,
-  Plus, Trash2, Edit, FileText, Hash, Download, Calendar
+  Plus, Trash2, Edit, FileText, Hash, Calendar
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ManagementHub from '../components/common/ManagementHub';
@@ -150,45 +151,6 @@ const ViewFirmModal = ({ firm, onClose, onEdit, onDelete, onDocuments }) => (
 );
 
 // ─── Firm Documents Modal ───────────────────────────────────────────────────────
-
-const FirmDocumentsModal = ({ firm, onClose }) => {
-  const documents = firm?.documents || [];
-  return (
-    <Modal
-      isOpen={true}
-      onClose={onClose}
-      title={`Documents · ${firm.name}`}
-      icon={FileText}
-      size="lg"
-    >
-      {documents.length === 0 ? (
-        <div className="py-8 text-center">
-          <FileText className="text-gray-300 dark:text-gray-600 mx-auto mb-3" size={48} />
-          <p className="text-gray-500 dark:text-gray-400">No documents found</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {documents.map((doc) => (
-            <div
-              key={doc.document_id}
-              className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
-            >
-              <div>
-                <p className="font-medium text-gray-800 dark:text-gray-100">{doc.name}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {doc.file_name} • {(doc.size / 1024).toFixed(1)} KB
-                </p>
-              </div>
-              <button className="p-2 text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 rounded-lg transition-colors">
-                <Download size={18} />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </Modal>
-  );
-};
 
 // ─── Firm Form Modal ──────────────────────────────────────────────────────────
 
@@ -363,6 +325,7 @@ const FirmManagementCard = ({ firm, index, onView, onEdit, onDelete, onDocuments
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Firms() {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('table');
@@ -379,9 +342,6 @@ export default function Firms() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [firmToDelete, setFirmToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  
-  const [isDocModalOpen, setIsDocModalOpen] = useState(false);
-  const [selectedFirmDocs, setSelectedFirmDocs] = useState(null);
 
   const itemsPerPage = 20;
   const lastFetchRef = useRef(null);
@@ -441,7 +401,16 @@ export default function Firms() {
   const handleEdit         = (firm) => { setEditingFirm(firm); setIsFormModalOpen(true); setIsViewModalOpen(false); };
   const handleCreateNew    = () => { setEditingFirm(null); setIsFormModalOpen(true); };
   const handleDeleteRequest= (firm) => { setFirmToDelete(firm); setIsDeleteModalOpen(true); setIsViewModalOpen(false); };
-  const handleViewDocuments= (firm) => { setSelectedFirmDocs(firm); setIsDocModalOpen(true); setIsViewModalOpen(false); };
+  const handleViewDocuments= (firm) => {
+    setIsViewModalOpen(false);
+    navigate('/documents', {
+      state: {
+        documents: firm.documents || [],
+        title: `Documents - ${firm.name || firm.firm_id}`,
+        subtitle: `${firm.client_name || 'Client'} · Firm ${firm.firm_id || ''}`,
+      },
+    });
+  };
 
   const confirmDelete = async () => {
     if (!firmToDelete) return;
@@ -696,15 +665,7 @@ export default function Firms() {
         )}
       </AnimatePresence>
 
-      {/* Firm Documents Modal */}
-      <AnimatePresence>
-        {isDocModalOpen && selectedFirmDocs && (
-          <FirmDocumentsModal
-            firm={selectedFirmDocs}
-            onClose={() => { setIsDocModalOpen(false); setSelectedFirmDocs(null); }}
-          />
-        )}
-      </AnimatePresence>
     </ManagementHub>
   );
 }
+

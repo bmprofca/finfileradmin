@@ -1,13 +1,11 @@
 // components/client/SessionsTab.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { Search, RefreshCw, Key } from 'lucide-react';
+import { Search, Key } from 'lucide-react';
 import apiCall from '../../utils/apiCall';
 import { formatDate } from '../../utils/helpers';
 import { PageContentSkeleton } from '../../components/SkeletonComponent';
 import ManagementTable from '../../components/common/ManagementTable';
 import PaginationComponent from '../../components/common/PaginationComponent';
-import Button from '../../components/common/Button';
 
 export default function SessionsTab({ username, refreshTrigger }) {
   const [loading, setLoading] = useState(true);
@@ -17,21 +15,31 @@ export default function SessionsTab({ username, refreshTrigger }) {
   const [totalSessions, setTotalSessions] = useState(0);
   const itemsPerPage = 10;
 
+  const lastFetchRef = useRef(null);
   const activeFetchRef = useRef(null);
 
   useEffect(() => {
     fetchSessions();
-  }, [username, currentPage, refreshTrigger]);
+  }, [username, currentPage, searchTerm, refreshTrigger]);
 
   const fetchSessions = async () => {
-    const requestKey = `sessions|${currentPage}|${refreshTrigger || 0}`;
+    const params = new URLSearchParams();
+    params.append('resource', 'sessions');
+    params.append('page_no', currentPage);
+    params.append('limit', itemsPerPage);
+    if (searchTerm) params.append('search', searchTerm);
+
+    const requestKey = `${username}|${params.toString()}|refresh=${refreshTrigger || 0}`;
     if (activeFetchRef.current === requestKey) return;
+    if (lastFetchRef.current === requestKey) return;
+
+    lastFetchRef.current = requestKey;
     activeFetchRef.current = requestKey;
 
     setLoading(true);
     try {
       const res = await apiCall(
-        `/api/admin/clients/profile/${username}?resource=sessions&page_no=${currentPage}&limit=${itemsPerPage}`,
+        `/api/admin/clients/profile/${username}?${params.toString()}`,
         'GET'
       );
       const data = await res.json();

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
-  Search, X, Briefcase, Hash, User
+  Search, X, Briefcase, Hash, User, FileText
 } from 'lucide-react';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
@@ -91,7 +92,7 @@ const PaymentText = ({ order }) => {
   );
 };
 
-const OrderCard = ({ order, index }) => (
+const OrderCard = ({ order, index, actions, onViewDocuments }) => (
   <ManagementCard
     delay={index * 0.05}
     accent="indigo"
@@ -106,6 +107,7 @@ const OrderCard = ({ order, index }) => (
     }
     badge={<StatusBadge status={order.status} />}
     menuId={`myorder-card-${order.order_id}`}
+    actions={actions}
     footer={
       <div className="flex items-center justify-between w-full text-xs text-gray-500 dark:text-gray-400">
         <span className="flex items-center gap-1"><Hash size={10} className="text-indigo-400 dark:text-indigo-500" /> {order.order_id}</span>
@@ -117,12 +119,19 @@ const OrderCard = ({ order, index }) => (
       <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
         <User size={10} className="text-gray-400 dark:text-gray-500" /> Client: {order.client_name || order.client_username}
       </p>
+      <button
+        onClick={(e) => { e.stopPropagation(); onViewDocuments && onViewDocuments(order); }}
+        className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold flex items-center gap-1.5 mt-1"
+      >
+        <FileText size={12} /> {order.documents?.length || 0} Documents
+      </button>
     </div>
   </ManagementCard>
 );
 
 export default function MyOrders() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -145,6 +154,7 @@ export default function MyOrders() {
           name: order.order_name,
           payments: order.payments || [],
           assigned_staff: order.assigned_staff || [],
+          documents: order.documents || [],
           base_price: Number(order.base_price),
           tax_rate: Number(order.tax_rate),
           tax_value: Number(order.tax_value),
@@ -179,6 +189,25 @@ export default function MyOrders() {
     fetchOrders();
   };
 
+  const openDocumentsPage = (order) => {
+    navigate('/documents', {
+      state: {
+        documents: order.documents || [],
+        title: `Documents - ${order.name || order.order_id}`,
+        subtitle: `${order.service_name || 'Order'} · ${order.client_name || order.client_username || ''}`,
+      },
+    });
+  };
+
+  const getActions = (order) => [
+    {
+      label: 'Documents',
+      icon: <FileText size={12} />,
+      onClick: () => openDocumentsPage(order),
+      className: 'text-blue-700 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-300 dark:hover:text-blue-200 dark:hover:bg-blue-950/40',
+    },
+  ];
+
   const columns = [
     { key: 'order_id', label: 'Order ID' },
     { key: 'name', label: 'Order Name' },
@@ -186,6 +215,18 @@ export default function MyOrders() {
     { key: 'client', label: 'Client', render: (row) => row.client_name || row.client_username },
     { key: 'fees', label: 'Fees', render: (row) => formatCurrency(row.fees) },
     { key: 'payment', label: 'Payment', render: (row) => <PaymentText order={row} /> },
+    {
+      key: 'documents',
+      label: 'Docs',
+      render: (row) => (
+        <button
+          onClick={(e) => { e.stopPropagation(); openDocumentsPage(row); }}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700 dark:hover:bg-blue-900/50"
+        >
+          <FileText size={12} /> {row.documents?.length || 0}
+        </button>
+      ),
+    },
     { key: 'status', label: 'Status', render: (row) => <StatusBadge status={row.status} /> },
     { key: 'create_date', label: 'Date', render: (row) => new Date(row.create_date).toLocaleDateString() },
   ];
@@ -259,6 +300,7 @@ export default function MyOrders() {
                     rows={orders}
                     rowKey="order_id"
                     accent="indigo"
+                    getActions={getActions}
                     rowClassName={(row) => getPaymentHighlightClass(row)}
                   />
                 )}
@@ -268,7 +310,13 @@ export default function MyOrders() {
                   <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4">
                     <AnimatePresence>
                       {orders.map((order, index) => (
-                        <OrderCard key={order.order_id} order={order} index={index} />
+                        <OrderCard
+                          key={order.order_id}
+                          order={order}
+                          index={index}
+                          actions={getActions(order)}
+                          onViewDocuments={openDocumentsPage}
+                        />
                       ))}
                     </AnimatePresence>
                   </ManagementGrid>

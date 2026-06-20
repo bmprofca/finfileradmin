@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   Search, X, Briefcase, Hash, User, Users, UserPlus, UserMinus,
-  Eye, Calendar, IndianRupee, FileText, Tag, CheckCircle, Edit, RefreshCw,
+  Eye, Calendar, IndianRupee, FileText, Tag, Edit, RefreshCw,
   ChevronLeft, ChevronRight
 } from 'lucide-react';
 import ManagementHub from '../components/common/ManagementHub';
@@ -608,8 +609,9 @@ const OrderStatusModal = ({ order, onClose, onSubmit, isSubmitting }) => {
 };
 
 /* ─── Order Card ─── */
-const OrderCard = ({ order, index, getActions, onClick, onManageStaff }) => {
+const OrderCard = ({ order, index, getActions, onClick, onManageStaff, onViewDocuments }) => {
   const hasAssignedStaff = order.assigned_staff && order.assigned_staff.length > 0;
+  const documentsCount = order.documents?.length || 0;
 
   return (
     <ManagementCard
@@ -642,6 +644,12 @@ const OrderCard = ({ order, index, getActions, onClick, onManageStaff }) => {
           <User size={10} className="text-gray-400 dark:text-gray-500" />
           Client: {order.client_name || order.client_username}
         </p>
+        <button
+          onClick={(e) => { e.stopPropagation(); onViewDocuments && onViewDocuments(order); }}
+          className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold flex items-center gap-1.5 mt-1"
+        >
+          <FileText size={12} /> {documentsCount} Documents
+        </button>
         {hasAssignedStaff ? (
           <button
             onClick={(e) => { e.stopPropagation(); onManageStaff && onManageStaff(order); }}
@@ -667,6 +675,7 @@ const OrderCard = ({ order, index, getActions, onClick, onManageStaff }) => {
    ═══════════════════════════════════════════════ */
 export default function Orders() {
   const { orderStatusOptions } = ConstantOptions();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -730,6 +739,7 @@ export default function Orders() {
           // Ensure arrays exist
           assigned_staff: order.assigned_staff || [],
           payments: order.payments || [],
+          documents: order.documents || [],
           // Ensure numeric values are numbers
           base_price: Number(order.base_price),
           tax_rate: Number(order.tax_rate),
@@ -790,12 +800,22 @@ export default function Orders() {
     setStatusModalOpen(true);
   };
 
+  const openDocumentsPage = (order) => {
+    navigate('/documents', {
+      state: {
+        documents: order.documents || [],
+        title: `Documents - ${order.order_name || order.order_id}`,
+        subtitle: `${order.service_name || 'Order'} · ${order.client_name || order.client_username || ''}`,
+      },
+    });
+  };
+
   /* ─── API Handlers ─── */
   const handleUpdateStaff = async (payload) => {
     if (!selectedOrder) return;
     setSaving(true);
     try {
-      const res = await apiCall('/api/admin/orders/assign', 'POST', payload);
+      const res = await apiCall('/api/admin/orders/assign/update', 'POST', payload);
       const data = await res.json();
       if (data.success) {
         setStaffModalOpen(false);
@@ -867,6 +887,12 @@ export default function Orders() {
         onClick: () => openStatusModal(order),
         className: 'text-red-700 hover:text-red-800 hover:bg-red-50 dark:text-red-300 dark:hover:text-red-200 dark:hover:bg-red-950/40',
       },
+      {
+        label: 'Documents',
+        icon: <FileText size={12} />,
+        onClick: () => openDocumentsPage(order),
+        className: 'text-blue-700 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-300 dark:hover:text-blue-200 dark:hover:bg-blue-950/40',
+      },
 
     ];
 
@@ -910,6 +936,17 @@ export default function Orders() {
     {
       key: 'payment', label: 'Payment',
       render: (row) => <PaymentText order={row} />,
+    },
+    {
+      key: 'documents', label: 'Docs',
+      render: (row) => (
+        <button
+          onClick={(e) => { e.stopPropagation(); openDocumentsPage(row); }}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700 dark:hover:bg-blue-900/50"
+        >
+          <FileText size={12} /> {row.documents?.length || 0}
+        </button>
+      ),
     },
     {
       key: 'status', label: 'Status',
@@ -1038,6 +1075,7 @@ export default function Orders() {
                           getActions={getActions}
                           onClick={openDetailModal}
                           onManageStaff={openStaffModal}
+                          onViewDocuments={openDocumentsPage}
                         />
                       ))}
                     </AnimatePresence>
