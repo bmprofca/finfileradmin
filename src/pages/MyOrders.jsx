@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
-  Search, X, Briefcase, Hash, User, FileText
+  Search, X, Briefcase, Hash, User, FileText, Download
 } from 'lucide-react';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
@@ -13,6 +13,7 @@ import PaginationComponent from '../components/common/PaginationComponent';
 import apiCall from '../utils/apiCall';
 import { useAuth } from '../contexts/AuthContext';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
+import toast from 'react-hot-toast';
 
 const STATUS_COLORS = {
   'created': { pill: 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800', dot: 'bg-blue-500 dark:bg-blue-400' },
@@ -216,12 +217,47 @@ export default function MyOrders() {
     });
   };
 
+  const handleDownloadStatement = async (order) => {
+    let toastId;
+    try {
+      toastId = toast.loading('Generating statement...');
+      const res = await apiCall(`/api/admin/orders/download-payments/${order.order_id}`, 'GET');
+      const data = await res.json();
+      if (data.success && data.data?.url) {
+        const fileRes = await fetch(data.data.url);
+        const blob = await fileRes.blob();
+        const objectUrl = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = objectUrl;
+        a.download = data.data.filename || 'statement.pdf';
+        document.body.appendChild(a);
+        a.click();
+        
+        document.body.removeChild(a);
+        setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1000);
+        toast.success('Statement downloaded successfully', { id: toastId });
+      } else {
+        toast.error(data.message || 'Failed to download statement', { id: toastId });
+      }
+    } catch (err) {
+      console.error('Error downloading statement', err);
+      toast.error('An error occurred while downloading', { id: toastId });
+    }
+  };
+
   const getActions = (order) => [
     {
       label: 'Documents',
       icon: <FileText size={12} />,
       onClick: () => openDocumentsPage(order),
       className: 'text-blue-700 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-300 dark:hover:text-blue-200 dark:hover:bg-blue-950/40',
+    },
+    {
+      label: 'Download Statement',
+      icon: <Download size={12} />,
+      onClick: () => handleDownloadStatement(order),
+      className: 'text-teal-700 hover:text-teal-800 hover:bg-teal-50 dark:text-teal-300 dark:hover:text-teal-200 dark:hover:bg-teal-950/40',
     },
   ];
 

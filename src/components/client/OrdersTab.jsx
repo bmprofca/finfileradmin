@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   ShoppingBag, Search, Eye, RefreshCw, User,
-  Calendar, Briefcase, Clock, X, FileText
+  Calendar, Briefcase, Clock, X, FileText, Download
 } from 'lucide-react';
 import apiCall from '../../utils/apiCall';
 import { formatDate } from '../../utils/helpers';
@@ -169,6 +169,35 @@ export default function OrdersTab({ username, refreshTrigger }) {
     });
   };
 
+  const handleDownloadStatement = async (order) => {
+    let toastId;
+    try {
+      toastId = toast.loading('Generating statement...');
+      const res = await apiCall(`/api/admin/orders/download-payments/${order.order_id}`, 'GET');
+      const data = await res.json();
+      if (data.success && data.data?.url) {
+        const fileRes = await fetch(data.data.url);
+        const blob = await fileRes.blob();
+        const objectUrl = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = objectUrl;
+        a.download = data.data.filename || 'statement.pdf';
+        document.body.appendChild(a);
+        a.click();
+        
+        document.body.removeChild(a);
+        setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1000);
+        toast.success('Statement downloaded successfully', { id: toastId });
+      } else {
+        toast.error(data.message || 'Failed to download statement', { id: toastId });
+      }
+    } catch (err) {
+      console.error('Error downloading statement', err);
+      toast.error('An error occurred while downloading', { id: toastId });
+    }
+  };
+
   const getActions = (row) => [
     {
       label: 'View Details',
@@ -181,6 +210,12 @@ export default function OrdersTab({ username, refreshTrigger }) {
       icon: <FileText size={12} />,
       onClick: () => handleViewDocuments(row),
       className: 'text-blue-700 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-300 dark:hover:text-blue-200 dark:hover:bg-blue-950/40',
+    },
+    {
+      label: 'Download Statement',
+      icon: <Download size={12} />,
+      onClick: () => handleDownloadStatement(row),
+      className: 'text-teal-700 hover:text-teal-800 hover:bg-teal-50 dark:text-teal-300 dark:hover:text-teal-200 dark:hover:bg-teal-950/40',
     }
   ];
 

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Search, X, Briefcase, Hash, User, Users, UserPlus, UserMinus,
   Eye, Calendar, IndianRupee, FileText, Tag, Edit, RefreshCw,
-  ChevronLeft, ChevronRight, Upload
+  ChevronLeft, ChevronRight, Upload, Download
 } from 'lucide-react';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
@@ -17,6 +17,7 @@ import SelectField from '../components/common/SelectField';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
 import { ConstantOptions } from '../contexts/ConstantOptionsContext';
 import apiCall from '../utils/apiCall';
+import toast from 'react-hot-toast';
 
 /* ─── Status Badge ─── */
 const STATUS_COLORS = {
@@ -810,6 +811,35 @@ export default function Orders() {
     });
   };
 
+  const handleDownloadStatement = async (order) => {
+    let toastId;
+    try {
+      toastId = toast.loading('Generating statement...');
+      const res = await apiCall(`/api/admin/orders/download-payments/${order.order_id}`, 'GET');
+      const data = await res.json();
+      if (data.success && data.data?.url) {
+        const fileRes = await fetch(data.data.url);
+        const blob = await fileRes.blob();
+        const objectUrl = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = objectUrl;
+        a.download = data.data.filename || 'statement.pdf';
+        document.body.appendChild(a);
+        a.click();
+        
+        document.body.removeChild(a);
+        setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1000);
+        toast.success('Statement downloaded successfully', { id: toastId });
+      } else {
+        toast.error(data.message || 'Failed to download statement', { id: toastId });
+      }
+    } catch (err) {
+      console.error('Error downloading statement', err);
+      toast.error('An error occurred while downloading', { id: toastId });
+    }
+  };
+
   /* ─── API Handlers ─── */
   const handleUpdateStaff = async (payload) => {
     if (!selectedOrder) return;
@@ -892,6 +922,12 @@ export default function Orders() {
         icon: <FileText size={12} />,
         onClick: () => openDocumentsPage(order),
         className: 'text-blue-700 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-300 dark:hover:text-blue-200 dark:hover:bg-blue-950/40',
+      },
+      {
+        label: 'Download Statement',
+        icon: <Download size={12} />,
+        onClick: () => handleDownloadStatement(order),
+        className: 'text-teal-700 hover:text-teal-800 hover:bg-teal-50 dark:text-teal-300 dark:hover:text-teal-200 dark:hover:bg-teal-950/40',
       },
     ];
 
