@@ -9,9 +9,11 @@ import {
   FileBox,
   BrickWall,
   IndianRupee,
+  Newspaper,
 } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { label } from 'framer-motion/client';
 
 const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -67,6 +69,11 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
       label:'Payments',
       path:'/payments',
       roles:['admin'],
+    },{
+      icon:Newspaper,
+      label:'Blogs',
+      path:'/blogs',
+      roles:['admin']
     }
   ];
 

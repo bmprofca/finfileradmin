@@ -14,7 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import Services from "./pages/Services";
 import Staffs from "./pages/Staffs";
 import StaffProfile from "./pages/StaffProfile";
-import ClientProfile from "./pages/ClientProfile"; // Import ClientProfile
+import ClientProfile from "./pages/ClientProfile";
 import MyOrders from "./pages/MyOrders";
 import Orders from "./pages/Orders";
 import NotFound from "./pages/NotFound";
@@ -25,6 +25,7 @@ import Payments from "./pages/Payments";
 import Profile from "./pages/Profile";
 import Documents from "./pages/Documents";
 import OrderDocumentUpload from "./pages/OrderDocumentUpload";
+import Blogs from "./pages/Blogs";
 
 function App() {
   return (
@@ -70,6 +71,7 @@ function App() {
                     <Route path="firms" element={<RoleRoute allowedRoles={['admin']}><Firms /></RoleRoute>} />
                     <Route path="payments" element={<RoleRoute allowedRoles={['admin']}><Payments /></RoleRoute>} />
                     <Route path="profile" element={<Profile />} />
+                    <Route path="blogs" element={<Blogs />} />
                   </Route>
                 </Route>
 
