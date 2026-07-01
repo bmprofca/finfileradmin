@@ -4,6 +4,10 @@
  */
 const API_BASE = (process.env.REACT_APP_BASE_API_URL || '').replace(/\/$/, '');
 
-export { API_BASE };
+const UPLOAD_API_URL =
+  process.env.REACT_APP_UPLOAD_API_URL || 'https://upload.onesaas.in/api/upload';
+const UPLOAD_API_KEY = process.env.REACT_APP_UPLOAD_API_KEY || 'onedevelopers';
+
+export { API_BASE, UPLOAD_API_URL, UPLOAD_API_KEY };
 
 export default API_BASE;

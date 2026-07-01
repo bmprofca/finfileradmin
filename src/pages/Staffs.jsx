@@ -114,6 +114,7 @@ const ViewStaffModal = ({ staff, onClose, onEdit }) => (
 const StaffFormModal = ({ staff, onClose, onSubmit, isSubmitting }) => {
   const isEdit = !!staff;
   const [isUploading, setIsUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState(staff?.image || '');
   const [form, setForm] = useState({
     username: staff?.username || '',
     first_name: staff?.first_name || '',
@@ -134,9 +135,10 @@ const StaffFormModal = ({ staff, onClose, onSubmit, isSubmitting }) => {
     try {
       const url = await uploadFile(file);
       setForm((f) => ({ ...f, image: url }));
+      setImagePreview(url);
       toast.success('Image uploaded successfully');
     } catch (error) {
-      toast.error('Failed to upload image');
+      toast.error(error.message || 'Failed to upload image');
     } finally {
       setIsUploading(false);
     }
@@ -267,9 +269,9 @@ const StaffFormModal = ({ staff, onClose, onSubmit, isSubmitting }) => {
             className={`mt-2 flex cursor-pointer justify-center rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 px-6 py-8 bg-gray-50 dark:bg-gray-800/50 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus-within:ring-4 focus-within:ring-blue-500/10 ${isUploading ? 'pointer-events-none opacity-50' : ''}`}
           >
             <div className="text-center flex flex-col items-center">
-              {form.image && !isUploading ? (
+              {imagePreview && !isUploading ? (
                 <div className="mb-4">
-                  <img src={form.image} alt="Preview" className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-700 shadow-lg mx-auto" />
+                  <img src={imagePreview} alt="Preview" className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-700 shadow-lg mx-auto" />
                 </div>
               ) : (
                 <div className="mx-auto h-16 w-16 mb-4 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
@@ -280,7 +282,7 @@ const StaffFormModal = ({ staff, onClose, onSubmit, isSubmitting }) => {
               )}
               <div className="flex text-sm text-gray-600 dark:text-gray-400 justify-center">
                 <span className="font-semibold text-blue-600 dark:text-blue-400">
-                  {isUploading ? 'Uploading image...' : form.image ? 'Change profile image' : 'Upload a profile image'}
+                  {isUploading ? 'Uploading image...' : imagePreview ? 'Change profile image' : 'Upload a profile image'}
                 </span>
                 <input id="staff-image-upload" type="file" accept="image/*" className="sr-only" onChange={handleImageUpload} disabled={isUploading} />
               </div>
