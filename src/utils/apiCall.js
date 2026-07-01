@@ -1,5 +1,5 @@
 import toast from 'react-hot-toast';
-import { API_BASE } from './config';
+import { API_BASE, UPLOAD_API_URL, UPLOAD_API_KEY } from './config';
 
 /**
  * Unified API calling utility
@@ -55,7 +55,7 @@ export const apiCall = async (endpoint, method = 'GET', body = null) => {
 
   if (!API_BASE && !endpoint.startsWith('http')) {
     console.error(
-      'REACT_APP_API_BASE is not set. Add it to .env.development or .env.production and restart the dev server.',
+      'REACT_APP_BASE_API_URL is not set. Add it to .env.development or .env.production and restart the dev server.',
     );
   }
 
@@ -106,10 +106,10 @@ export const uploadFile = async (file) => {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await fetch('https://upload.onesaas.in/api/upload', {
+  const response = await fetch(UPLOAD_API_URL, {
     method: 'POST',
     headers: {
-      'key': 'onedevelopers'
+      key: UPLOAD_API_KEY,
     },
     body: formData
   });
