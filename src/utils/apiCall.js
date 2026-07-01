@@ -1,6 +1,6 @@
 import toast from 'react-hot-toast';
 
-const API_BASE = process.env.NODE_ENV === 'production' ? "https://server.finfiler.com" : "http://localhost:8373";
+const API_BASE = process.env.BASE_API_URL;
 
 /**
  * Unified API calling utility
@@ -71,7 +71,7 @@ export const apiCall = async (endpoint, method = 'GET', body = null) => {
     try {
       const clonedResponse = response.clone();
       const data = await clonedResponse.json();
-      
+
       if (data && data.message) {
         if (data.success === true || (data.success === undefined && response.ok)) {
           toast.success(data.message);
