@@ -142,7 +142,8 @@ export default function MyOrders() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
 
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const handleLimitChange = (limit) => { setItemsPerPage(limit); setCurrentPage(1); };
   const lastFetchRef = useRef(null);
   const activeFetchRef = useRef(null);
 
@@ -200,7 +201,7 @@ export default function MyOrders() {
     } else {
       setLoading(false);
     }
-  }, [user, currentPage, searchTerm]);
+  }, [user, currentPage, searchTerm, itemsPerPage]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -386,6 +387,8 @@ export default function MyOrders() {
                   totalItems={totalOrders}
                   itemsPerPage={itemsPerPage}
                   onPageChange={setCurrentPage}
+                  onLimitChange={handleLimitChange}
+                  availableLimits={[10, 20, 50, 100]}
                 />
               </motion.div>
             </>

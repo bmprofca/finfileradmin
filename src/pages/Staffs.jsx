@@ -346,7 +346,8 @@ export default function Staffs() {
   const [staffToLogout, setStaffToLogout] = useState(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const handleLimitChange = (limit) => { setItemsPerPage(limit); setCurrentPage(1); };
 
   // ── Fetch ────────────────────────────────────────────────────────────────────
   const fetchStaffs = async () => {
@@ -368,12 +369,12 @@ export default function Staffs() {
     }
   };
 
-  const lastFetchRef = useRef({ page: null, search: null });
+  const lastFetchRef = useRef({ page: null, search: null, limit: null });
   useEffect(() => { 
-    if (lastFetchRef.current.page === currentPage && lastFetchRef.current.search === searchTerm) return;
-    lastFetchRef.current = { page: currentPage, search: searchTerm };
+    if (lastFetchRef.current.page === currentPage && lastFetchRef.current.search === searchTerm && lastFetchRef.current.limit === itemsPerPage) return;
+    lastFetchRef.current = { page: currentPage, search: searchTerm, limit: itemsPerPage };
     fetchStaffs(); 
-  }, [currentPage, searchTerm]);
+  }, [currentPage, searchTerm, itemsPerPage]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -571,6 +572,8 @@ export default function Staffs() {
                 totalItems={totalItems}
                 itemsPerPage={itemsPerPage}
                 onPageChange={setCurrentPage}
+                onLimitChange={handleLimitChange}
+                availableLimits={[10, 20, 50, 100]}
               />
             </motion.div>
           </>

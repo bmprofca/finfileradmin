@@ -67,11 +67,12 @@ export default function OrdersTab({ username, refreshTrigger }) {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loadingOrder, setLoadingOrder] = useState(false);
   
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const handleLimitChange = (limit) => { setItemsPerPage(limit); setCurrentPage(1); };
 
   useEffect(() => {
     fetchOrders();
-  }, [username, currentPage, statusFilter, dateFilter, refreshTrigger]);
+  }, [username, currentPage, statusFilter, dateFilter, refreshTrigger, itemsPerPage]);
 
   const buildQueryParams = () => {
     const params = new URLSearchParams();
@@ -404,6 +405,8 @@ export default function OrdersTab({ username, refreshTrigger }) {
             totalItems={totalOrders}
             itemsPerPage={itemsPerPage}
             onPageChange={setCurrentPage}
+            onLimitChange={handleLimitChange}
+            availableLimits={[10, 20, 50, 100]}
           />
         </>
       )}

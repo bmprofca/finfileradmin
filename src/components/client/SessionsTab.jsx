@@ -13,14 +13,15 @@ export default function SessionsTab({ username, refreshTrigger }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalSessions, setTotalSessions] = useState(0);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const handleLimitChange = (limit) => { setItemsPerPage(limit); setCurrentPage(1); };
 
   const lastFetchRef = useRef(null);
   const activeFetchRef = useRef(null);
 
   useEffect(() => {
     fetchSessions();
-  }, [username, currentPage, searchTerm, refreshTrigger]);
+  }, [username, currentPage, searchTerm, refreshTrigger, itemsPerPage]);
 
   const fetchSessions = async () => {
     const params = new URLSearchParams();
@@ -135,6 +136,8 @@ export default function SessionsTab({ username, refreshTrigger }) {
               totalItems={totalSessions}
               itemsPerPage={itemsPerPage}
               onPageChange={setCurrentPage}
+              onLimitChange={handleLimitChange}
+              availableLimits={[10, 20, 50, 100]}
             />
           </div>
         </div>

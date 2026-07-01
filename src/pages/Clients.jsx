@@ -295,7 +295,8 @@ export default function Clients() {
   const [clientToDelete, setClientToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const itemsPerPage = 20;
+  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const handleLimitChange = (limit) => { setItemsPerPage(limit); setCurrentPage(1); };
   const lastFetchRef = useRef(null);
   const activeFetchRef = useRef(null);
 
@@ -333,7 +334,7 @@ export default function Clients() {
 
   useEffect(() => {
     fetchClients();
-  }, [currentPage, searchTerm]);
+  }, [currentPage, searchTerm, itemsPerPage]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -567,6 +568,8 @@ export default function Clients() {
                 totalItems={totalItems}
                 itemsPerPage={itemsPerPage}
                 onPageChange={setCurrentPage}
+                onLimitChange={handleLimitChange}
+                availableLimits={[10, 20, 50, 100]}
               />
             </motion.div>
           </>

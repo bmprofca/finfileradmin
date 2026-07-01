@@ -79,7 +79,8 @@ export default function StaffProfile() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
 
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const handleLimitChange = (limit) => { setItemsPerPage(limit); setCurrentPage(1); };
 
   const fetchProfileAndOrders = async () => {
     setLoading(true);
@@ -109,17 +110,18 @@ export default function StaffProfile() {
     }
   };
 
-  const lastFetchRef = useRef({ username: null, page: null, search: null });
+  const lastFetchRef = useRef({ username: null, page: null, search: null, limit: null });
   useEffect(() => {
     if (
       lastFetchRef.current.username === username &&
       lastFetchRef.current.page === currentPage &&
-      lastFetchRef.current.search === searchTerm
+      lastFetchRef.current.search === searchTerm &&
+      lastFetchRef.current.limit === itemsPerPage
     ) return;
     
-    lastFetchRef.current = { username, page: currentPage, search: searchTerm };
+    lastFetchRef.current = { username, page: currentPage, search: searchTerm, limit: itemsPerPage };
     fetchProfileAndOrders();
-  }, [username, currentPage, searchTerm]);
+  }, [username, currentPage, searchTerm, itemsPerPage]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -270,6 +272,8 @@ export default function StaffProfile() {
                   totalItems={totalOrders}
                   itemsPerPage={itemsPerPage}
                   onPageChange={setCurrentPage}
+                  onLimitChange={handleLimitChange}
+                  availableLimits={[10, 20, 50, 100]}
                 />
               </motion.div>
             </>

@@ -689,7 +689,7 @@ export default function Blogs() {
   const [blogToDelete, setBlogToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const itemsPerPage = 20;
+  const [itemsPerPage, setItemsPerPage] = useState(20);
   const lastFetchRef = useRef(null);
   const activeFetchRef = useRef(null);
 
@@ -716,7 +716,7 @@ export default function Blogs() {
       const data = await response.json();
       if (data.success) {
         setBlogs(data.data.blogs);
-        setTotalItems(data.pagination?.total_records || data.pagination?.total || 0);
+        setTotalItems(data.data?.pagination?.total_records || data.data?.pagination?.total || data.pagination?.total_records || data.pagination?.total || 0);
       } else {
         toast.error('Failed to fetch blog posts.');
       }
@@ -729,13 +729,18 @@ export default function Blogs() {
         activeFetchRef.current = null;
       }
     }
-  }, [currentPage, searchTerm]);
+  }, [currentPage, searchTerm, itemsPerPage]);
 
   useEffect(() => {
     fetchBlogs();
   }, [fetchBlogs]);
 
   const handleRefresh = () => { setRefreshing(true); fetchBlogs({ force: true }); };
+
+  const handleLimitChange = (newLimit) => {
+    setItemsPerPage(newLimit);
+    setCurrentPage(1);
+  };
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleView          = (blog) => { setSelectedBlog(blog); setIsViewModalOpen(true); };
@@ -922,6 +927,8 @@ export default function Blogs() {
                 totalItems={totalItems}
                 itemsPerPage={itemsPerPage}
                 onPageChange={setCurrentPage}
+                onLimitChange={handleLimitChange}
+                availableLimits={[10, 20, 50, 100]}
               />
             </motion.div>
           </>

@@ -71,11 +71,12 @@ export default function PaymentsTab({ username, refreshTrigger }) {
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState(null);
 
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const handleLimitChange = (limit) => { setItemsPerPage(limit); setCurrentPage(1); };
 
   useEffect(() => {
     fetchPayments();
-  }, [username, currentPage, statusFilter, gatewayFilter, dateFilter, refreshTrigger]);
+  }, [username, currentPage, statusFilter, gatewayFilter, dateFilter, refreshTrigger, itemsPerPage]);
 
   const buildQueryParams = () => {
     const params = new URLSearchParams();
@@ -327,6 +328,8 @@ export default function PaymentsTab({ username, refreshTrigger }) {
             totalItems={totalPayments}
             itemsPerPage={itemsPerPage}
             onPageChange={setCurrentPage}
+            onLimitChange={handleLimitChange}
+            availableLimits={[10, 20, 50, 100]}
           />
         </>
       )}

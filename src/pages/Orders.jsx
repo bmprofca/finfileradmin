@@ -698,7 +698,8 @@ export default function Orders() {
   const [staffLoading, setStaffLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const handleLimitChange = (limit) => { setItemsPerPage(limit); setCurrentPage(1); };
 
   /* ─── Data Fetching ─── */
   const staffFetchedRef = useRef(false);
@@ -763,16 +764,17 @@ export default function Orders() {
     }
   };
 
-  const lastOrderFetchRef = useRef({ page: null, search: null, status: null });
+  const lastOrderFetchRef = useRef({ page: null, search: null, status: null, limit: null });
   useEffect(() => {
     if (
       lastOrderFetchRef.current.page === currentPage &&
       lastOrderFetchRef.current.search === searchTerm &&
-      lastOrderFetchRef.current.status === statusFilter
+      lastOrderFetchRef.current.status === statusFilter &&
+      lastOrderFetchRef.current.limit === itemsPerPage
     ) return;
-    lastOrderFetchRef.current = { page: currentPage, search: searchTerm, status: statusFilter };
+    lastOrderFetchRef.current = { page: currentPage, search: searchTerm, status: statusFilter, limit: itemsPerPage };
     fetchOrders();
-  }, [currentPage, searchTerm, statusFilter]);
+  }, [currentPage, searchTerm, statusFilter, itemsPerPage]);
 
   const handleRefresh = () => { setRefreshing(true); fetchOrders(); };
 
@@ -827,7 +829,7 @@ export default function Orders() {
         a.download = data.data.filename || 'statement.pdf';
         document.body.appendChild(a);
         a.click();
-        
+
         document.body.removeChild(a);
         setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1000);
         toast.success('Statement downloaded successfully', { id: toastId });
@@ -918,6 +920,12 @@ export default function Orders() {
         className: 'text-red-700 hover:text-red-800 hover:bg-red-50 dark:text-red-300 dark:hover:text-red-200 dark:hover:bg-red-950/40',
       },
       {
+        label: 'Upload Docs',
+        icon: <Upload size={12} />,
+        onClick: () => navigate(`/orders/${order.order_id}/upload-documents`, { state: { order } }),
+        className: 'text-purple-700 hover:text-purple-800 hover:bg-purple-50 dark:text-purple-300 dark:hover:text-purple-200 dark:hover:bg-purple-950/40',
+      },
+      {
         label: 'Documents',
         icon: <FileText size={12} />,
         onClick: () => openDocumentsPage(order),
@@ -931,14 +939,6 @@ export default function Orders() {
       },
     ];
 
-    if (order.status?.toLowerCase() === 'completed') {
-      actions.push({
-        label: 'Compilation Docs',
-        icon: <Upload size={12} />,
-        onClick: () => navigate(`/orders/${order.order_id}/upload-documents`, { state: { order } }),
-        className: 'text-purple-700 hover:text-purple-800 hover:bg-purple-50 dark:text-purple-300 dark:hover:text-purple-200 dark:hover:bg-purple-950/40',
-      });
-    }
 
     return actions;
   };
@@ -1133,6 +1133,8 @@ export default function Orders() {
                   totalItems={totalOrders}
                   itemsPerPage={itemsPerPage}
                   onPageChange={setCurrentPage}
+                  onLimitChange={handleLimitChange}
+                  availableLimits={[10, 20, 50, 100]}
                 />
               </motion.div>
             </>

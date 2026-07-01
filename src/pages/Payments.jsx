@@ -342,7 +342,8 @@ export default function Payments() {
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
-  const itemsPerPage = 20;
+  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const handleLimitChange = (limit) => { setItemsPerPage(limit); setCurrentPage(1); };
   const lastFetchRef = useRef(null);
   const activeFetchRef = useRef(null);
 
@@ -410,7 +411,7 @@ export default function Payments() {
           payment_id: payment.payment_id,
         }));
         setPayments(mappedPayments);
-        setTotalItems(data.data.pagination?.total || 0);
+        setTotalItems(data.pagination?.total || data.data?.pagination?.total || 0);
       } else {
         toast.error('Failed to fetch payments.');
       }
@@ -427,7 +428,7 @@ export default function Payments() {
   // ── Effects ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     fetchPayments();
-  }, [currentPage, searchTerm, statusFilter, gatewayFilter, dateFilter]);
+  }, [currentPage, searchTerm, statusFilter, gatewayFilter, dateFilter, itemsPerPage]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -745,6 +746,8 @@ export default function Payments() {
                 totalItems={totalItems}
                 itemsPerPage={itemsPerPage}
                 onPageChange={setCurrentPage}
+                onLimitChange={handleLimitChange}
+                availableLimits={[10, 20, 50, 100]}
               />
             </motion.div>
           </>

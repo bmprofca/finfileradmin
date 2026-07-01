@@ -40,7 +40,7 @@ const AdminLogin = () => {
 
   const sendOtp = async (e) => {
     e.preventDefault();
-    if (!mobile) { toast.error("Please enter your mobile number"); return; }
+    if (!mobile || mobile.length !== 10) { toast.error("Please enter a valid 10-digit mobile number"); return; }
     try {
       setLoading(true);
       await auth.sendOtp({ mobile });
@@ -165,8 +165,9 @@ const AdminLogin = () => {
         </div>
 
         {/* ── Right panel ── */}
-        <div className="flex-1 bg-white dark:bg-gray-800 flex flex-col p-6 sm:p-8 md:p-10">
-          <div className="text-center mb-6">
+        <div className="flex-1 bg-white dark:bg-gray-800 flex flex-col items-center justify-center p-6 sm:p-8 md:p-10 text-center">
+          <div className="w-full max-w-sm flex flex-col flex-1">
+            <div className="mb-6">
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center mx-auto mb-3 text-xl sm:text-2xl shadow-lg shadow-purple-500/20">
               🛡️
             </div>
@@ -206,7 +207,8 @@ const AdminLogin = () => {
                   type="tel"
                   placeholder="Enter your mobile number"
                   value={mobile}
-                  onChange={(e) => setMobile(e.target.value.replace(/[^\d+\-\s()]/g, ""))}
+                  maxLength={10}
+                  onChange={(e) => setMobile(e.target.value.replace(/\D/g, "").slice(0, 10))}
                   required
                 />
               </div>
@@ -309,10 +311,11 @@ const AdminLogin = () => {
           )}
 
           {/* Footer */}
-          <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
+          <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 w-full">
             <p className="text-center text-xs text-gray-400 dark:text-gray-500">
               🛡️ Secure admin area · All access is monitored
             </p>
+          </div>
           </div>
         </div>
       </div>
