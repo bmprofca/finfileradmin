@@ -70,6 +70,8 @@ export default function FirmsTab({ username, refreshTrigger }) {
         documents: firm.documents || [],
         title: `Documents - ${firm.name || firm.firm_id}`,
         subtitle: `Firm ${firm.firm_id || ''} · Client ${username}`,
+        type: 'firm',
+        id: firm.firm_id,
       },
     });
   };

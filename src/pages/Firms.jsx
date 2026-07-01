@@ -409,6 +409,8 @@ export default function Firms() {
         documents: firm.documents || [],
         title: `Documents - ${firm.name || firm.firm_id}`,
         subtitle: `${firm.client_name || 'Client'} · Firm ${firm.firm_id || ''}`,
+        type: 'firm',
+        id: firm.firm_id,
       },
     });
   };

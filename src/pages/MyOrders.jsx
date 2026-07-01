@@ -214,6 +214,8 @@ export default function MyOrders() {
         documents: order.documents || [],
         title: `Documents - ${order.name || order.order_id}`,
         subtitle: `${order.service_name || 'Order'} · ${order.client_name || order.client_username || ''}`,
+        type: 'order',
+        id: order.order_id,
       },
     });
   };

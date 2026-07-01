@@ -166,6 +166,8 @@ export default function OrdersTab({ username, refreshTrigger }) {
         documents: order.documents || [],
         title: `Documents - ${order.name || order.order_name || order.order_id}`,
         subtitle: `Client ${username}`,
+        type: 'order',
+        id: order.order_id,
       },
     });
   };
