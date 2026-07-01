@@ -1,6 +1,5 @@
 import toast from 'react-hot-toast';
-
-const API_BASE = process.env.BASE_API_URL;
+import { API_BASE } from './config';
 
 /**
  * Unified API calling utility
@@ -53,6 +52,12 @@ export const apiCall = async (endpoint, method = 'GET', body = null) => {
 
   // Handle absolute vs relative URLs
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
+
+  if (!API_BASE && !endpoint.startsWith('http')) {
+    console.error(
+      'REACT_APP_API_BASE is not set. Add it to .env.development or .env.production and restart the dev server.',
+    );
+  }
 
   try {
     const response = await fetch(url, options);
