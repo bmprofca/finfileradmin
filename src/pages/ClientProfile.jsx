@@ -1,48 +1,63 @@
 // pages/ClientProfile.jsx
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useParams, useNavigate } from 'react-router-dom';
-import { User, ChevronLeft, Key, Building2, ShoppingBag, CreditCard } from 'lucide-react';
-import ManagementHub from '../components/common/ManagementHub';
-import Button from '../components/common/Button';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  User,
+  ChevronLeft,
+  Key,
+  Building2,
+  ShoppingBag,
+  CreditCard,
+} from "lucide-react";
+import ManagementHub from "../components/common/ManagementHub";
+import Button from "../components/common/Button";
 
 // Import tab components
-import OverviewTab from '../components/client/OverviewTab';
-import SessionsTab from '../components/client/SessionsTab';
-import FirmsTab from '../components/client/FirmsTab';
-import OrdersTab from '../components/client/OrdersTab';
-import PaymentsTab from '../components/client/PaymentsTab';
+import OverviewTab from "../components/client/OverviewTab";
+import SessionsTab from "../components/client/SessionsTab";
+import FirmsTab from "../components/client/FirmsTab";
+import OrdersTab from "../components/client/OrdersTab";
+import PaymentsTab from "../components/client/PaymentsTab";
 
 export default function ClientProfile() {
   const { username } = useParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState("overview");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleRefresh = () => {
-    setRefreshTrigger(prev => prev + 1);
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   const tabs = [
-    { key: 'overview', label: 'Overview', icon: User },
-    { key: 'sessions', label: 'Sessions', icon: Key },
-    { key: 'firms', label: 'Firms', icon: Building2 },
-    { key: 'orders', label: 'Orders', icon: ShoppingBag },
-    { key: 'payments', label: 'Payments', icon: CreditCard },
+    { key: "overview", label: "Overview", icon: User },
+    { key: "sessions", label: "Sessions", icon: Key },
+    { key: "firms", label: "Firms", icon: Building2 },
+    { key: "orders", label: "Orders", icon: ShoppingBag },
+    { key: "payments", label: "Payments", icon: CreditCard },
   ];
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'overview':
-        return <OverviewTab username={username} refreshTrigger={refreshTrigger} />;
-      case 'sessions':
-        return <SessionsTab username={username} refreshTrigger={refreshTrigger} />;
-      case 'firms':
+      case "overview":
+        return (
+          <OverviewTab username={username} refreshTrigger={refreshTrigger} />
+        );
+      case "sessions":
+        return (
+          <SessionsTab username={username} refreshTrigger={refreshTrigger} />
+        );
+      case "firms":
         return <FirmsTab username={username} refreshTrigger={refreshTrigger} />;
-      case 'orders':
-        return <OrdersTab username={username} refreshTrigger={refreshTrigger} />;
-      case 'payments':
-        return <PaymentsTab username={username} refreshTrigger={refreshTrigger} />;
+      case "orders":
+        return (
+          <OrdersTab username={username} refreshTrigger={refreshTrigger} />
+        );
+      case "payments":
+        return (
+          <PaymentsTab username={username} refreshTrigger={refreshTrigger} />
+        );
       default:
         return null;
     }
@@ -55,7 +70,11 @@ export default function ClientProfile() {
       accent="emerald"
       onRefresh={handleRefresh}
       actions={
-        <Button variant="outline" onClick={() => navigate('/clients')} className="flex items-center gap-2 text-sm py-1.5">
+        <Button
+          variant="outline"
+          onClick={() => navigate("/clients")}
+          className="flex items-center gap-2 text-sm py-1.5"
+        >
           <ChevronLeft size={16} /> Back to Clients
         </Button>
       }
@@ -72,9 +91,10 @@ export default function ClientProfile() {
                 onClick={() => setActiveTab(tab.key)}
                 className={`
                   flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
-                  ${isActive 
-                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25' 
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  ${
+                    isActive
+                      ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                   }
                 `}
               >
