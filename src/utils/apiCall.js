@@ -1,6 +1,6 @@
 import toast from 'react-hot-toast';
 
-const API_BASE = process.env.BASE_API_URL;
+const API_BASE = process.env.REACT_APP_BASE_API_URL;
 
 /**
  * Unified API calling utility
