@@ -10,6 +10,8 @@ import {
   BrickWall,
   IndianRupee,
   Newspaper,
+  ShieldCheck,
+  PackageCheck,
 } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -74,6 +76,16 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
       label:'Blogs',
       path:'/blogs',
       roles:['admin']
+    },{
+      icon: ShieldCheck,
+      label: 'Permissions',
+      path: '/permissions',
+      roles: ['admin'],
+    },{
+      icon: PackageCheck,
+      label: 'Perm. Packages',
+      path: '/permission-packages',
+      roles: ['admin'],
     }
   ];
 

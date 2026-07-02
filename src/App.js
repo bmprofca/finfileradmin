@@ -26,6 +26,8 @@ import Profile from "./pages/Profile";
 import Documents from "./pages/Documents";
 import OrderDocumentUpload from "./pages/OrderDocumentUpload";
 import Blogs from "./pages/Blogs";
+import Permissions from "./pages/Permissions";
+import PermissionPackages from "./pages/PermissionPackages";
 
 function App() {
   return (
@@ -72,6 +74,8 @@ function App() {
                     <Route path="payments" element={<RoleRoute allowedRoles={['admin']}><Payments /></RoleRoute>} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="blogs" element={<Blogs />} />
+                    <Route path="permissions" element={<RoleRoute allowedRoles={['admin']}><Permissions /></RoleRoute>} />
+                    <Route path="permission-packages" element={<RoleRoute allowedRoles={['admin']}><PermissionPackages /></RoleRoute>} />
                   </Route>
                 </Route>
 

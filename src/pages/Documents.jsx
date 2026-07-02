@@ -57,8 +57,13 @@ export default function Documents() {
     }
 
     const params = new URLSearchParams();
-    params.append('type', type);
-    params.append('id', id);
+    if (type === 'firm') {
+      params.append('firm_id', id);
+    } else if (type === 'order') {
+      params.append('order_id', id);
+    } else {
+      params.append(`${type}_id`, id);
+    }
     params.append('page_no', currentPage);
     params.append('limit', itemsPerPage);
 
@@ -179,9 +184,18 @@ export default function Documents() {
         label: 'Download',
         icon: <Download size={12} />,
         onClick: () => {
+          let downloadUrl = document.file_url;
+          if (downloadUrl && downloadUrl.includes('backblazeb2.com')) {
+            const disposition = `attachment; filename="${document.file_name || 'document'}"`;
+            const separator = downloadUrl.includes('?') ? '&' : '?';
+            downloadUrl = `${downloadUrl}${separator}b2ContentDisposition=${encodeURIComponent(disposition)}`;
+          }
+          
           const a = window.document.createElement('a');
-          a.href = document.file_url;
+          a.href = downloadUrl;
           a.download = document.file_name || 'document';
+          // Using _blank prevents the current page from being replaced if the browser decides to navigate
+          a.target = '_blank';
           window.document.body.appendChild(a);
           a.click();
           window.document.body.removeChild(a);
