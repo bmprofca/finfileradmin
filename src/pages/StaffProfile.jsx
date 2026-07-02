@@ -11,6 +11,7 @@ import ManagementGrid from '../components/common/ManagementGrid';
 import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
 import PaginationComponent from '../components/common/PaginationComponent';
 import Button from '../components/common/Button';
+import RefreshButton from '../components/common/RefreshButton';
 import apiCall from '../utils/apiCall';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
 
@@ -149,47 +150,59 @@ export default function StaffProfile() {
   }
 
   return (
-    <ManagementHub
-      title={staff ? `${staff.full_name}'s Profile` : 'Staff Profile'}
-      description="View staff details and their assigned orders."
-      accent="indigo"
-      onRefresh={handleRefresh}
-      refreshing={refreshing}
-      actions={
-        <Button variant="outline" onClick={() => navigate('/staffs')} className="flex items-center gap-2 text-sm py-1.5">
-          <ArrowLeft size={16} /> Back
-        </Button>
-      }
-    >
+    <ManagementHub accent="indigo">
       <div className="space-y-6">
 
-        {/* Profile Details Card */}
+        {/* Profile Details Card (Compressed Header) */}
         {staff && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white dark:bg-gray-800 p-6 rounded-sm shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center gap-6">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg shrink-0">
+          <motion.div 
+            initial={{ opacity: 0, y: -14 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 0.4 }} 
+            className="rounded-sm border border-slate-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 p-3 shadow-sm shadow-slate-200/40 dark:shadow-none backdrop-blur md:p-4 flex flex-col md:flex-row md:items-center justify-between gap-4"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-md shrink-0">
                 {staff.full_name?.charAt(0)?.toUpperCase()}
               </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{staff.full_name}</h2>
-                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-2">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+              <div>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 leading-tight">{staff.full_name}</h2>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 border border-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 dark:border-indigo-800/50">
+                    Staff Profile
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
                     <User size={14} className="text-indigo-400" /> {staff.username}
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
                     <Mail size={14} className="text-indigo-400" /> {staff.email}
                   </p>
                   {staff.mobile && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
                       <Phone size={14} className="text-indigo-400" /> {staff.mobile}
                     </p>
                   )}
                 </div>
               </div>
             </div>
+            
+            <div className="flex items-center gap-2 self-start md:self-center shrink-0">
+              <RefreshButton
+                type="button"
+                loading={refreshing}
+                onClick={handleRefresh}
+                title="Refresh"
+              >
+                Refresh
+              </RefreshButton>
+              <Button variant="outline" onClick={() => navigate('/staffs')} className="flex items-center gap-2 text-sm py-1.5">
+                <ArrowLeft size={16} /> Back
+              </Button>
+            </div>
           </motion.div>
         )}
-
         <div className="space-y-3">
           <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Assigned Orders</h3>
           {/* Filters Bar */}
