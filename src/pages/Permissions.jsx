@@ -214,13 +214,6 @@ export default function Permissions() {
       accent="violet"
       onRefresh={handleRefresh}
       refreshing={refreshing}
-      summary={
-        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-          <span><span className="font-semibold text-gray-800 dark:text-gray-200">{permissions.length}</span> total</span>
-          <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{activeCount} active</span>
-          <span>{permissions.length - activeCount} inactive</span>
-        </div>
-      }
     >
       <div className="space-y-3 mt-2">
 
