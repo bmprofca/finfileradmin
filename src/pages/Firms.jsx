@@ -95,13 +95,13 @@ const ViewFirmModal = ({ firm, onClose, onEdit, onDelete, onDocuments }) => (
       <>
         <button
           onClick={() => onDelete(firm)}
-          className="px-5 py-2.5 rounded-sm border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2"
+          className="px-5 py-2.5 rounded-lg border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2"
         >
           <Trash2 size={16} /> Delete
         </button>
         <button
           onClick={() => onEdit(firm)}
-          className="px-5 py-2.5 rounded-sm bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2"
+          className="px-5 py-2.5 rounded-lg bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2"
         >
           <Edit size={16} /> Edit Firm
         </button>
@@ -220,7 +220,7 @@ const FirmFormModal = ({ firm, onClose, onSubmit, isSubmitting }) => {
   };
 
   const inputCls =
-    'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-sm focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all text-sm dark:text-gray-100';
+    'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all text-sm dark:text-gray-100';
 
   return (
     <Modal
@@ -236,7 +236,7 @@ const FirmFormModal = ({ firm, onClose, onSubmit, isSubmitting }) => {
           type="submit"
           form="firm-form"
           disabled={isSubmitting}
-          className="px-5 py-2.5 rounded-sm bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2 disabled:opacity-50"
+          className="px-5 py-2.5 rounded-lg bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2 disabled:opacity-50"
         >
           {isSubmitting ? 'Saving...' : isEdit ? 'Update Firm' : 'Create Firm'}
         </button>
@@ -735,7 +735,7 @@ export default function Firms() {
               <button
                 disabled={isDeleting}
                 onClick={confirmDelete}
-                className="px-5 py-2.5 rounded-sm bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
+                className="px-5 py-2.5 rounded-lg bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {isDeleting ? 'Deleting...' : 'Yes, Delete Firm'}
               </button>

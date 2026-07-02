@@ -21,7 +21,7 @@ export const getReactSelectStyles = (theme = 'light') => {
       ...provided,
       backgroundColor: colors.controlBg,
       borderColor: state.isFocused ? '#6366f1' : colors.controlBorder,
-      borderRadius: '0.75rem',
+      borderRadius: '0.5rem',
       boxShadow: state.isFocused ? '0 0 0 4px rgba(99, 102, 241, 0.12)' : 'none',
       '&:hover': {
         borderColor: state.isFocused ? '#6366f1' : colors.controlBorderHover,
@@ -52,7 +52,7 @@ export const getReactSelectStyles = (theme = 'light') => {
     return {
       ...provided,
       backgroundColor: colors.menuBg,
-      borderRadius: '0.75rem',
+      borderRadius: '0.5rem',
       boxShadow: isDark
         ? '0 18px 40px rgba(0, 0, 0, 0.45)'
         : '0 18px 40px rgba(15, 23, 42, 0.14)',

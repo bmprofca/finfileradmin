@@ -317,7 +317,7 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
           type="submit"
           form="service-form"
           disabled={isSubmitting}
-          className="px-5 py-2.5 rounded-sm bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50"
+          className="px-5 py-2.5 rounded-lg bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50"
         >
           {isSubmitting ? 'Saving...' : 'Save Service'}
         </button>

@@ -226,14 +226,14 @@ export default function OrderDocumentUpload() {
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="rounded-sm border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={submitting || isUploadingFiles}
-                className="inline-flex items-center gap-2 rounded-sm bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-600"
               >
                 <Upload size={16} />
                 {submitting ? 'Submitting...' : 'Submit Documents'}

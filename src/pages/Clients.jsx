@@ -23,8 +23,8 @@ const ClientStatusBadge = ({ status }) => {
   const isActive = status === 1 || status === true || status === 'Active';
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${isActive
-        ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-        : 'bg-gray-100 text-gray-600 border-gray-200'
+      ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+      : 'bg-gray-100 text-gray-600 border-gray-200'
       }`}>
       {isActive ? <CheckCircle size={10} /> : <XCircle size={10} />}
       {isActive ? 'Active' : 'Inactive'}
@@ -159,10 +159,10 @@ const ClientFormModal = ({ client, onClose, onSubmit, isSubmitting }) => {
                     type="button"
                     onClick={() => setStatus(value)}
                     className={`flex-1 py-2.5 rounded-sm border text-sm font-semibold transition-all ${form.status === value
-                        ? value === true
-                          ? 'bg-emerald-50 border-emerald-400 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-600 dark:text-emerald-300 shadow-sm'
-                          : 'bg-gray-100 border-gray-400 text-gray-700 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-200 shadow-sm'
-                        : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                      ? value === true
+                        ? 'bg-emerald-50 border-emerald-400 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-600 dark:text-emerald-300 shadow-sm'
+                        : 'bg-gray-100 border-gray-400 text-gray-700 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-200 shadow-sm'
+                      : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                       }`}
                   >
                     {label}
@@ -597,7 +597,7 @@ export default function Clients() {
               <button
                 disabled={isDeleting}
                 onClick={confirmDelete}
-                className="px-5 py-2.5 rounded-sm bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
+                className="px-5 py-2.5 rounded-lg bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {isDeleting ? 'Deleting...' : 'Yes, Delete Client'}
               </button>

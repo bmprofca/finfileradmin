@@ -213,13 +213,13 @@ const ViewBlogModal = ({ blog, onClose, onEdit, onDelete }) => (
       <>
         <button
           onClick={() => onDelete(blog)}
-          className="px-5 py-2.5 rounded-sm border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2"
+          className="px-5 py-2.5 rounded-lg border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2"
         >
           <Trash2 size={16} /> Delete
         </button>
         <button
           onClick={() => onEdit(blog)}
-          className="px-5 py-2.5 rounded-sm bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2"
+          className="px-5 py-2.5 rounded-lg bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2"
         >
           <Edit size={16} /> Edit Post
         </button>
@@ -540,7 +540,7 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isSubmitting }) => {
             type="submit"
             form="blog-form"
             disabled={isSubmitting}
-            className="px-5 py-2.5 rounded-sm bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2 disabled:opacity-50"
+            className="px-5 py-2.5 rounded-lg bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2 disabled:opacity-50"
           >
             {isSubmitting ? 'Saving...' : isEdit ? 'Update Post' : 'Publish / Save'}
           </button>
@@ -970,7 +970,7 @@ export default function Blogs() {
               <button
                 disabled={isDeleting}
                 onClick={confirmDelete}
-                className="px-5 py-2.5 rounded-sm bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
+                className="px-5 py-2.5 rounded-lg bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {isDeleting ? 'Deleting...' : 'Yes, Delete Post'}
               </button>

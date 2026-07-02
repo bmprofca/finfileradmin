@@ -79,10 +79,10 @@ const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
     contentClassName="p-5 space-y-4"
     footer={
       <>
-        <button onClick={() => onDelete(service)} className="px-5 py-2.5 rounded-sm border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2">
+        <button onClick={() => onDelete(service)} className="px-5 py-2.5 rounded-lg border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2">
           <Trash2 size={16} /> Delete
         </button>
-        <button onClick={() => onEdit(service)} className="px-5 py-2.5 rounded-sm bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2">
+        <button onClick={() => onEdit(service)} className="px-5 py-2.5 rounded-lg bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2">
           <Edit size={16} /> Edit Service
         </button>
       </>
@@ -602,7 +602,7 @@ export default function Services() {
               <button
                 disabled={isDeleting}
                 onClick={confirmDelete}
-                className="px-5 py-2.5 rounded-sm bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
+                className="px-5 py-2.5 rounded-lg bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {isDeleting ? 'Deleting...' : 'Yes, Delete Service'}
               </button>

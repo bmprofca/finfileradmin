@@ -179,7 +179,7 @@ const StaffManagementModal = ({ order, allStaff, onClose, onSubmit, isSubmitting
           <button
             onClick={handleSubmit}
             disabled={isSubmitting || !hasChanges || isInitial()}
-            className="px-5 py-2.5 rounded-sm bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 rounded-lg bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Users size={14} />
             {isSubmitting ? 'Updating...' : 'Update Staff'}
@@ -348,19 +348,19 @@ const ViewOrderModal = ({ order, onClose, onManageStaff, onUpdateOrder, onUpdate
         <>
           <button
             onClick={() => onUpdateStatus(order)}
-            className="px-4 py-2.5 rounded-sm border border-emerald-200 dark:border-emerald-900/30 bg-emerald-50 dark:bg-emerald-900/20 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all flex items-center gap-2"
+            className="px-4 py-2.5 rounded-lg border border-emerald-200 dark:border-emerald-900/30 bg-emerald-50 dark:bg-emerald-900/20 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all flex items-center gap-2"
           >
             <RefreshCw size={14} /> Status
           </button>
           <button
             onClick={() => onUpdateOrder(order)}
-            className="px-4 py-2.5 rounded-sm border border-indigo-200 dark:border-indigo-900/30 bg-indigo-50 dark:bg-indigo-900/20 text-sm font-semibold text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-all flex items-center gap-2"
+            className="px-4 py-2.5 rounded-lg border border-indigo-200 dark:border-indigo-900/30 bg-indigo-50 dark:bg-indigo-900/20 text-sm font-semibold text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-all flex items-center gap-2"
           >
             <Edit size={14} /> Update
           </button>
           <button
             onClick={() => onManageStaff(order)}
-            className={`px-4 py-2.5 rounded-sm border transition-all flex items-center gap-2 ${hasAssignedStaff
+            className={`px-4 py-2.5 rounded-lg border transition-all flex items-center gap-2 ${hasAssignedStaff
               ? 'border-blue-200 dark:border-blue-900/30 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40'
               : 'border-yellow-200 dark:border-yellow-900/30 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/40'
               }`}
@@ -494,7 +494,7 @@ const OrderUpdateModal = ({ order, onClose, onSubmit, isSubmitting }) => {
           type="submit"
           form="order-update-form"
           disabled={isSubmitting}
-          className="px-5 py-2.5 rounded-sm bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-50"
+          className="px-5 py-2.5 rounded-lg bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-50"
         >
           <Edit size={14} />
           {isSubmitting ? 'Updating...' : 'Update Order'}
