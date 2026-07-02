@@ -14,16 +14,13 @@ import {
   PackageCheck,
 } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { label } from 'framer-motion/client';
+import { usePermissions } from '../../contexts/PermissionsContext';
 
 const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) => {
   const [isHovered, setIsHovered] = useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
-  const { user } = useAuth();
-  
-  const userType = user?.user_type || 'admin';
+  const { hasModuleAccess } = usePermissions();
 
   const allMenuItems = [
     {
@@ -35,61 +32,64 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
       icon: Users,
       label: 'Clients',
       path: '/clients',
-      roles: ['admin'],
+      modules: ['client'],
     },
     {
       icon: Briefcase,
       label: 'Staffs',
       path: '/staffs',
-      roles: ['admin'],
+      modules: ['staff'],
     },
     {
       icon: ClipboardList,
       label: 'My Orders',
       path: '/my-orders',
-      roles: ['staff'],
+      modules: ['my_order'],
     },
     {
       icon: FileBox,
       label: 'Orders',
       path: '/orders',
-      roles: ['admin'],
+      modules: ['order'],
     },
     {
       icon: ConciergeBell,
       label: 'Services',
       path: '/services',
-      roles: ['admin'],
+      modules: ['service'],
     },
     {
       icon: BrickWall,
       label:'Firms',
       path:'/firms',
-      roles:['admin'],
+      modules:['firm'],
     },{
       icon:IndianRupee,
       label:'Payments',
       path:'/payments',
-      roles:['admin'],
+      modules:['payment'],
     },{
       icon:Newspaper,
       label:'Blogs',
       path:'/blogs',
-      roles:['admin']
+      modules:['blog']
     },{
       icon: ShieldCheck,
       label: 'Permissions',
       path: '/permissions',
-      roles: ['admin'],
+      modules: ['permission', 'permissions'],
     },{
       icon: PackageCheck,
       label: 'Perm. Packages',
       path: '/permission-packages',
-      roles: ['admin'],
+      modules: ['permission_package', 'permission', 'permissions'],
     }
   ];
 
-  const menuItems = allMenuItems.filter(item => !item.roles || item.roles.includes(userType));
+  const menuItems = allMenuItems.filter((item) => {
+    if (!item.modules?.length) return true;
+    return item.modules.some((module) => hasModuleAccess(module));
+  });
 
   const isActiveRoute = (itemPath) => {
     return currentPath === itemPath || currentPath.startsWith(itemPath + '/');

@@ -4,9 +4,10 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import { ServiceOptionsProvider } from "./contexts/ConstantOptionsContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { PermissionsProvider } from "./contexts/PermissionsContext";
 
 import ProtectedRoute from "./components/ProtectedRoute";
-import RoleRoute from "./components/RoleRoute";
+import PermissionRoute from "./components/PermissionRoute";
 import PublicRoute from "./components/PublicRoute";
 import MainLayout from "./components/layout/MainLayout";
 import Login from "./pages/Login";
@@ -34,9 +35,14 @@ function App() {
     <ThemeProvider>
       <BrowserRouter>
         <AuthProvider>
-          <ServiceOptionsProvider>
-            <ToastProvider>
-              <Routes>
+          {/* PermissionsProvider must be:
+              - INSIDE AuthProvider (so session exists before we call the API)
+              - INSIDE BrowserRouter (needs useNavigate for redirect)
+              - OUTSIDE ServiceOptionsProvider (blocks it on 401, preventing extra API calls) */}
+          <PermissionsProvider>
+            <ServiceOptionsProvider>
+              <ToastProvider>
+                <Routes>
                 {/* Public Routes */}
                 <Route
                   path="/login"
@@ -57,25 +63,25 @@ function App() {
                     <Route path="dashboard" element={<Dashboard />} />
                     
                     {/* Clients Routes */}
-                    <Route path="clients" element={<RoleRoute allowedRoles={['admin']}><Clients /></RoleRoute>} />
-                    <Route path="clients/:username" element={<RoleRoute allowedRoles={['admin']}><ClientProfile /></RoleRoute>} />
+                    <Route path="clients" element={<PermissionRoute modules="client"><Clients /></PermissionRoute>} />
+                    <Route path="clients/:username" element={<PermissionRoute modules="client"><ClientProfile /></PermissionRoute>} />
                     
                     {/* Staff Routes */}
-                    <Route path="staffs" element={<RoleRoute allowedRoles={['admin']}><Staffs /></RoleRoute>} />
-                    <Route path="staffs/:username" element={<RoleRoute allowedRoles={['admin']}><StaffProfile /></RoleRoute>} />
+                    <Route path="staffs" element={<PermissionRoute modules="staff"><Staffs /></PermissionRoute>} />
+                    <Route path="staffs/:username" element={<PermissionRoute modules="staff"><StaffProfile /></PermissionRoute>} />
                     
                     {/* Other Routes */}
-                    <Route path="my-orders" element={<RoleRoute allowedRoles={['staff']}><MyOrders /></RoleRoute>} />
-                    <Route path="orders" element={<RoleRoute allowedRoles={['admin']}><Orders /></RoleRoute>} />
-                    <Route path="orders/:orderId/upload-documents" element={<RoleRoute allowedRoles={['admin']}><OrderDocumentUpload /></RoleRoute>} />
+                    <Route path="my-orders" element={<PermissionRoute modules={['my_order', 'order']}><MyOrders /></PermissionRoute>} />
+                    <Route path="orders" element={<PermissionRoute modules="order"><Orders /></PermissionRoute>} />
+                    <Route path="orders/:orderId/upload-documents" element={<PermissionRoute modules="order"><OrderDocumentUpload /></PermissionRoute>} />
                     <Route path="documents" element={<Documents />} />
-                    <Route path="services" element={<RoleRoute allowedRoles={['admin']}><Services /></RoleRoute>} />
-                    <Route path="firms" element={<RoleRoute allowedRoles={['admin']}><Firms /></RoleRoute>} />
-                    <Route path="payments" element={<RoleRoute allowedRoles={['admin']}><Payments /></RoleRoute>} />
+                    <Route path="services" element={<PermissionRoute modules="service"><Services /></PermissionRoute>} />
+                    <Route path="firms" element={<PermissionRoute modules="firm"><Firms /></PermissionRoute>} />
+                    <Route path="payments" element={<PermissionRoute modules="payment"><Payments /></PermissionRoute>} />
                     <Route path="profile" element={<Profile />} />
-                    <Route path="blogs" element={<Blogs />} />
-                    <Route path="permissions" element={<RoleRoute allowedRoles={['admin']}><Permissions /></RoleRoute>} />
-                    <Route path="permission-packages" element={<RoleRoute allowedRoles={['admin']}><PermissionPackages /></RoleRoute>} />
+                    <Route path="blogs" element={<PermissionRoute modules="blog"><Blogs /></PermissionRoute>} />
+                    <Route path="permissions" element={<PermissionRoute modules={['permission', 'permissions']}><Permissions /></PermissionRoute>} />
+                    <Route path="permission-packages" element={<PermissionRoute modules={['permission_package', 'permission', 'permissions']}><PermissionPackages /></PermissionRoute>} />
                   </Route>
                 </Route>
 
@@ -85,8 +91,9 @@ function App() {
                 {/* Catch all route - redirect to 404 */}
                 <Route path="*" element={<Navigate to="/404" replace />} />
               </Routes>
-            </ToastProvider>
-          </ServiceOptionsProvider>
+              </ToastProvider>
+            </ServiceOptionsProvider>
+          </PermissionsProvider>
         </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>
