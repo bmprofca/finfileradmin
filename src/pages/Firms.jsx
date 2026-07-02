@@ -15,6 +15,7 @@ import PaginationComponent from '../components/common/PaginationComponent';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
+import SelectField from '../components/common/SelectField';
 import apiCall from '../utils/apiCall';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -157,7 +158,7 @@ const ViewFirmModal = ({ firm, onClose, onEdit, onDelete, onDocuments }) => (
 const FirmFormModal = ({ firm, onClose, onSubmit, isSubmitting }) => {
   const isEdit = !!firm;
   const [form, setForm] = useState({
-    username: firm?.username || '',
+    username: firm?.client_username || firm?.username || '',
     name: firm?.name || '',
     type: firm?.type || '',
     pan_no: firm?.pan_no || '',
@@ -165,6 +166,51 @@ const FirmFormModal = ({ firm, onClose, onSubmit, isSubmitting }) => {
     vat_no: firm?.vat_no || '',
     tan_no: firm?.tan_no || '',
   });
+
+  const [clientOptions, setClientOptions] = useState([]);
+  const [clientSearch, setClientSearch] = useState('');
+  const [clientPage, setClientPage] = useState(1);
+  const [clientTotalPages, setClientTotalPages] = useState(1);
+  const [isLoadingClients, setIsLoadingClients] = useState(false);
+  const [selectedClient, setSelectedClient] = useState(null);
+
+  const fetchClients = async (search, page, isLoadMore = false) => {
+    setIsLoadingClients(true);
+    try {
+      const res = await apiCall(`/api/admin/clients/list?page_no=${page}&limit=20&search=${search}`, 'GET');
+      const data = await res.json();
+      if (data.success) {
+        const newOptions = data.data.clients.map(c => ({
+          value: c.username,
+          label: `${c.full_name} (${c.username})`,
+          client: c
+        }));
+        setClientOptions(prev => isLoadMore ? [...prev, ...newOptions] : newOptions);
+        setClientTotalPages(data.pagination.total_pages);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoadingClients(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isEdit) {
+      const delayFn = setTimeout(() => {
+        fetchClients(clientSearch, 1, false);
+      }, 300);
+      return () => clearTimeout(delayFn);
+    }
+  }, [clientSearch, isEdit]);
+
+  const handleMenuScrollToBottom = () => {
+    if (clientPage < clientTotalPages && !isLoadingClients) {
+      const nextPage = clientPage + 1;
+      setClientPage(nextPage);
+      fetchClients(clientSearch, nextPage, true);
+    }
+  };
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
@@ -203,14 +249,49 @@ const FirmFormModal = ({ firm, onClose, onSubmit, isSubmitting }) => {
           <h4 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3">Client Linking</h4>
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Client Username *</label>
-            <input
-              required
-              value={form.username}
-              onChange={set('username')}
-              placeholder="e.g. 7364076458"
-              className={inputCls}
-            />
-            <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">Enter the client's username this firm belongs to.</p>
+            {isEdit ? (
+              <input
+                disabled
+                value={firm?.client_name || form.username}
+                className={`${inputCls} bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-70`}
+              />
+            ) : (
+              <>
+                <SelectField
+                  options={clientOptions}
+                  isLoading={isLoadingClients}
+                  onInputChange={(val, { action }) => {
+                    if (action === 'input-change') {
+                      setClientSearch(val);
+                      setClientPage(1);
+                    }
+                  }}
+                  onMenuScrollToBottom={handleMenuScrollToBottom}
+                  onChange={(option) => {
+                    setForm(f => ({ ...f, username: option ? option.value : '' }));
+                    setSelectedClient(option ? option.client : null);
+                  }}
+                  value={clientOptions.find(o => o.value === form.username) || null}
+                  placeholder="Search and select client..."
+                  isClearable
+                />
+                {selectedClient && (
+                  <div className="mt-3 p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/30 rounded-md">
+                    <div className="flex items-center gap-2 mb-1">
+                      <User size={14} className="text-indigo-600 dark:text-indigo-400" />
+                      <span className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">{selectedClient.full_name}</span>
+                    </div>
+                    <div className="text-xs text-indigo-700 dark:text-indigo-300 space-y-0.5 ml-5">
+                      <p>Email: {selectedClient.email || 'N/A'}</p>
+                      <p>Mobile: {selectedClient.mobile || 'N/A'}</p>
+                    </div>
+                  </div>
+                )}
+                {!selectedClient && (
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">Search and select the client this firm belongs to.</p>
+                )}
+              </>
+            )}
           </div>
         </div>
 
@@ -226,12 +307,12 @@ const FirmFormModal = ({ firm, onClose, onSubmit, isSubmitting }) => {
             </div>
             <div className="sm:col-span-2">
               <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Firm Type *</label>
-              <select required value={form.type} onChange={set('type')} className={inputCls}>
-                <option value="">Select firm type…</option>
-                {FIRM_TYPES.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
+              <SelectField
+                options={FIRM_TYPES.map(t => ({ value: t, label: t }))}
+                value={form.type ? { value: form.type, label: form.type } : null}
+                onChange={(option) => setForm(f => ({ ...f, type: option ? option.value : '' }))}
+                placeholder="Select firm type…"
+              />
             </div>
           </div>
         </div>
