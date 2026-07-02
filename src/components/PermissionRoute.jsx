@@ -21,7 +21,9 @@ const PermissionRoute = ({ children, permissions = [], modules = [] }) => {
 
   useEffect(() => {
     if (!isAllowed) {
-      showToast.error('You do not have permission to access this page.');
+      showToast.error('You do not have permission to access this page.', {
+        id: 'permission-route-denied',
+      });
     }
   }, [isAllowed, showToast]);
 

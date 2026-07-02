@@ -422,7 +422,6 @@ export default function Firms() {
       const response = await apiCall(`/api/admin/firms/delete/${firmToDelete.firm_id}`, 'DELETE');
       const json = await response.json();
       if (json.success) {
-        toast.success('Firm deleted successfully.');
         setIsDeleteModalOpen(false);
         setFirmToDelete(null);
         fetchFirms({ force: true });
@@ -445,7 +444,6 @@ export default function Firms() {
       const response = await apiCall(endpoint, method, formData);
       const json     = await response.json();
       if (json.success) {
-        toast.success(isEdit ? 'Firm updated successfully!' : 'Firm created successfully!');
         setIsFormModalOpen(false);
         fetchFirms({ force: true });
       } else {

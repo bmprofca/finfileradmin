@@ -148,7 +148,6 @@ export default function Permissions() {
             p.permission_id === permission.permission_id ? { ...p, status: newStatus } : p
           )
         );
-        toast.success(`Permission ${newStatus ? 'activated' : 'deactivated'} successfully.`);
       } else {
         toast.error(data.message || 'Failed to update status.');
       }

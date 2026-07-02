@@ -470,7 +470,6 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isSubmitting }) => {
     try {
       const url = await uploadFile(file);
       setForm((f) => ({ ...f, thumbnail: url }));
-      toast.success('Image uploaded successfully');
     } catch {
       toast.error('Failed to upload image');
     } finally {
@@ -755,7 +754,6 @@ export default function Blogs() {
       const response = await apiCall('/api/admin/blogs/delete', 'DELETE', { blog_id: blogToDelete.blog_id });
       const json = await response.json();
       if (json.success) {
-        toast.success('Blog post deleted successfully.');
         setIsDeleteModalOpen(false);
         setBlogToDelete(null);
         fetchBlogs({ force: true });
@@ -779,7 +777,6 @@ export default function Blogs() {
       const response = await apiCall(endpoint, method, payload);
       const json     = await response.json();
       if (json.success) {
-        toast.success(isEdit ? 'Blog post updated successfully!' : 'Blog post created successfully!');
         setIsFormModalOpen(false);
         fetchBlogs({ force: true });
       } else {

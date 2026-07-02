@@ -347,7 +347,6 @@ export default function Services() {
       const response = await apiCall('/api/admin/services/delete', 'POST', { service_id: serviceToDelete.service_id });
       const json = await response.json();
       if (json.success) {
-        toast.success('Service deleted successfully.');
         setIsDeleteModalOpen(false);
         setServiceToDelete(null);
         fetchServices({ silent: true, force: true });
@@ -368,7 +367,6 @@ export default function Services() {
       const response = await apiCall(endpoint, 'POST', formData);
       const json = await response.json();
       if (json.success) {
-        toast.success(editingService ? 'Service updated successfully!' : 'Service created successfully!');
         setIsFormModalOpen(false);
         fetchServices({ silent: true, force: true });
       } else {

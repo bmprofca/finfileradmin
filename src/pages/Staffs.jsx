@@ -136,7 +136,6 @@ const StaffFormModal = ({ staff, onClose, onSubmit, isSubmitting }) => {
       const url = await uploadFile(file);
       setForm((f) => ({ ...f, image: url }));
       setImagePreview(url);
-      toast.success('Image uploaded successfully');
     } catch (error) {
       toast.error(error.message || 'Failed to upload image');
     } finally {
@@ -396,7 +395,6 @@ export default function Staffs() {
       const response = await apiCall(`/api/admin/staff/logout/${staffToLogout.username}`, 'POST');
       const json = await response.json();
       if (json.success) {
-        toast.success(json.message || 'Staff sessions terminated successfully.');
         setIsLogoutModalOpen(false);
         setStaffToLogout(null);
       } else {
@@ -422,7 +420,6 @@ export default function Staffs() {
       const json = await response.json();
 
       if (json.success) {
-        toast.success(isEdit ? 'Staff updated successfully!' : 'Staff created successfully!');
         setIsFormModalOpen(false);
         fetchStaffs();
       } else {

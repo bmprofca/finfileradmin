@@ -85,7 +85,6 @@ const ClientFormModal = ({ client, onClose, onSubmit, isSubmitting }) => {
     try {
       const url = await uploadFile(file);
       setForm((f) => ({ ...f, image: url }));
-      toast.success('Image uploaded successfully');
     } catch {
       toast.error('Failed to upload image');
     } finally {
@@ -368,7 +367,6 @@ export default function Clients() {
       const response = await apiCall(`/api/admin/clients/delete/${clientToDelete.username}`, 'DELETE');
       const json = await response.json();
       if (json.success) {
-        toast.success('Client deleted successfully.');
         setIsDeleteModalOpen(false);
         setClientToDelete(null);
         fetchClients({ force: true });
@@ -395,7 +393,6 @@ export default function Clients() {
       const json = await response.json();
 
       if (json.success) {
-        toast.success(isEdit ? 'Client updated successfully!' : 'Client created successfully!');
         setIsFormModalOpen(false);
         fetchClients({ force: true });
       } else {

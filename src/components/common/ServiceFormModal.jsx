@@ -194,7 +194,6 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
     try {
       const url = await uploadFile(file);
       setFormData(prev => ({ ...prev, image: url }));
-      toast.success('Image uploaded successfully');
     } catch (error) {
       toast.error('Failed to upload image');
     } finally {

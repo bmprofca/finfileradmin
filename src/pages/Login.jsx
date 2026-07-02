@@ -44,7 +44,6 @@ const AdminLogin = () => {
     try {
       setLoading(true);
       await auth.sendOtp({ mobile });
-      toast.success("OTP sent to " + mobile);
       setOtpSent(true);
     } catch (err) {
       toast.error(err.message || "Failed to send OTP");
@@ -58,7 +57,6 @@ const AdminLogin = () => {
       setLoading(true);
       await auth.sendOtp({ mobile });
       setOtp(["", "", "", "", "", ""]);
-      toast.success("New OTP sent to " + mobile);
     } catch (err) {
       toast.error(err.message || "Failed to resend OTP");
     } finally {
@@ -74,7 +72,6 @@ const AdminLogin = () => {
       setLoading(true);
       await auth.login({ mobile, otp: code });
       setSuccess(true);
-      toast.success("Login successful!");
       setTimeout(() => navigate("/"), 1800);
     } catch (err) {
       toast.error(err.message || "Login failed");

@@ -12,8 +12,6 @@ const useApiWithToast = () => {
     url,
     data = null,
     params = null,
-    showSuccess = false,
-    successMessage = null,
     showError = true,
     errorMessage = null,
   }) => {
@@ -37,12 +35,6 @@ const useApiWithToast = () => {
       // Dismiss loading toast
       if (loadingToast) {
         toast.dismiss(loadingToast);
-      }
-
-      if (showSuccess) {
-        toast.success(
-          successMessage || response?.data?.message || "Operation successful"
-        );
       }
 
       return response.data;

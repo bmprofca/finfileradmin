@@ -47,7 +47,6 @@ export default function OrderDocumentUpload() {
           size: file.size,
           isImage: file.type.startsWith('image/'),
         });
-        toast.success(`${file.name} uploaded successfully.`);
       } catch (err) {
         toast.error(`Failed to upload ${file.name}`);
       }

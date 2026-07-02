@@ -239,7 +239,7 @@ export default function MyOrders() {
         
         document.body.removeChild(a);
         setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1000);
-        toast.success('Statement downloaded successfully', { id: toastId });
+        toast.dismiss(toastId);
       } else {
         toast.error(data.message || 'Failed to download statement', { id: toastId });
       }

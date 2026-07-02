@@ -1,5 +1,5 @@
 // src/contexts/ToastContext.jsx
-import React, { createContext, useContext, useRef } from 'react';
+import React, { createContext, useContext } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 
 const ToastContext = createContext();

@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import apiCall from '../utils/apiCall';
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
