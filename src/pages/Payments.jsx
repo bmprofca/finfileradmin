@@ -68,7 +68,7 @@ const PaymentStatusBadge = ({ status }) => {
 // ─── Info Item ────────────────────────────────────────────────────────────────
 
 const InfoItem = ({ icon: Icon, label, value, mono = false }) => (
-  <div className="flex items-start gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
+  <div className="flex items-start gap-2 rounded-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
     <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600">
       <Icon size={14} className="text-emerald-500 dark:text-emerald-400" />
     </div>
@@ -90,7 +90,7 @@ const PaymentDetailsTable = ({ payments }) => {
   );
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+    <div className="overflow-x-auto rounded-sm border border-gray-200 dark:border-gray-700">
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-gray-50 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400">
@@ -161,7 +161,7 @@ const ViewPaymentModal = ({ payment, onClose }) => {
     >
       {/* Header */}
       <div className="flex items-start gap-4 pb-4 border-b dark:border-gray-700">
-        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shrink-0">
+        <div className="h-12 w-12 rounded-sm bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shrink-0">
           <CreditCard size={22} className="text-white" />
         </div>
         <div className="flex-1 min-w-0">
@@ -189,15 +189,15 @@ const ViewPaymentModal = ({ payment, onClose }) => {
           <Wallet className="text-emerald-500" size={15} /> Payment Summary
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 p-3 text-center">
+          <div className="rounded-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 p-3 text-center">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Amount</div>
             <div className="text-base font-bold text-gray-800 dark:text-gray-100">{formatAmount(payment.amount)}</div>
           </div>
-          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-900/30 p-3 text-center">
+          <div className="rounded-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-900/30 p-3 text-center">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1">Total Paid</div>
             <div className="text-base font-bold text-emerald-600 dark:text-emerald-400">{formatAmount(totalPaid)}</div>
           </div>
-          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 p-3 text-center">
+          <div className="rounded-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 p-3 text-center">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Payments</div>
             <div className="text-base font-bold text-gray-800 dark:text-gray-100">{paymentCount} attempt{paymentCount !== 1 ? 's' : ''}</div>
           </div>
@@ -251,7 +251,7 @@ const PaymentCard = ({ payment, index, onView }) => {
       title={payment.order_name}
       subtitle={formatDate(payment.create_date)}
       icon={
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shrink-0">
+        <div className="w-8 h-8 rounded-sm bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shrink-0">
           <CreditCard size={14} className="text-white" />
         </div>
       }
@@ -300,7 +300,7 @@ const FilterSelect = ({ options, value, onChange, placeholder, icon: Icon, label
       <select
         value={value || ''}
         onChange={(e) => onChange(e.target.value || null)}
-        className="appearance-none w-full pl-9 pr-8 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100 cursor-pointer"
+        className="appearance-none w-full pl-9 pr-8 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-sm focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100 cursor-pointer"
       >
         <option value="">{placeholder}</option>
         {options.map((option) => (
@@ -563,7 +563,7 @@ export default function Payments() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col gap-3 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm"
+          className="flex flex-col gap-3 bg-white dark:bg-gray-800 p-4 rounded-sm border border-gray-100 dark:border-gray-700 shadow-sm"
         >
           {/* Row 1: Search and View Switcher */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
@@ -575,7 +575,7 @@ export default function Payments() {
                   placeholder="Search by order name, client, or payment ID..."
                   value={searchTerm}
                   onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                  className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
+                  className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
                 />
                 {searchTerm && (
                   <button
@@ -677,7 +677,7 @@ export default function Payments() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-950/50"
+            className="text-center py-16 bg-white dark:bg-gray-800 rounded-sm shadow-xl dark:shadow-gray-950/50"
           >
             <CreditCard className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
             <p className="text-xl text-gray-500 dark:text-gray-400">No payments found</p>
@@ -702,7 +702,7 @@ export default function Payments() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="rounded-xl bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50"
+              className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50"
             >
               {/* Table View */}
               {viewMode === 'table' && (

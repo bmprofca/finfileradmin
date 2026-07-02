@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { 
-    FaChevronLeft, 
-    FaChevronRight, 
-    FaAngleDoubleLeft, 
+import {
+    FaChevronLeft,
+    FaChevronRight,
+    FaAngleDoubleLeft,
     FaAngleDoubleRight,
-    FaLevelDownAlt 
+    FaLevelDownAlt
 } from 'react-icons/fa';
 import SelectField from './SelectField';
 
@@ -22,7 +22,7 @@ const Pagination = ({
     const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
     const startItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
     const endItem = Math.min(currentPage * itemsPerPage, totalItems);
-    
+
     const [jumpPage, setJumpPage] = useState('');
 
     useEffect(() => {
@@ -72,7 +72,7 @@ const Pagination = ({
         <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`w-full lg:flex lg:justify-between lg:items-center bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 mt-6 p-3 sm:p-4 ${className}`.trim()}
+            className={`w-full lg:flex lg:justify-between lg:items-center bg-white dark:bg-gray-800 rounded-sm border border-slate-200 dark:border-gray-700 mt-6 p-3 sm:p-4 ${className}`.trim()}
         >
             {/* ── ROW 1 (mobile): Info + Page controls side by side ── */}
             <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">

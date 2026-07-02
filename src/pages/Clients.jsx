@@ -22,11 +22,10 @@ import apiCall, { uploadFile } from '../utils/apiCall';
 const ClientStatusBadge = ({ status }) => {
   const isActive = status === 1 || status === true || status === 'Active';
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
-      isActive
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${isActive
         ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
         : 'bg-gray-100 text-gray-600 border-gray-200'
-    }`}>
+      }`}>
       {isActive ? <CheckCircle size={10} /> : <XCircle size={10} />}
       {isActive ? 'Active' : 'Inactive'}
     </span>
@@ -34,7 +33,7 @@ const ClientStatusBadge = ({ status }) => {
 };
 
 const InfoItem = ({ icon: Icon, label, value }) => (
-  <div className="flex items-start gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
+  <div className="flex items-start gap-2 rounded-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
     <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600">
       <Icon size={14} className="dark:text-gray-300" />
     </div>
@@ -51,10 +50,10 @@ const ClientAvatar = ({ client, size = 'md' }) => {
   const sizes = { sm: 'w-8 h-8 text-xs', md: 'w-10 h-10 text-sm', lg: 'w-16 h-16 text-xl' };
   const cls = sizes[size] || sizes.md;
   if (client.image) {
-    return <img src={client.image} alt={client.full_name} className={`${cls} rounded-xl object-cover shrink-0`} />;
+    return <img src={client.image} alt={client.full_name} className={`${cls} rounded-sm object-cover shrink-0`} />;
   }
   return (
-    <div className={`${cls} rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold shrink-0`}>
+    <div className={`${cls} rounded-sm bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold shrink-0`}>
       {client.full_name?.charAt(0)?.toUpperCase() || <User size={16} />}
     </div>
   );
@@ -111,7 +110,7 @@ const ClientFormModal = ({ client, onClose, onSubmit, isSubmitting }) => {
   };
 
   const inputCls =
-    'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all text-sm dark:text-gray-100';
+    'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-sm focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all text-sm dark:text-gray-100';
 
   return (
     <Modal
@@ -127,7 +126,7 @@ const ClientFormModal = ({ client, onClose, onSubmit, isSubmitting }) => {
           type="submit"
           form="client-form"
           disabled={isSubmitting}
-          className="px-5 py-2.5 rounded-xl bg-violet-600 dark:bg-violet-500 text-white text-sm font-semibold hover:bg-violet-700 dark:hover:bg-violet-600 transition-all flex items-center gap-2 disabled:opacity-50"
+          className="px-5 py-2.5 rounded-sm bg-violet-600 dark:bg-violet-500 text-white text-sm font-semibold hover:bg-violet-700 dark:hover:bg-violet-600 transition-all flex items-center gap-2 disabled:opacity-50"
         >
           {isSubmitting ? 'Saving...' : isEdit ? 'Update Client' : 'Create Client'}
         </button>
@@ -159,13 +158,12 @@ const ClientFormModal = ({ client, onClose, onSubmit, isSubmitting }) => {
                     key={String(value)}
                     type="button"
                     onClick={() => setStatus(value)}
-                    className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
-                      form.status === value
+                    className={`flex-1 py-2.5 rounded-sm border text-sm font-semibold transition-all ${form.status === value
                         ? value === true
                           ? 'bg-emerald-50 border-emerald-400 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-600 dark:text-emerald-300 shadow-sm'
                           : 'bg-gray-100 border-gray-400 text-gray-700 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-200 shadow-sm'
                         : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                    }`}
+                      }`}
                   >
                     {label}
                   </button>
@@ -214,7 +212,7 @@ const ClientFormModal = ({ client, onClose, onSubmit, isSubmitting }) => {
             htmlFor="client-image-upload"
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleImageDrop}
-            className={`mt-2 flex cursor-pointer justify-center rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 px-6 py-8 bg-gray-50 dark:bg-gray-800/50 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus-within:ring-4 focus-within:ring-violet-500/10 ${isUploading ? 'pointer-events-none opacity-50' : ''}`}
+            className={`mt-2 flex cursor-pointer justify-center rounded-sm border-2 border-dashed border-gray-300 dark:border-gray-600 px-6 py-8 bg-gray-50 dark:bg-gray-800/50 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus-within:ring-4 focus-within:ring-violet-500/10 ${isUploading ? 'pointer-events-none opacity-50' : ''}`}
           >
             <div className="text-center flex flex-col items-center">
               {form.image && !isUploading ? (
@@ -344,20 +342,20 @@ export default function Clients() {
   const handleViewProfile = (client) => {
     navigate(`/clients/${client.username}`);
   };
-  
-  const handleEdit = (client) => { 
-    setEditingClient(client); 
-    setIsFormModalOpen(true); 
+
+  const handleEdit = (client) => {
+    setEditingClient(client);
+    setIsFormModalOpen(true);
   };
-  
-  const handleCreateNew = () => { 
-    setEditingClient(null); 
-    setIsFormModalOpen(true); 
+
+  const handleCreateNew = () => {
+    setEditingClient(null);
+    setIsFormModalOpen(true);
   };
-  
-  const handleDeleteRequest = (client) => { 
-    setClientToDelete(client); 
-    setIsDeleteModalOpen(true); 
+
+  const handleDeleteRequest = (client) => {
+    setClientToDelete(client);
+    setIsDeleteModalOpen(true);
   };
 
   const confirmDelete = async () => {
@@ -451,7 +449,7 @@ export default function Clients() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm"
+          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-sm border border-gray-100 dark:border-gray-700 shadow-sm"
         >
           <div className="flex items-center gap-4 flex-1">
             <div className="relative flex-1">
@@ -461,7 +459,7 @@ export default function Clients() {
                 placeholder="Search clients by name, email, username, or mobile..."
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
+                className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
               />
               {searchTerm && (
                 <button onClick={() => { setSearchTerm(''); setCurrentPage(1); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1">
@@ -487,7 +485,7 @@ export default function Clients() {
 
         {/* Empty State */}
         {!loading && clients.length === 0 && (
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-950/50">
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-sm shadow-xl dark:shadow-gray-950/50">
             <Users className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
             <p className="text-xl text-gray-500 dark:text-gray-400">No clients found</p>
             <p className="text-gray-400 dark:text-gray-500 mt-2">
@@ -496,7 +494,7 @@ export default function Clients() {
             {!searchTerm && (
               <button
                 onClick={handleCreateNew}
-                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-all"
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-sm bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-all"
               >
                 <Plus size={16} /> Add First Client
               </button>
@@ -507,7 +505,7 @@ export default function Clients() {
         {/* Content */}
         {!loading && clients.length > 0 && (
           <>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
 
               {/* Table View */}
               {viewMode === 'table' && (
@@ -517,23 +515,23 @@ export default function Clients() {
                   rowKey="username"
                   onRowClick={(row) => navigate(`/clients/${row.username}`)}
                   getActions={(row) => [
-                    { 
-                      label: 'View Profile', 
-                      icon: <User size={12} />, 
-                      onClick: () => navigate(`/clients/${row.username}`), 
-                      className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300' 
+                    {
+                      label: 'View Profile',
+                      icon: <User size={12} />,
+                      onClick: () => navigate(`/clients/${row.username}`),
+                      className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300'
                     },
-                    { 
-                      label: 'Edit Client', 
-                      icon: <Edit size={12} />, 
-                      onClick: () => handleEdit(row), 
-                      className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300' 
+                    {
+                      label: 'Edit Client',
+                      icon: <Edit size={12} />,
+                      onClick: () => handleEdit(row),
+                      className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300'
                     },
-                    { 
-                      label: 'Delete', 
-                      icon: <Trash2 size={12} />, 
-                      onClick: () => handleDeleteRequest(row), 
-                      className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' 
+                    {
+                      label: 'Delete',
+                      icon: <Trash2 size={12} />,
+                      onClick: () => handleDeleteRequest(row),
+                      className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300'
                     },
                   ]}
                   accent="violet"
@@ -599,7 +597,7 @@ export default function Clients() {
               <button
                 disabled={isDeleting}
                 onClick={confirmDelete}
-                className="px-5 py-2.5 rounded-xl bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
+                className="px-5 py-2.5 rounded-sm bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {isDeleting ? 'Deleting...' : 'Yes, Delete Client'}
               </button>

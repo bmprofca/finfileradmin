@@ -156,8 +156,8 @@ const docToText = (doc) => {
 const StatusBadge = ({ status }) => {
   const map = {
     published: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800',
-    draft:     'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800',
-    archived:  'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600',
+    draft: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800',
+    archived: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600',
   };
   const cls = map[status] || map.draft;
   return (
@@ -169,7 +169,7 @@ const StatusBadge = ({ status }) => {
 };
 
 const InfoItem = ({ icon: Icon, label, value }) => (
-  <div className="flex items-start gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
+  <div className="flex items-start gap-2 rounded-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
     <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600">
       <Icon size={14} className="dark:text-gray-300" />
     </div>
@@ -188,12 +188,12 @@ const BlogThumb = ({ blog, size = 'md' }) => {
       <img
         src={blog.thumbnail}
         alt={blog.title}
-        className={`${cls} rounded-xl object-cover shrink-0 border border-gray-200 dark:border-gray-700`}
+        className={`${cls} rounded-sm object-cover shrink-0 border border-gray-200 dark:border-gray-700`}
       />
     );
   }
   return (
-    <div className={`${cls} rounded-xl bg-gradient-to-br from-fuchsia-500 to-pink-600 flex items-center justify-center text-white shrink-0`}>
+    <div className={`${cls} rounded-sm bg-gradient-to-br from-fuchsia-500 to-pink-600 flex items-center justify-center text-white shrink-0`}>
       <FileText size={size === 'lg' ? 36 : 18} />
     </div>
   );
@@ -213,13 +213,13 @@ const ViewBlogModal = ({ blog, onClose, onEdit, onDelete }) => (
       <>
         <button
           onClick={() => onDelete(blog)}
-          className="px-5 py-2.5 rounded-xl border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2"
+          className="px-5 py-2.5 rounded-sm border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2"
         >
           <Trash2 size={16} /> Delete
         </button>
         <button
           onClick={() => onEdit(blog)}
-          className="px-5 py-2.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2"
+          className="px-5 py-2.5 rounded-sm bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2"
         >
           <Edit size={16} /> Edit Post
         </button>
@@ -262,7 +262,7 @@ const ViewBlogModal = ({ blog, onClose, onEdit, onDelete }) => (
     {blog.summary && (
       <div>
         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Summary</h4>
-        <p className="text-sm text-gray-600 dark:text-gray-300 italic bg-gray-50 dark:bg-gray-900 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
+        <p className="text-sm text-gray-600 dark:text-gray-300 italic bg-gray-50 dark:bg-gray-900 rounded-sm p-3 border border-gray-200 dark:border-gray-700">
           {blog.summary}
         </p>
       </div>
@@ -272,7 +272,7 @@ const ViewBlogModal = ({ blog, onClose, onEdit, onDelete }) => (
     <div>
       <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Content</h4>
       <div
-        className="prose prose-sm dark:prose-invert max-w-none rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900 max-h-72 overflow-y-auto"
+        className="prose prose-sm dark:prose-invert max-w-none rounded-sm border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900 max-h-72 overflow-y-auto"
         dangerouslySetInnerHTML={{ __html: docToHtml(blog.content) || '<p class="text-gray-400">No content yet.</p>' }}
       />
     </div>
@@ -335,7 +335,7 @@ const RichTextEditor = ({ value, onChange }) => {
   };
 
   return (
-    <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+    <div className="rounded-sm overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60">
         <ToolbarBtn title="Bold" active={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()}>
@@ -510,7 +510,7 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isSubmitting }) => {
   };
 
   const inputCls =
-    'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-fuchsia-500/10 focus:border-fuchsia-500 outline-none transition-all text-sm dark:text-gray-100';
+    'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-sm focus:ring-4 focus:ring-fuchsia-500/10 focus:border-fuchsia-500 outline-none transition-all text-sm dark:text-gray-100';
 
 
   return (
@@ -540,7 +540,7 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isSubmitting }) => {
             type="submit"
             form="blog-form"
             disabled={isSubmitting}
-            className="px-5 py-2.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2 disabled:opacity-50"
+            className="px-5 py-2.5 rounded-sm bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2 disabled:opacity-50"
           >
             {isSubmitting ? 'Saving...' : isEdit ? 'Update Post' : 'Publish / Save'}
           </button>
@@ -607,12 +607,12 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isSubmitting }) => {
             htmlFor="blog-thumbnail-upload"
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleThumbnailDrop}
-            className={`mt-2 flex cursor-pointer justify-center rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 px-6 py-8 bg-gray-50 dark:bg-gray-800/50 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus-within:ring-4 focus-within:ring-fuchsia-500/10 ${isUploading ? 'pointer-events-none opacity-50' : ''}`}
+            className={`mt-2 flex cursor-pointer justify-center rounded-sm border-2 border-dashed border-gray-300 dark:border-gray-600 px-6 py-8 bg-gray-50 dark:bg-gray-800/50 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus-within:ring-4 focus-within:ring-fuchsia-500/10 ${isUploading ? 'pointer-events-none opacity-50' : ''}`}
           >
             <div className="text-center flex flex-col items-center">
               {form.thumbnail && !isUploading ? (
                 <div className="mb-4">
-                  <img src={form.thumbnail} alt="Preview" className="w-full max-w-xs h-32 rounded-xl object-cover border-4 border-white dark:border-gray-700 shadow-lg mx-auto" />
+                  <img src={form.thumbnail} alt="Preview" className="w-full max-w-xs h-32 rounded-sm object-cover border-4 border-white dark:border-gray-700 shadow-lg mx-auto" />
                 </div>
               ) : (
                 <div className="mx-auto h-16 w-16 mb-4 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900/30 flex items-center justify-center">
@@ -653,8 +653,8 @@ const BlogManagementCard = ({ blog, index, onView, onEdit, onDelete }) => (
     hoverable
     actions={[
       { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(blog), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
-      { label: 'Edit Post',    icon: <Edit size={12} />, onClick: () => onEdit(blog), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
-      { label: 'Delete',       icon: <Trash2 size={12} />, onClick: () => onDelete(blog), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
+      { label: 'Edit Post', icon: <Edit size={12} />, onClick: () => onEdit(blog), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
+      { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => onDelete(blog), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
     ]}
     menuId={`blog-card-${blog.blog_id}`}
     footer={
@@ -742,10 +742,10 @@ export default function Blogs() {
   };
 
   // ── Handlers ──────────────────────────────────────────────────────────────
-  const handleView          = (blog) => { setSelectedBlog(blog); setIsViewModalOpen(true); };
-  const handleEdit           = (blog) => { setEditingBlog(blog); setIsFormModalOpen(true); setIsViewModalOpen(false); };
-  const handleCreateNew      = () => { setEditingBlog(null); setIsFormModalOpen(true); };
-  const handleDeleteRequest  = (blog) => { setBlogToDelete(blog); setIsDeleteModalOpen(true); setIsViewModalOpen(false); };
+  const handleView = (blog) => { setSelectedBlog(blog); setIsViewModalOpen(true); };
+  const handleEdit = (blog) => { setEditingBlog(blog); setIsFormModalOpen(true); setIsViewModalOpen(false); };
+  const handleCreateNew = () => { setEditingBlog(null); setIsFormModalOpen(true); };
+  const handleDeleteRequest = (blog) => { setBlogToDelete(blog); setIsDeleteModalOpen(true); setIsViewModalOpen(false); };
 
   const confirmDelete = async () => {
     if (!blogToDelete) return;
@@ -771,11 +771,11 @@ export default function Blogs() {
   const handleFormSubmit = async (payload) => {
     setIsSubmitting(true);
     try {
-      const isEdit   = !!editingBlog;
+      const isEdit = !!editingBlog;
       const endpoint = isEdit ? '/api/admin/blogs/update' : '/api/admin/blogs/create';
-      const method   = isEdit ? 'PUT' : 'POST';
+      const method = isEdit ? 'PUT' : 'POST';
       const response = await apiCall(endpoint, method, payload);
-      const json     = await response.json();
+      const json = await response.json();
       if (json.success) {
         setIsFormModalOpen(false);
         fetchBlogs({ force: true });
@@ -802,10 +802,10 @@ export default function Blogs() {
         </div>
       ),
     },
-    { key: 'status',       label: 'Status',     render: (row) => <StatusBadge status={row.status} /> },
-    { key: 'summary',      label: 'Summary',    render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 line-clamp-1 max-w-[220px] block">{row.summary || '—'}</span> },
-    { key: 'published_at', label: 'Published',  render: (row) => <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{row.published_at ? new Date(row.published_at).toLocaleDateString() : '—'}</span> },
-    { key: 'updated_at',   label: 'Updated',     render: (row) => <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{row.updated_at ? new Date(row.updated_at).toLocaleDateString() : '—'}</span> },
+    { key: 'status', label: 'Status', render: (row) => <StatusBadge status={row.status} /> },
+    { key: 'summary', label: 'Summary', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 line-clamp-1 max-w-[220px] block">{row.summary || '—'}</span> },
+    { key: 'published_at', label: 'Published', render: (row) => <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{row.published_at ? new Date(row.published_at).toLocaleDateString() : '—'}</span> },
+    { key: 'updated_at', label: 'Updated', render: (row) => <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{row.updated_at ? new Date(row.updated_at).toLocaleDateString() : '—'}</span> },
   ];
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -829,7 +829,7 @@ export default function Blogs() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm"
+          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-sm border border-gray-100 dark:border-gray-700 shadow-sm"
         >
           <div className="flex items-center gap-4 flex-1">
             <div className="relative flex-1">
@@ -839,7 +839,7 @@ export default function Blogs() {
                 placeholder="Search posts by title or path…"
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-fuchsia-500/10 focus:border-fuchsia-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
+                className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-fuchsia-500/10 focus:border-fuchsia-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
               />
               {searchTerm && (
                 <button onClick={() => { setSearchTerm(''); setCurrentPage(1); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1">
@@ -863,7 +863,7 @@ export default function Blogs() {
 
         {/* Empty State */}
         {!loading && blogs.length === 0 && (
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-950/50">
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-sm shadow-xl dark:shadow-gray-950/50">
             <FileText className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
             <p className="text-xl text-gray-500 dark:text-gray-400">No blog posts found</p>
             <p className="text-gray-400 dark:text-gray-500 mt-2">
@@ -872,7 +872,7 @@ export default function Blogs() {
             {!searchTerm && (
               <button
                 onClick={handleCreateNew}
-                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-fuchsia-600 text-white text-sm font-semibold hover:bg-fuchsia-700 transition-all"
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-sm bg-fuchsia-600 text-white text-sm font-semibold hover:bg-fuchsia-700 transition-all"
               >
                 <Plus size={16} /> Write First Post
               </button>
@@ -883,7 +883,7 @@ export default function Blogs() {
         {/* Content */}
         {!loading && blogs.length > 0 && (
           <>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
 
               {viewMode === 'table' && (
                 <ManagementTable
@@ -892,9 +892,9 @@ export default function Blogs() {
                   rowKey="blog_id"
                   onRowClick={(row) => handleView(row)}
                   getActions={(row) => [
-                    { label: 'View Details', icon: <Eye size={12} />,   onClick: () => handleView(row),         className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
-                    { label: 'Edit Post',    icon: <Edit size={12} />,   onClick: () => handleEdit(row),         className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
-                    { label: 'Delete',       icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
+                    { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
+                    { label: 'Edit Post', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
+                    { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
                   ]}
                   accent="fuchsia"
                 />
@@ -970,7 +970,7 @@ export default function Blogs() {
               <button
                 disabled={isDeleting}
                 onClick={confirmDelete}
-                className="px-5 py-2.5 rounded-xl bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
+                className="px-5 py-2.5 rounded-sm bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {isDeleting ? 'Deleting...' : 'Yes, Delete Post'}
               </button>

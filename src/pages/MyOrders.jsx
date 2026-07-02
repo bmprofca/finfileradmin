@@ -26,7 +26,7 @@ const STATUS_COLORS = {
 const StatusBadge = ({ status }) => {
   const normalizedStatus = (status || '').toString().toLowerCase();
   const config = STATUS_COLORS[normalizedStatus] || { pill: 'bg-slate-100 text-slate-700 border border-slate-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700', dot: 'bg-slate-400 dark:bg-gray-500' };
-  
+
   // Capitalize first letter of each word for display
   const displayStatus = normalizedStatus.replace(/\b\w/g, l => l.toUpperCase());
 
@@ -83,11 +83,10 @@ const PaymentText = ({ order }) => {
   const isPaid = paymentState === 'paid';
 
   return (
-    <span className={`whitespace-nowrap text-xs font-semibold ${
-      isPaid
+    <span className={`whitespace-nowrap text-xs font-semibold ${isPaid
         ? 'text-emerald-700 dark:text-emerald-300'
         : 'text-amber-700 dark:text-amber-300'
-    }`}>
+      }`}>
       {isPaid ? 'Paid' : `Due ${formatCurrency(order.due_amount)}`}
     </span>
   );
@@ -102,7 +101,7 @@ const OrderCard = ({ order, index, actions, onViewDocuments }) => (
     title={order.name}
     subtitle={order.service_name}
     icon={
-      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+      <div className="w-10 h-10 rounded-sm bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
         <Briefcase size={20} />
       </div>
     }
@@ -236,7 +235,7 @@ export default function MyOrders() {
         a.download = data.data.filename || 'statement.pdf';
         document.body.appendChild(a);
         a.click();
-        
+
         document.body.removeChild(a);
         setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1000);
         toast.dismiss(toastId);
@@ -306,7 +305,7 @@ export default function MyOrders() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-4 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm dark:shadow-gray-950/30"
+            className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-4 rounded-sm border border-slate-200 dark:border-gray-700 shadow-sm dark:shadow-gray-950/30"
           >
             <div className="flex items-center gap-4 flex-1">
               <div className="relative flex-1">
@@ -316,7 +315,7 @@ export default function MyOrders() {
                   placeholder="Search your orders..."
                   value={searchTerm}
                   onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                  className="w-full pl-11 pr-10 py-2 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-950 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm min-h-[42px]"
+                  className="w-full pl-11 pr-10 py-2 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-950 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm min-h-[42px]"
                 />
                 {searchTerm && (
                   <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1">
@@ -336,7 +335,7 @@ export default function MyOrders() {
 
           {/* Empty state */}
           {!loading && orders.length === 0 && (
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-950/50">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-sm shadow-xl dark:shadow-gray-950/50">
               <Briefcase className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
               <p className="text-xl text-gray-500 dark:text-gray-400">No orders found</p>
               <p className="text-gray-400 dark:text-gray-500 mt-2">{searchTerm ? 'Try adjusting your search' : 'You do not have any assigned orders yet'}</p>
@@ -351,7 +350,7 @@ export default function MyOrders() {
           {/* Content */}
           {!loading && orders.length > 0 && (
             <>
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
 
                 {/* Table View */}
                 {viewMode === 'table' && (

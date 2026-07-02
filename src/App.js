@@ -9,6 +9,7 @@ import { PermissionsProvider } from "./contexts/PermissionsContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PermissionRoute from "./components/PermissionRoute";
 import PublicRoute from "./components/PublicRoute";
+import RoleRoute from "./components/RoleRoute";
 import MainLayout from "./components/layout/MainLayout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -71,7 +72,7 @@ function App() {
                     <Route path="staffs/:username" element={<PermissionRoute modules="staff"><StaffProfile /></PermissionRoute>} />
                     
                     {/* Other Routes */}
-                    <Route path="my-orders" element={<PermissionRoute modules={['my_order', 'order']}><MyOrders /></PermissionRoute>} />
+                    <Route path="my-orders" element={<RoleRoute allowedRoles={['staff']}><PermissionRoute><MyOrders /></PermissionRoute></RoleRoute>} />
                     <Route path="orders" element={<PermissionRoute modules="order"><Orders /></PermissionRoute>} />
                     <Route path="orders/:orderId/upload-documents" element={<PermissionRoute modules="order"><OrderDocumentUpload /></PermissionRoute>} />
                     <Route path="documents" element={<Documents />} />

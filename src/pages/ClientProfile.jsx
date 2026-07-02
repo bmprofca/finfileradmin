@@ -81,7 +81,7 @@ export default function ClientProfile() {
     >
       <div className="space-y-6">
         {/* Tabs */}
-        <div className="flex flex-wrap gap-1 bg-white dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="flex flex-wrap gap-1 bg-white dark:bg-gray-800 p-1 rounded-sm border border-gray-200 dark:border-gray-700 shadow-sm">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.key;
@@ -91,10 +91,9 @@ export default function ClientProfile() {
                 onClick={() => setActiveTab(tab.key)}
                 className={`
                   flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
-                  ${
-                    isActive
-                      ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
-                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  ${isActive
+                    ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                   }
                 `}
               >

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Menu, 
-  X, 
-  User, 
-  ChevronDown, 
-  Settings, 
+import {
+  Menu,
+  X,
+  User,
+  ChevronDown,
+  Settings,
   LogOut,
   Sun,
   Moon,
@@ -70,7 +70,7 @@ const Navbar = ({
               {/* Theme Toggle Button */}
               <button
                 onClick={toggleTheme}
-                className="relative w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 group focus:outline-none
+                className="relative w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-300 group focus:outline-none
                   bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700
                   border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500
                   hover:shadow-md active:scale-95"
@@ -116,7 +116,7 @@ const Navbar = ({
                 {openDropdown && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setOpenDropdown(false)} />
-                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-950/50 border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
+                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-sm shadow-xl dark:shadow-gray-950/50 border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
                       {/* Mobile user info */}
                       <div className="md:hidden p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">

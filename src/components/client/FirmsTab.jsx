@@ -212,14 +212,14 @@ export default function FirmsTab({ username, refreshTrigger }) {
       </div>
 
       {filteredFirms.length === 0 ? (
-        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-sm border border-gray-200 dark:border-gray-700">
           <Building2 className="text-gray-300 dark:text-gray-600 mx-auto mb-3" size={48} />
           <p className="text-gray-500 dark:text-gray-400">No firms registered</p>
         </div>
       ) : (
         <>
           {viewMode === 'table' ? (
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="bg-white dark:bg-gray-800 rounded-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
               <ManagementTable
                 columns={columns}
                 rows={filteredFirms}
@@ -230,7 +230,7 @@ export default function FirmsTab({ username, refreshTrigger }) {
               />
             </div>
           ) : (
-            <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-sm border border-gray-200 dark:border-gray-700">
               <AnimatePresence>
                 {filteredFirms.map((firm) => (
                   <FirmCard key={firm.firm_id} firm={firm} />
@@ -255,7 +255,7 @@ export default function FirmsTab({ username, refreshTrigger }) {
           <div className="space-y-4">
             <div className="flex items-start justify-between gap-3 pb-4 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shrink-0">
+                <div className="w-12 h-12 rounded-sm bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shrink-0">
                   <Building2 size={24} />
                 </div>
                 <div className="min-w-0">

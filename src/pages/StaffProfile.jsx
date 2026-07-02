@@ -25,7 +25,7 @@ const STATUS_COLORS = {
 const StatusBadge = ({ status }) => {
   const normalizedStatus = (status || '').toString().toLowerCase();
   const config = STATUS_COLORS[normalizedStatus] || { pill: 'bg-gray-100 text-gray-700 border border-gray-200', dot: 'bg-gray-400' };
-  
+
   // Capitalize first letter of each word for display
   const displayStatus = normalizedStatus.replace(/\b\w/g, l => l.toUpperCase());
 
@@ -45,7 +45,7 @@ const OrderCard = ({ order, index }) => (
     title={order.name}
     subtitle={order.service_name}
     icon={
-      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+      <div className="w-10 h-10 rounded-sm bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
         <Briefcase size={20} />
       </div>
     }
@@ -118,7 +118,7 @@ export default function StaffProfile() {
       lastFetchRef.current.search === searchTerm &&
       lastFetchRef.current.limit === itemsPerPage
     ) return;
-    
+
     lastFetchRef.current = { username, page: currentPage, search: searchTerm, limit: itemsPerPage };
     fetchProfileAndOrders();
   }, [username, currentPage, searchTerm, itemsPerPage]);
@@ -162,10 +162,10 @@ export default function StaffProfile() {
       }
     >
       <div className="space-y-6">
-        
+
         {/* Profile Details Card */}
         {staff && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white dark:bg-gray-800 p-6 rounded-sm shadow-sm border border-gray-100 dark:border-gray-700">
             <div className="flex items-center gap-6">
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg shrink-0">
                 {staff.full_name?.charAt(0)?.toUpperCase()}
@@ -197,7 +197,7 @@ export default function StaffProfile() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm"
+            className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-sm border border-gray-100 dark:border-gray-700 shadow-sm"
           >
             <div className="flex items-center gap-4 flex-1">
               <div className="relative flex-1">
@@ -207,7 +207,7 @@ export default function StaffProfile() {
                   placeholder="Search orders..."
                   value={searchTerm}
                   onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                  className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
+                  className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
                 />
                 {searchTerm && (
                   <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1">
@@ -227,7 +227,7 @@ export default function StaffProfile() {
 
           {/* Empty state */}
           {!loading && orders.length === 0 && (
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-950/50">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-sm shadow-xl dark:shadow-gray-950/50">
               <Briefcase className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
               <p className="text-xl text-gray-500 dark:text-gray-400">No orders found</p>
               <p className="text-gray-400 dark:text-gray-500 mt-2">{searchTerm ? 'Try adjusting your search' : 'No orders assigned to this staff yet'}</p>
@@ -242,7 +242,7 @@ export default function StaffProfile() {
           {/* Content */}
           {!loading && orders.length > 0 && (
             <>
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
 
                 {/* Table View */}
                 {viewMode === 'table' && (

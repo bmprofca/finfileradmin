@@ -44,7 +44,7 @@ export default function Documents() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [totalItems, setTotalItems] = useState(0);
-  
+
   const lastFetchRef = useRef(null);
   const activeFetchRef = useRef(null);
 
@@ -77,7 +77,7 @@ export default function Documents() {
     lastFetchRef.current = queryString;
     activeFetchRef.current = queryString;
     setLoading(true);
-    
+
     try {
       const response = await apiCall(`/api/admin/documents/list?${queryString}`, 'GET');
       const data = await response.json();
@@ -190,7 +190,7 @@ export default function Documents() {
             const separator = downloadUrl.includes('?') ? '&' : '?';
             downloadUrl = `${downloadUrl}${separator}b2ContentDisposition=${encodeURIComponent(disposition)}`;
           }
-          
+
           const a = window.document.createElement('a');
           a.href = downloadUrl;
           a.download = document.file_name || 'document';
@@ -227,12 +227,12 @@ export default function Documents() {
         {loading ? (
           <PageContentSkeleton viewMode="table" rows={5} columns={3} />
         ) : documents.length === 0 ? (
-          <div className="rounded-xl border border-gray-200 bg-white py-16 text-center dark:border-gray-700 dark:bg-gray-800 shadow-sm">
+          <div className="rounded-sm border border-gray-200 bg-white py-16 text-center dark:border-gray-700 dark:bg-gray-800 shadow-sm">
             <FileText className="mx-auto mb-3 text-gray-300 dark:text-gray-600" size={56} />
             <p className="text-xl text-gray-500 dark:text-gray-400">No documents found</p>
           </div>
         ) : (
-          <div className="rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="rounded-sm bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700">
             <ManagementTable
               columns={columns}
               rows={documents}

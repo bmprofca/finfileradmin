@@ -18,11 +18,10 @@ import apiCall from '../utils/apiCall';
 const StatusBadge = ({ status }) => {
   const isActive = status === true || status === 1;
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
-      isActive
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${isActive
         ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700'
         : 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600'
-    }`}>
+      }`}>
       {isActive ? <CheckCircle size={10} /> : <XCircle size={10} />}
       {isActive ? 'Active' : 'Inactive'}
     </span>
@@ -30,16 +29,15 @@ const StatusBadge = ({ status }) => {
 };
 
 const MODULE_COLORS = {
-  client:  'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-700',
-  firm:    'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-700',
-  order:   'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-700',
+  client: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-700',
+  firm: 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-700',
+  order: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-700',
   payment: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-700',
 };
 
 const ModuleBadge = ({ module }) => (
-  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border capitalize ${
-    MODULE_COLORS[module] || 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600'
-  }`}>
+  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border capitalize ${MODULE_COLORS[module] || 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600'
+    }`}>
     {module}
   </span>
 );
@@ -53,13 +51,11 @@ const ToggleBtn = ({ permission, onToggle, toggling }) => {
     <button
       onClick={(e) => { e.stopPropagation(); onToggle(permission); }}
       disabled={isTogglingThis}
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
-        isTogglingThis ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'
-      } ${
-        isActive
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${isTogglingThis ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'
+        } ${isActive
           ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800'
           : 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'
-      }`}
+        }`}
     >
       {isTogglingThis
         ? <RefreshCw size={11} className="animate-spin" />
@@ -178,11 +174,10 @@ export default function Permissions() {
       label: 'Permission',
       render: (row) => (
         <div className="flex items-center gap-2">
-          <div className={`p-1.5 rounded-lg ${
-            row.status === true || row.status === 1
+          <div className={`p-1.5 rounded-lg ${row.status === true || row.status === 1
               ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
               : 'bg-gray-100 dark:bg-gray-700 text-gray-400'
-          }`}>
+            }`}>
             <Shield size={13} />
           </div>
           <span className="font-semibold text-gray-800 dark:text-gray-100 text-sm whitespace-nowrap">{row.name}</span>
@@ -234,7 +229,7 @@ export default function Permissions() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm"
+          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-sm border border-gray-100 dark:border-gray-700 shadow-sm"
         >
           <div className="flex items-center gap-4 flex-1">
             <div className="relative flex-1">
@@ -244,7 +239,7 @@ export default function Permissions() {
                 placeholder="Search by name, module, description..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
+                className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
               />
               {searchTerm && (
                 <button
@@ -274,7 +269,7 @@ export default function Permissions() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-950/50"
+            className="text-center py-16 bg-white dark:bg-gray-800 rounded-sm shadow-xl dark:shadow-gray-950/50"
           >
             <Lock className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
             <p className="text-xl text-gray-500 dark:text-gray-400">No permissions found</p>
@@ -290,7 +285,7 @@ export default function Permissions() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="rounded-xl bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50"
+            className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50"
           >
             {/* Table View */}
             {viewMode === 'table' && (

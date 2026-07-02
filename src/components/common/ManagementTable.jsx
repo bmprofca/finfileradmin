@@ -61,7 +61,7 @@ export default function ManagementTable({
     else if (containerWidth < 768) maxCols = 4;
     else if (containerWidth < 1024) maxCols = 5;
     else if (containerWidth < 1280) maxCols = 6;
-    
+
     return allVisibleColumns.slice(0, maxCols);
   };
 
@@ -88,7 +88,7 @@ export default function ManagementTable({
       ref={containerRef}
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
-      className={joinClasses('overflow-hidden rounded-xl bg-white dark:bg-gray-800 w-full', cardClass, containerClassName, className)}
+      className={joinClasses('overflow-hidden rounded-sm bg-white dark:bg-gray-800 w-full', cardClass, containerClassName, className)}
     >
       <div className={joinClasses('w-full', tableClassName)}>
         <table className="w-full table-fixed text-left text-sm text-gray-700 dark:text-gray-300">

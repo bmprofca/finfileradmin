@@ -73,9 +73,9 @@ function Calendar({ mode, viewDate, onViewChange, selectedSingle, onSelectSingle
       "w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-[10px] sm:text-xs select-none transition-colors duration-100 cursor-pointer ";
 
     if (mode === "single") {
-      if (sameDay(date, selectedSingle)) 
+      if (sameDay(date, selectedSingle))
         return base + "bg-blue-500 text-white rounded-lg font-medium dark:bg-blue-600";
-      if (sameDay(date, today)) 
+      if (sameDay(date, today))
         return base + "bg-blue-100 text-blue-700 rounded-lg font-medium dark:bg-blue-900/30 dark:text-blue-400";
       return base + "hover:bg-gray-100 rounded-lg text-gray-700 dark:text-gray-300 dark:hover:bg-gray-700/50";
     }
@@ -96,7 +96,7 @@ function Calendar({ mode, viewDate, onViewChange, selectedSingle, onSelectSingle
       return base + "bg-blue-500 text-white font-medium dark:bg-blue-600 rounded-r-lg rounded-l-none";
     if (lo && hi && date > lo && date < hi)
       return base + "bg-blue-100 text-blue-700 rounded-none dark:bg-blue-900/30 dark:text-blue-400";
-    if (sameDay(date, today)) 
+    if (sameDay(date, today))
       return base + "bg-blue-100 text-blue-600 rounded-lg font-medium dark:bg-blue-900/30 dark:text-blue-400";
     return base + "hover:bg-gray-100 rounded-lg text-gray-700 dark:text-gray-300 dark:hover:bg-gray-700/50";
   }
@@ -207,11 +207,10 @@ function MonthYearPicker({ month, year, onMonthChange, onYearChange }) {
             <button
               key={y}
               onClick={() => onYearChange(y)}
-              className={`py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors ${
-                year === y
+              className={`py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors ${year === y
                   ? "bg-blue-500 text-white dark:bg-blue-600"
                   : "border border-gray-100 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700/50"
-              }`}
+                }`}
             >
               {y}
             </button>
@@ -228,11 +227,10 @@ function MonthYearPicker({ month, year, onMonthChange, onYearChange }) {
               <button
                 key={name}
                 onClick={() => onMonthChange(val)}
-                className={`py-2 rounded-lg text-[11px] sm:text-xs font-medium transition-colors ${
-                  month === val
+                className={`py-2 rounded-lg text-[11px] sm:text-xs font-medium transition-colors ${month === val
                     ? "bg-blue-500 text-white dark:bg-blue-600"
                     : "border border-gray-100 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700/50"
-                }`}
+                  }`}
               >
                 {name}
               </button>
@@ -321,7 +319,7 @@ export default function AdvancedDateFilter({
 
     prevIsOpen.current = isOpen;
     prevValue.current = value;
-  // eslint-disable-next-line
+    // eslint-disable-next-line
   }, [isOpen, value, allowedTabs, activeTab]);
 
   useEffect(() => {
@@ -435,7 +433,7 @@ export default function AdvancedDateFilter({
   return (
     <div className="relative inline-block w-full">
       {/* Trigger */}
-      <div className={shouldShowStepper ? "flex w-full rounded-xl border border-slate-200 dark:border-gray-700 min-w-[260px] items-stretch" : ""}>
+      <div className={shouldShowStepper ? "flex w-full rounded-sm border border-slate-200 dark:border-gray-700 min-w-[260px] items-stretch" : ""}>
         {shouldShowStepper && (
           <button
             type="button"
@@ -466,11 +464,10 @@ export default function AdvancedDateFilter({
               if (canStepForward) applySingleDate(shiftDate(stepperDate, 1));
             }}
             disabled={!canStepForward}
-            className={`flex w-9 flex-shrink-0 items-center justify-center rounded-r-xl bg-blue-50 text-blue-600 transition hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-800/40 ${
-              canStepForward
+            className={`flex w-9 flex-shrink-0 items-center justify-center rounded-r-xl bg-blue-50 text-blue-600 transition hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-800/40 ${canStepForward
                 ? "border-blue-100 bg-blue-50 text-blue-600 dark:border-blue-800/30 dark:bg-blue-900/30 dark:text-blue-400"
                 : "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-600"
-            }`}
+              }`}
             title={canStepForward ? "Next day" : "Future dates are not available"}
           >
             <FaChevronRight size={11} />
@@ -510,7 +507,7 @@ export default function AdvancedDateFilter({
             </button>
 
             {/* Panel */}
-            <div className="w-full rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden font-sans flex flex-col dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-950/50">
+            <div className="w-full rounded-sm border border-gray-200 bg-white shadow-lg overflow-hidden font-sans flex flex-col dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-950/50">
 
               {/* Header — selected label */}
               <div className="px-3 sm:px-4 pt-2.5 sm:pt-3 pb-2 border-b border-gray-100 dark:border-gray-700">
@@ -525,11 +522,10 @@ export default function AdvancedDateFilter({
                     <button
                       key={t.key}
                       onClick={() => setActiveTab(t.key)}
-                      className={`min-w-0 flex-1 py-2 text-[10px] sm:text-[11px] font-medium transition-colors border-b-2 ${
-                        activeTab === t.key
+                      className={`min-w-0 flex-1 py-2 text-[10px] sm:text-[11px] font-medium transition-colors border-b-2 ${activeTab === t.key
                           ? "border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400"
                           : "border-transparent text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-                      }`}
+                        }`}
                     >
                       {t.label}
                     </button>

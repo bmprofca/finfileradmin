@@ -56,7 +56,7 @@ export default function ManagementHub({
           initial={{ opacity: 0, y: -14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="mb-4 rounded-lg border border-slate-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 p-2.5 shadow-sm shadow-slate-200/40 dark:shadow-none backdrop-blur md:p-3"
+          className="mb-4 rounded-sm border border-slate-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 p-2.5 shadow-sm shadow-slate-200/40 dark:shadow-none backdrop-blur md:p-3"
         >
           <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
@@ -88,7 +88,7 @@ export default function ManagementHub({
                   )}
                   {actions}
                 </div>
-                
+
               </div>
             )}
           </div>
@@ -108,7 +108,7 @@ export default function ManagementHub({
                     disabled={disabled}
                     title={tab.title || tab.description || tab.label}
                     className={joinClasses(
-                      'inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-xs font-semibold transition-all duration-200',
+                      'inline-flex items-center gap-1 rounded-sm border px-3 py-2 text-xs font-semibold transition-all duration-200',
                       isActive
                         ? activeButtonStyles[accent] || activeButtonStyles.slate
                         : disabled

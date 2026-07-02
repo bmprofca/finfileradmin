@@ -34,11 +34,11 @@ const FIRM_TYPES = [
 const FirmTypeBadge = ({ type }) => {
   const colorMap = {
     'Private Limited': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800',
-    'Public Limited':  'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800',
-    'Partnership':     'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800',
-    'Proprietorship':  'bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-800',
-    'LLP':             'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800',
-    'OPC':             'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-800',
+    'Public Limited': 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800',
+    'Partnership': 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800',
+    'Proprietorship': 'bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-800',
+    'LLP': 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800',
+    'OPC': 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-800',
   };
   const cls = colorMap[type] || 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600';
   return (
@@ -50,7 +50,7 @@ const FirmTypeBadge = ({ type }) => {
 };
 
 const InfoItem = ({ icon: Icon, label, value }) => (
-  <div className="flex items-start gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
+  <div className="flex items-start gap-2 rounded-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
     <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600">
       <Icon size={14} className="dark:text-gray-300" />
     </div>
@@ -74,7 +74,7 @@ const FirmAvatar = ({ firm, size = 'md' }) => {
     .toUpperCase() || '?';
 
   return (
-    <div className={`${cls} rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold shrink-0`}>
+    <div className={`${cls} rounded-sm bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold shrink-0`}>
       {initials.length > 1 ? initials : <Building2 size={16} />}
     </div>
   );
@@ -94,13 +94,13 @@ const ViewFirmModal = ({ firm, onClose, onEdit, onDelete, onDocuments }) => (
       <>
         <button
           onClick={() => onDelete(firm)}
-          className="px-5 py-2.5 rounded-xl border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2"
+          className="px-5 py-2.5 rounded-sm border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2"
         >
           <Trash2 size={16} /> Delete
         </button>
         <button
           onClick={() => onEdit(firm)}
-          className="px-5 py-2.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2"
+          className="px-5 py-2.5 rounded-sm bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2"
         >
           <Edit size={16} /> Edit Firm
         </button>
@@ -174,7 +174,7 @@ const FirmFormModal = ({ firm, onClose, onSubmit, isSubmitting }) => {
   };
 
   const inputCls =
-    'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all text-sm dark:text-gray-100';
+    'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-sm focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all text-sm dark:text-gray-100';
 
   return (
     <Modal
@@ -190,7 +190,7 @@ const FirmFormModal = ({ firm, onClose, onSubmit, isSubmitting }) => {
           type="submit"
           form="firm-form"
           disabled={isSubmitting}
-          className="px-5 py-2.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2 disabled:opacity-50"
+          className="px-5 py-2.5 rounded-sm bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2 disabled:opacity-50"
         >
           {isSubmitting ? 'Saving...' : isEdit ? 'Update Firm' : 'Create Firm'}
         </button>
@@ -286,9 +286,9 @@ const FirmManagementCard = ({ firm, index, onView, onEdit, onDelete, onDocuments
     hoverable
     actions={[
       { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(firm), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
-      { label: 'Documents',    icon: <FileText size={12} />, onClick: () => onDocuments(firm), className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300' },
-      { label: 'Edit Firm',    icon: <Edit size={12} />, onClick: () => onEdit(firm),  className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
-      { label: 'Delete',       icon: <Trash2 size={12} />, onClick: () => onDelete(firm), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
+      { label: 'Documents', icon: <FileText size={12} />, onClick: () => onDocuments(firm), className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300' },
+      { label: 'Edit Firm', icon: <Edit size={12} />, onClick: () => onEdit(firm), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
+      { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => onDelete(firm), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
     ]}
     menuId={`firm-card-${firm.firm_id}`}
     footer={
@@ -398,11 +398,11 @@ export default function Firms() {
   const handleRefresh = () => { setRefreshing(true); fetchFirms({ force: true }); };
 
   // ── Handlers ──────────────────────────────────────────────────────────────
-  const handleView         = (firm) => { setSelectedFirm(firm); setIsViewModalOpen(true); };
-  const handleEdit         = (firm) => { setEditingFirm(firm); setIsFormModalOpen(true); setIsViewModalOpen(false); };
-  const handleCreateNew    = () => { setEditingFirm(null); setIsFormModalOpen(true); };
-  const handleDeleteRequest= (firm) => { setFirmToDelete(firm); setIsDeleteModalOpen(true); setIsViewModalOpen(false); };
-  const handleViewDocuments= (firm) => {
+  const handleView = (firm) => { setSelectedFirm(firm); setIsViewModalOpen(true); };
+  const handleEdit = (firm) => { setEditingFirm(firm); setIsFormModalOpen(true); setIsViewModalOpen(false); };
+  const handleCreateNew = () => { setEditingFirm(null); setIsFormModalOpen(true); };
+  const handleDeleteRequest = (firm) => { setFirmToDelete(firm); setIsDeleteModalOpen(true); setIsViewModalOpen(false); };
+  const handleViewDocuments = (firm) => {
     setIsViewModalOpen(false);
     navigate('/documents', {
       state: {
@@ -438,11 +438,11 @@ export default function Firms() {
   const handleFormSubmit = async (formData) => {
     setIsSubmitting(true);
     try {
-      const isEdit   = !!editingFirm;
+      const isEdit = !!editingFirm;
       const endpoint = isEdit ? `/api/admin/firms/update/${editingFirm.firm_id}` : '/api/admin/firms/create';
-      const method   = isEdit ? 'PUT' : 'POST';
+      const method = isEdit ? 'PUT' : 'POST';
       const response = await apiCall(endpoint, method, formData);
-      const json     = await response.json();
+      const json = await response.json();
       if (json.success) {
         setIsFormModalOpen(false);
         fetchFirms({ force: true });
@@ -466,13 +466,14 @@ export default function Firms() {
         </div>
       ),
     },
-    { key: 'type',        label: 'Type',       render: (row) => <FirmTypeBadge type={row.type} /> },
-    { key: 'client_name', label: 'Client',     render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">{row.client_name || '—'}</span> },
-    { key: 'pan_no',      label: 'PAN',        render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">{row.pan_no || '—'}</span> },
-    { key: 'gst_no',      label: 'GST',        render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">{row.gst_no || '—'}</span> },
-    { key: 'vat_no',      label: 'VAT',        render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">{row.vat_no || '—'}</span> },
-    { key: 'tan_no',      label: 'TAN',        render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">{row.tan_no || '—'}</span> },
-    { key: 'documents',   label: 'Documents',  render: (row) => (
+    { key: 'type', label: 'Type', render: (row) => <FirmTypeBadge type={row.type} /> },
+    { key: 'client_name', label: 'Client', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">{row.client_name || '—'}</span> },
+    { key: 'pan_no', label: 'PAN', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">{row.pan_no || '—'}</span> },
+    { key: 'gst_no', label: 'GST', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">{row.gst_no || '—'}</span> },
+    { key: 'vat_no', label: 'VAT', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">{row.vat_no || '—'}</span> },
+    { key: 'tan_no', label: 'TAN', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">{row.tan_no || '—'}</span> },
+    {
+      key: 'documents', label: 'Documents', render: (row) => (
         <button
           type="button"
           onClick={(event) => {
@@ -485,7 +486,7 @@ export default function Firms() {
         </button>
       )
     },
-    { key: 'create_date', label: 'Created',    render: (row) => <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{row.create_date ? new Date(row.create_date).toLocaleDateString() : '—'}</span> },
+    { key: 'create_date', label: 'Created', render: (row) => <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{row.create_date ? new Date(row.create_date).toLocaleDateString() : '—'}</span> },
   ];
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -509,7 +510,7 @@ export default function Firms() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm"
+          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-sm border border-gray-100 dark:border-gray-700 shadow-sm"
         >
           <div className="flex items-center gap-4 flex-1">
             <div className="relative flex-1">
@@ -519,7 +520,7 @@ export default function Firms() {
                 placeholder="Search firms by name, PAN, GST, client…"
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
+                className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
               />
               {searchTerm && (
                 <button onClick={() => { setSearchTerm(''); setCurrentPage(1); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1">
@@ -543,7 +544,7 @@ export default function Firms() {
 
         {/* Empty State */}
         {!loading && firms.length === 0 && (
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-950/50">
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-sm shadow-xl dark:shadow-gray-950/50">
             <Building2 className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
             <p className="text-xl text-gray-500 dark:text-gray-400">No firms found</p>
             <p className="text-gray-400 dark:text-gray-500 mt-2">
@@ -552,7 +553,7 @@ export default function Firms() {
             {!searchTerm && (
               <button
                 onClick={handleCreateNew}
-                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-all"
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-sm bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-all"
               >
                 <Plus size={16} /> Add First Firm
               </button>
@@ -563,7 +564,7 @@ export default function Firms() {
         {/* Content */}
         {!loading && firms.length > 0 && (
           <>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
 
               {viewMode === 'table' && (
                 <ManagementTable
@@ -572,10 +573,10 @@ export default function Firms() {
                   rowKey="firm_id"
                   onRowClick={(row) => handleView(row)}
                   getActions={(row) => [
-                    { label: 'View Details', icon: <Eye size={12} />,   onClick: () => handleView(row),          className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
-                    { label: 'Documents',    icon: <FileText size={12} />, onClick: () => handleViewDocuments(row), className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300' },
-                    { label: 'Edit Firm',    icon: <Edit size={12} />,   onClick: () => handleEdit(row),          className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
-                    { label: 'Delete',       icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
+                    { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
+                    { label: 'Documents', icon: <FileText size={12} />, onClick: () => handleViewDocuments(row), className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300' },
+                    { label: 'Edit Firm', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
+                    { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
                   ]}
                   accent="violet"
                 />
@@ -653,7 +654,7 @@ export default function Firms() {
               <button
                 disabled={isDeleting}
                 onClick={confirmDelete}
-                className="px-5 py-2.5 rounded-xl bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
+                className="px-5 py-2.5 rounded-sm bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {isDeleting ? 'Deleting...' : 'Yes, Delete Firm'}
               </button>

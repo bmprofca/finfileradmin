@@ -212,7 +212,7 @@ export default function PaymentsTab({ username, refreshTrigger }) {
       title={`Order: ${payment.order_id}`}
       subtitle={`Gateway: ${payment.gateway || '—'}`}
       icon={
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+        <div className="w-10 h-10 rounded-sm bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
           <CreditCard size={20} />
         </div>
       }
@@ -235,8 +235,8 @@ export default function PaymentsTab({ username, refreshTrigger }) {
   return (
     <div className="space-y-3">
       {/* Filters */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-200 dark:border-gray-700">
-        
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white dark:bg-gray-800 p-3 rounded-sm border border-gray-200 dark:border-gray-700">
+
         {/* Search */}
         <div className="relative flex-1 w-full shrink-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
@@ -301,7 +301,7 @@ export default function PaymentsTab({ username, refreshTrigger }) {
       </div>
 
       {payments?.length === 0 ? (
-        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-sm border border-gray-200 dark:border-gray-700">
           <CreditCard className="text-gray-300 dark:text-gray-600 mx-auto mb-3" size={48} />
           <p className="text-gray-500 dark:text-gray-400">No payments found</p>
           {(searchTerm || hasActiveFilters) && (
@@ -311,11 +311,11 @@ export default function PaymentsTab({ username, refreshTrigger }) {
       ) : (
         <>
           {viewMode === 'table' ? (
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="bg-white dark:bg-gray-800 rounded-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
               <ManagementTable columns={columns} rows={payments || []} rowKey="payment_id" accent="emerald" getActions={getActions} onRowClick={(row) => handleViewPayment(row)} />
             </div>
           ) : (
-            <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-sm border border-gray-200 dark:border-gray-700">
               <AnimatePresence>
                 {payments.map((payment) => (
                   <PaymentCard key={payment.payment_id} payment={payment} />

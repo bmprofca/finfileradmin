@@ -216,8 +216,8 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
     setFormData(prev => ({ ...prev, [name]: selectedOption?.value ?? "" }));
   };
 
-  const inputCls = "w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none";
-  const readOnlyCls = "w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-100 dark:bg-gray-600/50 text-gray-500 dark:text-gray-400 cursor-not-allowed outline-none";
+  const inputCls = "w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none";
+  const readOnlyCls = "w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-100 dark:bg-gray-600/50 text-gray-500 dark:text-gray-400 cursor-not-allowed outline-none";
 
   const selectStyles = {
     control: (base) => ({
@@ -317,7 +317,7 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
           type="submit"
           form="service-form"
           disabled={isSubmitting}
-          className="px-5 py-2.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50"
+          className="px-5 py-2.5 rounded-sm bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50"
         >
           {isSubmitting ? 'Saving...' : 'Save Service'}
         </button>
@@ -503,7 +503,7 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
 
           {/* Live calculation summary */}
           {(Number(formData.base_price) > 0) && (
-            <div className="mt-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs text-emerald-700 dark:text-emerald-300 flex flex-wrap gap-x-4 gap-y-1">
+            <div className="mt-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-sm text-xs text-emerald-700 dark:text-emerald-300 flex flex-wrap gap-x-4 gap-y-1">
               <span>Base <strong>{formData.base_price}</strong></span>
               <span>+ Tax <strong>{formData.tax_value || 0}</strong></span>
               <span>= Total <strong>{formData.total_fees || 0}</strong></span>
@@ -518,7 +518,7 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
         {/* ── Dynamic Fields ──────────────────────────────────────────────── */}
         <section>
           <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 border-b pb-2 dark:border-gray-700">Dynamic Fields</h3>
-          <div className="bg-gray-50 dark:bg-gray-800/50 p-5 rounded-xl border border-gray-200 dark:border-gray-700">
+          <div className="bg-gray-50 dark:bg-gray-800/50 p-5 rounded-sm border border-gray-200 dark:border-gray-700">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {FIELD_OPTIONS.map((field) => {
                 const enabled = Boolean(formData.fields?.[field.key]);
@@ -527,7 +527,7 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
                     key={field.key}
                     type="button"
                     onClick={() => handleFieldToggle(field.key)}
-                    className="flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white px-4 py-3 text-left shadow-sm transition-all hover:border-emerald-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-emerald-700"
+                    className="flex items-center justify-between gap-4 rounded-sm border border-gray-200 bg-white px-4 py-3 text-left shadow-sm transition-all hover:border-emerald-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-emerald-700"
                   >
                     <div>
                       <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">{field.label}</p>
@@ -549,13 +549,13 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
         <section>
           <div className="flex justify-between items-center mb-4 border-b pb-2 dark:border-gray-700">
             <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Required Documents</h3>
-            <button type="button" onClick={handleAddDocument} className="text-emerald-600 dark:text-emerald-400 text-sm font-semibold flex items-center gap-1.5 hover:text-emerald-700 dark:hover:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/30 px-4 py-2 rounded-xl transition-colors">
+            <button type="button" onClick={handleAddDocument} className="text-emerald-600 dark:text-emerald-400 text-sm font-semibold flex items-center gap-1.5 hover:text-emerald-700 dark:hover:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/30 px-4 py-2 rounded-sm transition-colors">
               <Plus size={16} /> Add Document
             </button>
           </div>
           <div className="space-y-4">
             {formData.documents.map((doc, index) => (
-              <div key={index} className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800/50 relative shadow-sm">
+              <div key={index} className="p-4 border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-50 dark:bg-gray-800/50 relative shadow-sm">
                 <button type="button" onClick={() => handleRemoveDocument(index)} className="absolute top-4 right-4 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 bg-white dark:bg-gray-800 rounded-full p-1 shadow-sm">
                   <Trash2 size={16} />
                 </button>
@@ -583,7 +583,7 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
                             key={extension}
                             type="button"
                             onClick={() => handleDocumentExtensionToggle(index, extension)}
-                            className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold uppercase transition-colors ${isSelected
+                            className={`inline-flex items-center gap-2 rounded-sm border px-3 py-2 text-xs font-semibold uppercase transition-colors ${isSelected
                               ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
                               : 'border-gray-300 bg-white text-gray-600 hover:border-emerald-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300'
                               }`}
@@ -623,7 +623,7 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
               </div>
             ))}
             {formData.documents.length === 0 && (
-              <p className="text-sm text-gray-500 italic p-4 text-center bg-gray-50 dark:bg-gray-800/30 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+              <p className="text-sm text-gray-500 italic p-4 text-center bg-gray-50 dark:bg-gray-800/30 rounded-sm border border-dashed border-gray-200 dark:border-gray-700">
                 No documents required for this service.
               </p>
             )}
@@ -637,7 +637,7 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
             htmlFor="service-image-upload"
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleImageDrop}
-            className={`mt-2 flex cursor-pointer justify-center rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 px-6 py-8 bg-gray-50 dark:bg-gray-800/50 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus-within:ring-4 focus-within:ring-emerald-500/10 ${isUploadingImage ? 'pointer-events-none opacity-50' : ''}`}
+            className={`mt-2 flex cursor-pointer justify-center rounded-sm border-2 border-dashed border-gray-300 dark:border-gray-600 px-6 py-8 bg-gray-50 dark:bg-gray-800/50 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus-within:ring-4 focus-within:ring-emerald-500/10 ${isUploadingImage ? 'pointer-events-none opacity-50' : ''}`}
           >
             <div className="text-center flex flex-col items-center">
               {formData.image && !isUploadingImage ? (

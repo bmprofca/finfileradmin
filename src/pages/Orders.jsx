@@ -179,7 +179,7 @@ const StaffManagementModal = ({ order, allStaff, onClose, onSubmit, isSubmitting
           <button
             onClick={handleSubmit}
             disabled={isSubmitting || !hasChanges || isInitial()}
-            className="px-5 py-2.5 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 rounded-sm bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Users size={14} />
             {isSubmitting ? 'Updating...' : 'Update Staff'}
@@ -194,7 +194,7 @@ const StaffManagementModal = ({ order, allStaff, onClose, onSubmit, isSubmitting
 
         <div className="flex flex-col gap-4 lg:flex-row md:flex-row items-stretch">
           {/* Left Column - Available Staff */}
-          <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl p-3 bg-gray-50 dark:bg-gray-900/30">
+          <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-sm p-3 bg-gray-50 dark:bg-gray-900/30">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
                 <UserPlus size={14} className="text-indigo-500" />
@@ -251,7 +251,7 @@ const StaffManagementModal = ({ order, allStaff, onClose, onSubmit, isSubmitting
           </div>
 
           {/* Right Column - Assigned Staff */}
-          <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl p-3 bg-gray-50 dark:bg-gray-900/30">
+          <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-sm p-3 bg-gray-50 dark:bg-gray-900/30">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
                 <UserCheck size={14} className="text-green-500" />
@@ -321,7 +321,7 @@ const UserCheck = ({ size, className }) => (
 
 /* ─── Info Item ─── */
 const InfoItem = ({ icon: Icon, label, value }) => (
-  <div className="flex items-start gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
+  <div className="flex items-start gap-2 rounded-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
     <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600">
       <Icon size={14} className="text-indigo-500 dark:text-indigo-400" />
     </div>
@@ -348,19 +348,19 @@ const ViewOrderModal = ({ order, onClose, onManageStaff, onUpdateOrder, onUpdate
         <>
           <button
             onClick={() => onUpdateStatus(order)}
-            className="px-4 py-2.5 rounded-xl border border-emerald-200 dark:border-emerald-900/30 bg-emerald-50 dark:bg-emerald-900/20 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all flex items-center gap-2"
+            className="px-4 py-2.5 rounded-sm border border-emerald-200 dark:border-emerald-900/30 bg-emerald-50 dark:bg-emerald-900/20 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all flex items-center gap-2"
           >
             <RefreshCw size={14} /> Status
           </button>
           <button
             onClick={() => onUpdateOrder(order)}
-            className="px-4 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-900/30 bg-indigo-50 dark:bg-indigo-900/20 text-sm font-semibold text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-all flex items-center gap-2"
+            className="px-4 py-2.5 rounded-sm border border-indigo-200 dark:border-indigo-900/30 bg-indigo-50 dark:bg-indigo-900/20 text-sm font-semibold text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-all flex items-center gap-2"
           >
             <Edit size={14} /> Update
           </button>
           <button
             onClick={() => onManageStaff(order)}
-            className={`px-4 py-2.5 rounded-xl border transition-all flex items-center gap-2 ${hasAssignedStaff
+            className={`px-4 py-2.5 rounded-sm border transition-all flex items-center gap-2 ${hasAssignedStaff
               ? 'border-blue-200 dark:border-blue-900/30 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40'
               : 'border-yellow-200 dark:border-yellow-900/30 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/40'
               }`}
@@ -379,7 +379,7 @@ const ViewOrderModal = ({ order, onClose, onManageStaff, onUpdateOrder, onUpdate
       }
     >
       <div className="flex items-center gap-4 pb-4 border-b dark:border-gray-700">
-        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-indigo-500/30">
+        <div className="w-16 h-16 rounded-sm bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-indigo-500/30">
           <Briefcase size={28} />
         </div>
         <div>
@@ -415,7 +415,7 @@ const ViewOrderModal = ({ order, onClose, onManageStaff, onUpdateOrder, onUpdate
         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
           <Users className="text-indigo-500 dark:text-indigo-400" size={15} /> Assigned Staff
         </h4>
-        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-3">
+        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-sm border border-gray-200 dark:border-gray-700 p-3">
           {order.assigned_staff && order.assigned_staff.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {order.assigned_staff.map(s => (
@@ -457,7 +457,7 @@ const OrderUpdateModal = ({ order, onClose, onSubmit, isSubmitting }) => {
     partial_payment_allowed: order?.partial_payment_allowed ?? true,
   });
 
-  const inputCls = 'w-full px-3 py-2.5 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm';
+  const inputCls = 'w-full px-3 py-2.5 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm';
 
   const setText = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
   const setNumber = (key) => (e) => {
@@ -494,7 +494,7 @@ const OrderUpdateModal = ({ order, onClose, onSubmit, isSubmitting }) => {
           type="submit"
           form="order-update-form"
           disabled={isSubmitting}
-          className="px-5 py-2.5 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-50"
+          className="px-5 py-2.5 rounded-sm bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-50"
         >
           <Edit size={14} />
           {isSubmitting ? 'Updating...' : 'Update Order'}
@@ -534,7 +534,7 @@ const OrderUpdateModal = ({ order, onClose, onSubmit, isSubmitting }) => {
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200">
+            <label className="flex items-center gap-3 rounded-sm border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200">
               <input
                 type="checkbox"
                 checked={form.partial_payment_allowed}
@@ -557,7 +557,7 @@ const OrderStatusModal = ({ order, onClose, onSubmit, isSubmitting }) => {
     remark: order?.remark || '',
   });
 
-  const inputCls = 'w-full px-3 py-2.5 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm';
+  const inputCls = 'w-full px-3 py-2.5 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-sm focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm';
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -578,7 +578,7 @@ const OrderStatusModal = ({ order, onClose, onSubmit, isSubmitting }) => {
           type="submit"
           form="order-status-form"
           disabled={isSubmitting}
-          className="px-5 py-2.5 rounded-xl bg-emerald-600 dark:bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-all flex items-center gap-2 disabled:opacity-50"
+          className="px-5 py-2.5 rounded-sm bg-emerald-600 dark:bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-all flex items-center gap-2 disabled:opacity-50"
         >
           <RefreshCw size={14} />
           {isSubmitting ? 'Updating...' : 'Update Status'}
@@ -624,7 +624,7 @@ const OrderCard = ({ order, index, getActions, onClick, onManageStaff, onViewDoc
       subtitle={order.service_name}
       onClick={() => onClick && onClick(order)}
       icon={
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shrink-0">
+        <div className="w-10 h-10 rounded-sm bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shrink-0">
           <Briefcase size={20} />
         </div>
       }
@@ -1025,7 +1025,7 @@ export default function Orders() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-4 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm dark:shadow-gray-950/30"
+            className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-4 rounded-sm border border-slate-200 dark:border-gray-700 shadow-sm dark:shadow-gray-950/30"
           >
             <div className="flex items-center gap-4 flex-1">
               <div className="relative flex-1">
@@ -1035,7 +1035,7 @@ export default function Orders() {
                   placeholder="Search orders..."
                   value={searchTerm}
                   onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                  className="w-full pl-11 pr-10 py-2 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-950 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm min-h-[42px]"
+                  className="w-full pl-11 pr-10 py-2 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-950 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm min-h-[42px]"
                 />
                 {searchTerm && (
                   <button
@@ -1077,7 +1077,7 @@ export default function Orders() {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-950/50"
+              className="text-center py-16 bg-white dark:bg-gray-800 rounded-sm shadow-xl dark:shadow-gray-950/50"
             >
               <Briefcase className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
               <p className="text-xl text-gray-500 dark:text-gray-400">No orders found</p>
@@ -1094,7 +1094,7 @@ export default function Orders() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="rounded-xl bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50"
+                className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50"
               >
                 {/* Table View */}
                 {viewMode === 'table' && (

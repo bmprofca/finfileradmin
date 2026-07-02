@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  House, 
-  Users, 
-  ConciergeBell, 
-  LifeBuoy,  
+import {
+  House,
+  Users,
+  ConciergeBell,
+  LifeBuoy,
   Briefcase,
   ClipboardList,
   FileBox,
@@ -21,6 +21,17 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
   const location = useLocation();
   const currentPath = location.pathname;
   const { hasModuleAccess } = usePermissions();
+
+  const userDataStr = localStorage.getItem('user_data');
+  let userType = 'admin'; // default fallback
+  if (userDataStr) {
+    try {
+      const parsed = JSON.parse(userDataStr);
+      if (parsed && parsed.user_type) {
+        userType = parsed.user_type;
+      }
+    } catch (e) { }
+  }
 
   const allMenuItems = [
     {
@@ -45,6 +56,7 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
       label: 'My Orders',
       path: '/my-orders',
       modules: ['my_order'],
+      roles: ['staff'],
     },
     {
       icon: FileBox,
@@ -60,25 +72,25 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
     },
     {
       icon: BrickWall,
-      label:'Firms',
-      path:'/firms',
-      modules:['firm'],
-    },{
-      icon:IndianRupee,
-      label:'Payments',
-      path:'/payments',
-      modules:['payment'],
-    },{
-      icon:Newspaper,
-      label:'Blogs',
-      path:'/blogs',
-      modules:['blog']
-    },{
+      label: 'Firms',
+      path: '/firms',
+      modules: ['firm'],
+    }, {
+      icon: IndianRupee,
+      label: 'Payments',
+      path: '/payments',
+      modules: ['payment'],
+    }, {
+      icon: Newspaper,
+      label: 'Blogs',
+      path: '/blogs',
+      modules: ['blog']
+    }, {
       icon: ShieldCheck,
       label: 'Permissions',
       path: '/permissions',
       modules: ['permission', 'permissions'],
-    },{
+    }, {
       icon: PackageCheck,
       label: 'Perm. Packages',
       path: '/permission-packages',
@@ -87,6 +99,7 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
   ];
 
   const menuItems = allMenuItems.filter((item) => {
+    if (item.roles && !item.roles.includes(userType)) return false;
     if (!item.modules?.length) return true;
     return item.modules.some((module) => hasModuleAccess(module));
   });
@@ -115,7 +128,7 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
             {/* User Profile Section */}
             <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-2xl">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                <div className="w-12 h-12 rounded-sm bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
                   A
                 </div>
                 <div>
@@ -136,7 +149,7 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
                     to={item.path}
                     onClick={() => toggleSidebar()}
                     className={`
-                      flex items-center px-3 py-3 rounded-xl transition-all duration-200 mb-1
+                      flex items-center px-3 py-3 rounded-sm transition-all duration-200 mb-1
                       ${isActive
                         ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 text-blue-700 dark:text-blue-400'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400'
@@ -144,7 +157,7 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
                     `}
                   >
                     <div className={`
-                      p-2 rounded-lg mr-3
+                      p-2 rounded-sm mr-3
                       ${isActive
                         ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400'
                         : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
@@ -160,7 +173,7 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
 
             {/* Help Section */}
             <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl p-4">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-sm p-4">
                 <LifeBuoy className="text-blue-600 dark:text-blue-400 mb-2" size={20} />
                 <p className="text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">Need Help?</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Contact our support team</p>
@@ -184,7 +197,7 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
         key={item.label}
         to={item.path}
         className={`
-          flex items-center rounded-xl transition-all duration-200 group
+          flex items-center rounded-sm transition-all duration-200 group
           ${isExpandedState ? 'px-3 py-2.5 gap-3' : 'px-0 py-2.5 justify-center'}
           ${isActive
             ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
@@ -194,7 +207,7 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
         title={!isExpandedState ? item.label : ''}
       >
         <div className={`
-          p-2 rounded-lg transition-all duration-200
+          p-2 rounded-sm transition-all duration-200
           ${isExpandedState ? '' : 'mx-auto'}
           ${isActive
             ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400'
@@ -255,7 +268,7 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
         {/* Footer Section */}
         {isSidebarExpanded && (
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-sm p-3">
               <LifeBuoy className="text-blue-600 dark:text-blue-400 mb-2" size={16} />
               <p className="text-xs font-semibold text-gray-700 dark:text-gray-200">Need Help?</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">Support</p>

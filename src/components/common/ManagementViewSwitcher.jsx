@@ -17,8 +17,7 @@ export default function ManagementViewSwitcher({
   className = '',
 }) {
   const buttonClass = (mode) =>
-    `px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${
-      viewMode === mode ? colorClasses.active : colorClasses.inactive
+    `px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${viewMode === mode ? colorClasses.active : colorClasses.inactive
     }`;
 
   const TableIcon = iconByView.table;

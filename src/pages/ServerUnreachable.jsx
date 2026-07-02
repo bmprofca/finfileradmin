@@ -1,10 +1,10 @@
 // src/pages/ServerUnreachable.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  WifiOff, 
-  RefreshCw, 
-  Home, 
+import {
+  WifiOff,
+  RefreshCw,
+  Home,
   AlertTriangle,
   Globe,
   Server
@@ -35,7 +35,7 @@ const ServerUnreachable = () => {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (response.ok) {
         window.location.reload();
       } else {
@@ -78,9 +78,9 @@ const ServerUnreachable = () => {
         <p className="text-gray-600 dark:text-gray-400 mb-4">
           Unable to connect to the server. This could be due to:
         </p>
-        
+
         {/* Reasons List */}
-        <div className="bg-white/50 dark:bg-gray-800/50 rounded-xl p-4 mb-6 text-left space-y-2">
+        <div className="bg-white/50 dark:bg-gray-800/50 rounded-sm p-4 mb-6 text-left space-y-2">
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
             <Globe className="w-4 h-4 text-red-500" />
             <span>Network connectivity issues</span>
@@ -100,15 +100,15 @@ const ServerUnreachable = () => {
           <button
             onClick={handleManualRetry}
             disabled={isRetrying}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-xl hover:from-red-700 hover:to-orange-700 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-sm hover:from-red-700 hover:to-orange-700 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw className={`w-4 h-4 ${isRetrying ? 'animate-spin' : ''}`} />
             {isRetrying ? 'Retrying...' : `Retry Connection ${countdown > 0 ? `(${countdown}s)` : ''}`}
           </button>
-          
+
           <button
             onClick={() => navigate('/dashboard')}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
           >
             <Home className="w-4 h-4" />
             Go to Dashboard
@@ -116,11 +116,11 @@ const ServerUnreachable = () => {
         </div>
 
         {/* Help Text */}
-        <div className="mt-8 p-4 bg-white/50 dark:bg-gray-800/50 rounded-xl">
+        <div className="mt-8 p-4 bg-white/50 dark:bg-gray-800/50 rounded-sm">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             If the problem persists, please check your internet connection or contact your system administrator.
           </p>
-          <button 
+          <button
             onClick={() => window.location.href = '/login'}
             className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold mt-2"
           >

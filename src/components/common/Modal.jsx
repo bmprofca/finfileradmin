@@ -79,7 +79,7 @@ const Modal = ({ isOpen, onClose, title, icon: Icon, children, onConfirm, confir
                 </button>
               </div>
             </div>
-            
+
             {/* Scrollable Body */}
             <div className={`overflow-y-auto flex-1 custom-scrollbar ${contentClassName}`}>
               {children}
@@ -96,7 +96,7 @@ const Modal = ({ isOpen, onClose, title, icon: Icon, children, onConfirm, confir
               </div>
               <button
                 onClick={onClose}
-                className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all shrink-0"
+                className="px-5 py-2.5 rounded-sm border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all shrink-0"
               >
                 {closeText}
               </button>

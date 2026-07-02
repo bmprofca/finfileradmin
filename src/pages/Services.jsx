@@ -35,7 +35,7 @@ const ServiceStatusBadge = ({ status }) => {
 };
 
 const InfoItem = ({ icon: Icon, label, value }) => (
-  <div className="flex items-start gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
+  <div className="flex items-start gap-2 rounded-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
     <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600">
       <Icon size={14} className="dark:text-gray-300" />
     </div>
@@ -79,10 +79,10 @@ const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
     contentClassName="p-5 space-y-4"
     footer={
       <>
-        <button onClick={() => onDelete(service)} className="px-5 py-2.5 rounded-xl border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2">
+        <button onClick={() => onDelete(service)} className="px-5 py-2.5 rounded-sm border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2">
           <Trash2 size={16} /> Delete
         </button>
-        <button onClick={() => onEdit(service)} className="px-5 py-2.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2">
+        <button onClick={() => onEdit(service)} className="px-5 py-2.5 rounded-sm bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2">
           <Edit size={16} /> Edit Service
         </button>
       </>
@@ -90,9 +90,9 @@ const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
   >
     <div className="flex items-center gap-4 pb-4 border-b dark:border-gray-700">
       {service.image ? (
-        <img src={service.image} alt={service.name} className="w-16 h-16 rounded-xl object-cover" />
+        <img src={service.image} alt={service.name} className="w-16 h-16 rounded-sm object-cover" />
       ) : (
-        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shrink-0">
+        <div className="w-16 h-16 rounded-sm bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shrink-0">
           <Briefcase size={28} />
         </div>
       )}
@@ -106,7 +106,7 @@ const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
       </div>
     </div>
 
-    <div className="p-3 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/50">
+    <div className="p-3 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-sm border border-emerald-100 dark:border-emerald-800/50">
       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Description</p>
       <p className="text-sm text-gray-700 dark:text-gray-300">{service.description || 'No description provided.'}</p>
     </div>
@@ -132,7 +132,7 @@ const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
           <CheckCircle className="text-emerald-500 dark:text-emerald-400" size={15} /> Fields Requirement
         </h4>
-        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-3 flex flex-wrap gap-2">
+        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-sm border border-gray-200 dark:border-gray-700 p-3 flex flex-wrap gap-2">
           {service.fields && Object.keys(service.fields).length > 0 ? (
             Object.entries(service.fields).map(([key, val]) => (
               <span key={key} className="text-xs px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md text-gray-600 dark:text-gray-300">
@@ -148,7 +148,7 @@ const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
           <FileText className="text-emerald-500 dark:text-emerald-400" size={15} /> Required Documents
         </h4>
-        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-3 space-y-2">
+        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-sm border border-gray-200 dark:border-gray-700 p-3 space-y-2">
           {service.documents && service.documents.length > 0 ? (
             service.documents.map((doc, idx) => (
               <div key={idx} className="text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md p-2">
@@ -436,7 +436,7 @@ export default function Services() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col gap-3 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm"
+          className="flex flex-col gap-3 bg-white dark:bg-gray-800 p-4 rounded-sm border border-gray-100 dark:border-gray-700 shadow-sm"
         >
           {/* Top row: search + dropdowns + view switcher */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
@@ -448,7 +448,7 @@ export default function Services() {
                 placeholder="Search by name, category..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-10 py-2 h-[42px] bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm dark:text-gray-100"
+                className="w-full pl-10 pr-10 py-2 h-[42px] bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm dark:text-gray-100"
               />
               {searchTerm && (
                 <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1">
@@ -513,7 +513,7 @@ export default function Services() {
 
         {/* Empty state */}
         {!loading && services.length === 0 && (
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-950/50">
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-sm shadow-xl dark:shadow-gray-950/50">
             <Briefcase className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
             <p className="text-xl text-gray-500 dark:text-gray-400">No services found</p>
             <p className="text-gray-400 dark:text-gray-500 mt-2">
@@ -529,7 +529,7 @@ export default function Services() {
 
         {/* Content */}
         {!loading && services.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
             {viewMode === 'card' && (
               <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4">
                 <AnimatePresence>
@@ -602,7 +602,7 @@ export default function Services() {
               <button
                 disabled={isDeleting}
                 onClick={confirmDelete}
-                className="px-5 py-2.5 rounded-xl bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
+                className="px-5 py-2.5 rounded-sm bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {isDeleting ? 'Deleting...' : 'Yes, Delete Service'}
               </button>
