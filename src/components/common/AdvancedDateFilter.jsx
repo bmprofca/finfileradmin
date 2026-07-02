@@ -433,7 +433,7 @@ export default function AdvancedDateFilter({
   return (
     <div className="relative inline-block w-full">
       {/* Trigger */}
-      <div className={shouldShowStepper ? "flex w-full rounded-sm border border-slate-200 dark:border-gray-700 min-w-[260px] items-stretch" : ""}>
+      <div className={shouldShowStepper ? "flex w-full rounded-lg border border-slate-200 dark:border-gray-700 min-w-[260px] items-stretch" : ""}>
         {shouldShowStepper && (
           <button
             type="button"

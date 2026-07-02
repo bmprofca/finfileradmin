@@ -300,7 +300,7 @@ const FilterSelect = ({ options, value, onChange, placeholder, icon: Icon, label
       <select
         value={value || ''}
         onChange={(e) => onChange(e.target.value || null)}
-        className="appearance-none w-full pl-9 pr-8 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-sm focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100 cursor-pointer"
+        className="appearance-none w-full pl-9 pr-8 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100 cursor-pointer"
       >
         <option value="">{placeholder}</option>
         {options.map((option) => (
