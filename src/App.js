@@ -23,6 +23,7 @@ import NotFound from "./pages/NotFound";
 import ServerUnreachable from "./pages/ServerUnreachable";
 import Clients from "./pages/Clients";
 import Firms from "./pages/Firms";
+import Settings from "./pages/Settings";
 import Payments from "./pages/Payments";
 import Profile from "./pages/Profile";
 import Documents from "./pages/Documents";
@@ -82,6 +83,7 @@ function App() {
                     <Route path="blogs" element={<PermissionRoute modules="blog"><Blogs /></PermissionRoute>} />
                     <Route path="permissions" element={<PermissionRoute modules={['permission', 'permissions']}><AccessManagement /></PermissionRoute>} />
                     <Route path="permission-packages" element={<PermissionRoute modules={['permission_package', 'permission', 'permissions']}><AccessManagement /></PermissionRoute>} />
+                    <Route path="settings" element={<Settings />} />
                   </Route>
                 </Route>
 

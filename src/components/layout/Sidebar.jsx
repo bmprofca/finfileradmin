@@ -12,6 +12,7 @@ import {
   Newspaper,
   ShieldCheck,
   PackageCheck,
+  Settings,
 } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 import { usePermissions } from '../../contexts/PermissionsContext';
@@ -90,6 +91,10 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
       label: 'Permissions',
       path: '/permissions',
       modules: ['permission', 'permissions', 'permission_package'],
+    }, {
+      icon: Settings,
+      label: 'Settings',
+      path: '/settings',
     }
   ];
 
