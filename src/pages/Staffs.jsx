@@ -161,7 +161,7 @@ const StaffFormModal = ({ staff, onClose, onSubmit, isSubmitting }) => {
   };
 
   const inputCls =
-    'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm dark:text-gray-100';
+    'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm dark:text-gray-100';
 
   return (
     <Modal
@@ -209,7 +209,7 @@ const StaffFormModal = ({ staff, onClose, onSubmit, isSubmitting }) => {
                     key={value}
                     type="button"
                     onClick={() => setStatus(value)}
-                    className={`flex-1 py-2.5 rounded-sm border text-sm font-semibold transition-all ${form.status === value
+                    className={`flex-1 py-2.5 rounded-lg border text-sm font-semibold transition-all ${form.status === value
                       ? value === 1
                         ? 'bg-emerald-50 border-emerald-400 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-600 dark:text-emerald-300 shadow-sm'
                         : 'bg-gray-100 border-gray-400 text-gray-700 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-200 shadow-sm'

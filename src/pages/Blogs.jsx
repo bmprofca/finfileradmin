@@ -30,9 +30,13 @@ import Modal from '../components/common/Modal';
 import AdvancedDateFilter from '../components/common/AdvancedDateFilter';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
 import apiCall, { uploadFile } from '../utils/apiCall';
-
+import SelectField from '../components/common/SelectField';
 // ─── Constants ────────────────────────────────────────────────────────────────
-
+const statusOptions = [
+  { value: "draft", label: "Draft" },
+  { value: "published", label: "Published" },
+  { value: "archived", label: "Archived" },
+];
 const EMPTY_DOC = { type: 'doc', content: [{ type: 'paragraph' }] };
 
 const TEXT_COLORS = ['#1f2937', '#dc2626', '#2563eb', '#16a34a', '#d97706', '#7c3aed', '#db2777'];
@@ -527,15 +531,18 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isSubmitting }) => {
         <div className="flex items-center gap-2 w-full justify-between">
           <div className="flex items-center gap-2">
             <label className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</label>
-            <select
-              value={form.status}
-              onChange={set('status')}
-              className="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-gray-100"
-            >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-              <option value="archived">Archived</option>
-            </select>
+            <SelectField
+              options={statusOptions}
+              value={statusOptions.find(option => option.value === form.status)}
+              onChange={(selectedOption) =>
+                setForm((prev) => ({
+                  ...prev,
+                  status: selectedOption?.value || "",
+                }))
+              }
+              placeholder="Select Status"
+              isSearchable={false}
+            />
           </div>
           <button
             type="submit"

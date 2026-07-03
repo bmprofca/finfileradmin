@@ -180,7 +180,7 @@ const PackageFormModal = ({ pkg, allPermissions, onClose, onSubmit, isSubmitting
                   key={String(value)}
                   type="button"
                   onClick={() => setForm((f) => ({ ...f, status: value }))}
-                  className={`flex-1 py-2.5 rounded-sm border text-sm font-semibold transition-all ${form.status === value
+                  className={`flex-1 py-2.5 rounded-lg border text-sm font-semibold transition-all ${form.status === value
                     ? value
                       ? 'bg-emerald-50 border-emerald-400 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-600 dark:text-emerald-300 shadow-sm'
                       : 'bg-gray-100 border-gray-400 text-gray-700 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-200 shadow-sm'
