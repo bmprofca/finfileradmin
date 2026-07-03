@@ -539,7 +539,7 @@ const BulkPermissionsModal = ({ staffList, onClose, onSaved }) => {
     setIsSaving(true);
     try {
       const response = await apiCall('/api/admin/permissions/package/assign', 'PUT', {
-        usernames,
+        staff_usernames:usernames,
         permission_package_id: packageValue, // string id for all, or null to remove from all
       });
       const json = await response.json();
