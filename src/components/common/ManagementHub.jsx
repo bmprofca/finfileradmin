@@ -76,7 +76,7 @@ export default function ManagementHub({
               {(summary || actions || onRefresh) && (
                 <div className="flex flex-wrap items-center justify-between w-full gap-1.5">
                   {summary}
-                  <div className="flex w-full items-center justify-end gap-1.5">
+                  <div className="flex absolute top-[10px] right-[10px] w-full items-center justify-end gap-1.5">
                     {onRefresh && (
                       <RefreshButton
                         type="button"
@@ -84,7 +84,7 @@ export default function ManagementHub({
                         onClick={onRefresh}
                         title={refreshTitle || refreshLabel}
                       >
-                        {refreshLabel}
+                        <span className='hidden md:block'>{refreshLabel}</span>
                       </RefreshButton>
                     )}
                     {actions}

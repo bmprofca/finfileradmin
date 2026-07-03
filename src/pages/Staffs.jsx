@@ -824,11 +824,23 @@ export default function Staffs() {
       ),
     },
     { key: 'username', label: 'Username', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">@{row.username}</span> },
-    { key: 'first_name', label: 'First Name', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">{row.first_name || '—'}</span> },
-    { key: 'middle_name', label: 'Middle Name', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">{row.middle_name || '—'}</span> },
-    { key: 'last_name', label: 'Last Name', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">{row.last_name || '—'}</span> },
     { key: 'email', label: 'Email', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300">{row.email || '—'}</span> },
     { key: 'mobile', label: 'Mobile', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">{row.mobile || '—'}</span> },
+    {
+      key: 'assigned_orders', label: 'Assigned Orders', render: (row) => (
+        <span className="text-xs font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap">{row.assigned_orders ?? 0}</span>
+      ),
+    },
+    {
+      key: 'pending_orders', label: 'Pending Orders', render: (row) => (
+        <span className="text-xs font-medium text-amber-600 dark:text-amber-400 whitespace-nowrap">{row.pending_orders ?? 0}</span>
+      ),
+    },
+    {
+      key: 'completed_orders', label: 'Completed Orders', render: (row) => (
+        <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{row.completed_orders ?? 0}</span>
+      ),
+    },
     { key: 'permission_package', label: 'Permission Package', render: (row) => <PermissionPackageBadge staff={row} /> },
     { key: 'status', label: 'Status', render: (row) => <StaffStatusBadge status={row.status} /> },
   ];
@@ -848,7 +860,7 @@ export default function Staffs() {
       refreshing={refreshing}
       actions={
         <Button onClick={handleCreateNew} variant="primary" className="flex items-center gap-2 text-sm py-1.5 bg-blue-600 hover:bg-blue-700">
-          <Plus size={16} /> Add Staff
+          <Plus size={16} /> <span className='hidden md:block'>Add Staff</span>
         </Button>
       }
     >

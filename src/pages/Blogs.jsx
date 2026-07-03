@@ -832,7 +832,7 @@ export default function Blogs() {
       refreshing={refreshing}
       actions={
         <Button onClick={handleCreateNew} variant="primary" className="flex items-center gap-2 text-sm py-1.5 bg-blue-600 hover:bg-blue-700">
-          <Plus size={16} /> New Post
+          <Plus size={16} /> <span className='hidden md:block'>New Post</span>
         </Button>
       }
     >

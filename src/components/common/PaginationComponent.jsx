@@ -193,7 +193,7 @@ const Pagination = ({
             </div>
 
             {/* ── Desktop layout (sm+): original single row ── */}
-            <div className="hidden sm:flex items-center justify-between gap-4 mt-3 pt-3 border-t border-slate-100 dark:border-gray-700 lg:mt-0 lg:pt-0">
+            <div className="hidden sm:flex items-center justify-between gap-4 mt-3 pt-3 border-t lg:border-none border-slate-100 dark:border-gray-700 lg:mt-0 lg:pt-0">
                 {onLimitChange && (
                     <div className="flex items-center gap-2">
                         <span className="text-sm text-slate-500 dark:text-gray-400 font-medium">Show:</span>
