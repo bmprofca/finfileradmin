@@ -42,33 +42,12 @@ const ModuleBadge = ({ module }) => (
   </span>
 );
 
-// ─── Toggle Button ────────────────────────────────────────────────────────────
-
-const ToggleBtn = ({ permission, onToggle, toggling }) => {
-  const isActive = permission.status === true || permission.status === 1;
-  const isTogglingThis = toggling === permission.permission_id;
-  return (
-    <button
-      onClick={(e) => { e.stopPropagation(); onToggle(permission); }}
-      disabled={isTogglingThis}
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${isTogglingThis ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'
-        } ${isActive
-          ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800'
-          : 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'
-        }`}
-    >
-      {isTogglingThis
-        ? <RefreshCw size={11} className="animate-spin" />
-        : isActive ? <ToggleRight size={13} /> : <ToggleLeft size={13} />}
-      {isTogglingThis ? 'Saving…' : isActive ? 'Disable' : 'Enable'}
-    </button>
-  );
-};
-
 // ─── Permission Card (card view) ──────────────────────────────────────────────
 
 const PermissionManagementCard = ({ permission, index, onToggle, toggling }) => {
   const isActive = permission.status === true || permission.status === 1;
+  const isTogglingThis = toggling === permission.permission_id;
+  
   return (
     <ManagementCard
       key={permission.permission_id}
@@ -85,10 +64,20 @@ const PermissionManagementCard = ({ permission, index, onToggle, toggling }) => 
       }
       badge={<StatusBadge status={permission.status} />}
       menuId={`perm-card-${permission.permission_id}`}
+      actions={[
+        {
+          label: isTogglingThis ? 'Saving...' : (isActive ? 'Disable' : 'Enable'),
+          icon: isTogglingThis ? <RefreshCw size={12} className="animate-spin" /> : (isActive ? <ToggleRight size={12} /> : <ToggleLeft size={12} />),
+          onClick: () => onToggle(permission),
+          disabled: isTogglingThis,
+          className: isActive
+            ? 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300'
+            : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 dark:text-emerald-400 dark:hover:text-emerald-300'
+        }
+      ]}
     >
       <div className="mt-2 flex items-center justify-between gap-2">
         <ModuleBadge module={permission.module} />
-        <ToggleBtn permission={permission} onToggle={onToggle} toggling={toggling} />
       </div>
     </ManagementCard>
   );
@@ -96,7 +85,7 @@ const PermissionManagementCard = ({ permission, index, onToggle, toggling }) => 
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function Permissions() {
+export default function Permissions({ tabs, activeTab, onTabChange }) {
   const [permissions, setPermissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -199,11 +188,6 @@ export default function Permissions() {
       label: 'Status',
       render: (row) => <StatusBadge status={row.status} />,
     },
-    {
-      key: 'toggle',
-      label: 'Action',
-      render: (row) => <ToggleBtn permission={row} onToggle={handleToggle} toggling={toggling} />,
-    },
   ];
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -214,6 +198,9 @@ export default function Permissions() {
       accent="violet"
       onRefresh={handleRefresh}
       refreshing={refreshing}
+      tabs={tabs}
+      activeTab={activeTab}
+      onTabChange={onTabChange}
     >
       <div className="space-y-3 mt-2">
 
@@ -287,7 +274,21 @@ export default function Permissions() {
                 rows={filtered}
                 rowKey="permission_id"
                 accent="violet"
-                showActionsColumn={false}
+                getActions={(row) => {
+                  const isActive = row.status === true || row.status === 1;
+                  const isTogglingThis = toggling === row.permission_id;
+                  return [
+                    {
+                      label: isTogglingThis ? 'Saving...' : (isActive ? 'Disable' : 'Enable'),
+                      icon: isTogglingThis ? <RefreshCw size={12} className="animate-spin" /> : (isActive ? <ToggleRight size={12} /> : <ToggleLeft size={12} />),
+                      onClick: () => handleToggle(row),
+                      disabled: isTogglingThis,
+                      className: isActive
+                        ? 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300'
+                        : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 dark:text-emerald-400 dark:hover:text-emerald-300'
+                    }
+                  ];
+                }}
               />
             )}
 

@@ -329,7 +329,7 @@ const PackageManagementCard = ({ pkg, index, allPermissions, onView, onEdit, onD
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function PermissionPackages() {
+export default function PermissionPackages({ tabs, activeTab, onTabChange }) {
   const [packages, setPackages] = useState([]);
   const [allPermissions, setAllPermissions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -540,6 +540,9 @@ export default function PermissionPackages() {
           <Plus size={16} /> Add Package
         </Button>
       }
+      tabs={tabs}
+      activeTab={activeTab}
+      onTabChange={onTabChange}
     >
       <div className="space-y-3 mt-2">
 

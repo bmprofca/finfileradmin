@@ -89,12 +89,7 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
       icon: ShieldCheck,
       label: 'Permissions',
       path: '/permissions',
-      modules: ['permission', 'permissions'],
-    }, {
-      icon: PackageCheck,
-      label: 'Perm. Packages',
-      path: '/permission-packages',
-      modules: ['permission_package', 'permission', 'permissions'],
+      modules: ['permission', 'permissions', 'permission_package'],
     }
   ];
 

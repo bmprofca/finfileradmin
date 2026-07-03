@@ -28,8 +28,7 @@ import Profile from "./pages/Profile";
 import Documents from "./pages/Documents";
 import OrderDocumentUpload from "./pages/OrderDocumentUpload";
 import Blogs from "./pages/Blogs";
-import Permissions from "./pages/Permissions";
-import PermissionPackages from "./pages/PermissionPackages";
+import AccessManagement from "./pages/AccessManagement";
 
 function App() {
   return (
@@ -81,8 +80,8 @@ function App() {
                     <Route path="payments" element={<PermissionRoute modules="payment"><Payments /></PermissionRoute>} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="blogs" element={<PermissionRoute modules="blog"><Blogs /></PermissionRoute>} />
-                    <Route path="permissions" element={<PermissionRoute modules={['permission', 'permissions']}><Permissions /></PermissionRoute>} />
-                    <Route path="permission-packages" element={<PermissionRoute modules={['permission_package', 'permission', 'permissions']}><PermissionPackages /></PermissionRoute>} />
+                    <Route path="permissions" element={<PermissionRoute modules={['permission', 'permissions']}><AccessManagement /></PermissionRoute>} />
+                    <Route path="permission-packages" element={<PermissionRoute modules={['permission_package', 'permission', 'permissions']}><AccessManagement /></PermissionRoute>} />
                   </Route>
                 </Route>
 

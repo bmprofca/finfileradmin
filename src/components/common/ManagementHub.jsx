@@ -95,7 +95,7 @@ export default function ManagementHub({
             </div>
 
             {tabs?.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1">
+              <div className="mt-2 flex flex-wrap gap-2">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = tab.id === activeTab;
@@ -109,7 +109,7 @@ export default function ManagementHub({
                       disabled={disabled}
                       title={tab.title || tab.description || tab.label}
                       className={joinClasses(
-                        'inline-flex items-center gap-1 rounded-sm border px-3 py-2 text-xs font-semibold transition-all duration-200',
+                        'inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold transition-all duration-200',
                         isActive
                           ? activeButtonStyles[accent] || activeButtonStyles.slate
                           : disabled
