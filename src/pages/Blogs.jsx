@@ -27,6 +27,7 @@ import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher'
 import PaginationComponent from '../components/common/PaginationComponent';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
+import AdvancedDateFilter from '../components/common/AdvancedDateFilter';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
 import apiCall, { uploadFile } from '../utils/apiCall';
 
@@ -510,7 +511,7 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isSubmitting }) => {
   };
 
   const inputCls =
-    'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-sm focus:ring-4 focus:ring-fuchsia-500/10 focus:border-fuchsia-500 outline-none transition-all text-sm dark:text-gray-100';
+    'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-fuchsia-500/10 focus:border-fuchsia-500 outline-none transition-all text-sm dark:text-gray-100';
 
 
   return (
@@ -594,7 +595,13 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isSubmitting }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Published Date</label>
-            <input type="date" value={form.published_at} onChange={set('published_at')} className={inputCls} />
+            <AdvancedDateFilter
+              value={{ date: form.published_at }}
+              onChange={(val) => setForm((f) => ({ ...f, published_at: val?.date || '' }))}
+              tabOptions={['date']}
+              placeholder="Select date"
+              buttonClassName="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg outline-none transition-all text-sm dark:text-gray-100"
+            />
           </div>
         </div>
 
