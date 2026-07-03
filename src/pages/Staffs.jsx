@@ -2,7 +2,8 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, X, Eye, User, Phone, Mail,
-  Plus, Edit, CheckCircle, XCircle, Briefcase, LogOut
+  Plus, Edit, CheckCircle, XCircle, Briefcase, LogOut,
+  Shield, ShieldCheck, ChevronDown, Loader2, Trash2, Users2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +16,7 @@ import PaginationComponent from '../components/common/PaginationComponent';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
+import SelectField from '../components/common/SelectField';
 import apiCall, { uploadFile } from '../utils/apiCall';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -44,6 +46,21 @@ const InfoItem = ({ icon: Icon, label, value }) => (
   </div>
 );
 
+// Small pill that shows a staff member's currently assigned permission package.
+// Assumes the staff list / detail payload exposes either `permission_package_name`
+// (preferred, joined server-side) or falls back to the raw `permission_package_id`.
+const PermissionPackageBadge = ({ staff }) => {
+  const label = staff.permission_package_name || staff.permission_package_id || null;
+  if (!label) {
+    return <span className="text-xs text-gray-400 dark:text-gray-500 italic">No package</span>;
+  }
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800">
+      <Shield size={10} /> {label}
+    </span>
+  );
+};
+
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 
 const StaffAvatar = ({ staff, size = 'md' }) => {
@@ -55,6 +72,161 @@ const StaffAvatar = ({ staff, size = 'md' }) => {
   return (
     <div className={`${cls} rounded-sm bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shrink-0`}>
       {staff.full_name?.charAt(0)?.toUpperCase() || <User size={16} />}
+    </div>
+  );
+};
+
+// ─── Permission Package Picker (searchable + infinite scroll + summary) ───────
+
+const PACKAGE_PAGE_LIMIT = 20;
+
+// Reusable hook: paginated + searchable fetch of /permissions/package/list
+function usePermissionPackages(search) {
+  const [packages, setPackages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  const loadPage = async (pageToLoad, replace) => {
+    setLoading(true);
+    try {
+      const response = await apiCall(
+        `/api/admin/permissions/package/list?page_no=${pageToLoad}&limit=${PACKAGE_PAGE_LIMIT}&search=${encodeURIComponent(search || '')}`,
+        'GET'
+      );
+      const json = await response.json();
+      if (json.success) {
+        setPackages((prev) => (replace ? json.data : [...prev, ...json.data]));
+        const totalPages = json.pagination?.total_pages || 1;
+        setHasMore(pageToLoad < totalPages);
+        setPage(pageToLoad);
+      } else {
+        toast.error(json.message || 'Failed to load permission packages.');
+      }
+    } catch {
+      toast.error('Error connecting to server.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Re-fetch from page 1 whenever the search term changes
+  useEffect(() => {
+    setHasMore(true);
+    loadPage(1, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
+
+  const loadMore = () => {
+    if (!loading && hasMore) loadPage(page + 1, false);
+  };
+
+  return { packages, loading, hasMore, loadMore };
+}
+
+/**
+ * value:
+ *   - string  -> a permission package is selected (its id)
+ *   - null    -> permission package explicitly removed
+ *   - undefined is never produced by this component; the parent decides
+ *     whether "unchanged" applies by comparing against the original value.
+ */
+const PermissionPackagePicker = ({
+  value,
+  onChange,
+  placeholder = 'Select permission package',
+  allowRemove = true,
+  compact = false,
+  initialDetail = null,
+}) => {
+  const [searchInput, setSearchInput] = useState('');
+  const [committedSearch, setCommittedSearch] = useState('');
+  const [selectedDetail, setSelectedDetail] = useState(initialDetail);
+  const debounceRef = useRef(null);
+  const { packages, loading, loadMore } = usePermissionPackages(committedSearch);
+
+  // If the current value matches a package that has since loaded, hydrate the summary
+  useEffect(() => {
+    if (!value) return;
+    const found = packages.find((p) => p.permission_package_id === value);
+    if (found) setSelectedDetail(found);
+  }, [value, packages]);
+
+  const handleSearchChange = (val) => {
+    setSearchInput(val);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setCommittedSearch(val), 300);
+  };
+
+  const options = useMemo(() => {
+    return packages.map(pkg => ({
+      value: pkg.permission_package_id,
+      label: pkg.name,
+      pkg
+    }));
+  }, [packages]);
+
+  const combinedOptions = useMemo(() => {
+    if (allowRemove) {
+      return [{ value: null, label: 'Remove permission package' }, ...options];
+    }
+    return options;
+  }, [options, allowRemove]);
+
+  const selectedOption = useMemo(() => {
+    if (value === null && allowRemove) return { value: null, label: 'Remove permission package' };
+    if (!value) return null;
+    return options.find(o => o.value === value) || (selectedDetail ? { value, label: selectedDetail.name, pkg: selectedDetail } : null);
+  }, [value, options, allowRemove, selectedDetail]);
+
+  const handleChange = (selected) => {
+    if (!selected) {
+      setSelectedDetail(null);
+      onChange(allowRemove ? null : undefined);
+      return;
+    }
+    if (selected.value === null) {
+      setSelectedDetail(null);
+      onChange(null);
+      return;
+    }
+    setSelectedDetail(selected.pkg);
+    onChange(selected.value);
+  };
+
+  return (
+    <div>
+      <SelectField
+        options={combinedOptions}
+        value={selectedOption}
+        onChange={handleChange}
+        onInputChange={(val, { action }) => {
+          if (action === 'input-change') {
+            handleSearchChange(val);
+          }
+        }}
+        isLoading={loading}
+        placeholder={placeholder}
+        isClearable={allowRemove}
+        onMenuScrollToBottom={loadMore}
+        styles={{ menu: (base) => ({ ...base, zIndex: 50 }) }}
+      />
+      {value && selectedDetail && !compact && (
+        <div className="mt-2 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50/60 dark:bg-blue-900/20 px-3 py-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-semibold text-blue-900 dark:text-blue-200 truncate">{selectedDetail.name}</span>
+            {'status' in selectedDetail && <StaffStatusBadge status={selectedDetail.status} />}
+          </div>
+          {selectedDetail.remark && (
+            <p className="text-xs text-blue-700/80 dark:text-blue-300/80 mt-1">{selectedDetail.remark}</p>
+          )}
+          {Array.isArray(selectedDetail.assigned_permissions) && (
+            <p className="text-[11px] text-blue-600/70 dark:text-blue-400/70 mt-1">
+              {selectedDetail.assigned_permissions.length} permission{selectedDetail.assigned_permissions.length === 1 ? '' : 's'} assigned
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -84,8 +256,9 @@ const ViewStaffModal = ({ staff, onClose, onEdit }) => (
       <div>
         <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">{staff.full_name}</h3>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">@{staff.username}</p>
-        <div className="mt-1.5 flex gap-2 items-center">
+        <div className="mt-1.5 flex gap-2 items-center flex-wrap">
           <StaffStatusBadge status={staff.status} />
+          <PermissionPackageBadge staff={staff} />
         </div>
       </div>
     </div>
@@ -105,10 +278,18 @@ const ViewStaffModal = ({ staff, onClose, onEdit }) => (
         {staff.last_name && <InfoItem icon={User} label="Last Name" value={staff.last_name} />}
       </div>
     </div>
+
+    {/* Permission Package */}
+    <div>
+      <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+        <Shield className="text-indigo-500 dark:text-indigo-400" size={15} /> Permission Package
+      </h4>
+      <InfoItem icon={Shield} label="Assigned Package" value={staff.permission_package_name || staff.permission_package_id || 'None'} />
+    </div>
   </Modal>
 );
 
-// ─── Staff Form Modal ─────────────────────────────────────────────────────────
+// ─── Staff Form Modal (Create / Edit) ──────────────────────────────────────────
 
 const StaffFormModal = ({ staff, onClose, onSubmit, isSubmitting }) => {
   const isEdit = !!staff;
@@ -124,6 +305,15 @@ const StaffFormModal = ({ staff, onClose, onSubmit, isSubmitting }) => {
     status: staff?.status ?? 1,
     image: staff?.image || '',
   });
+
+  // Permission package selection. For edit, prefill with the staff's current
+  // package so the picker reflects reality; we only include it in the submitted
+  // payload if it ends up different from this original value (or explicitly removed).
+  const originalPermissionPackageId = staff?.permission_package_id ?? null;
+  const [permissionPackageId, setPermissionPackageId] = useState(originalPermissionPackageId);
+  const initialPackageDetail = staff?.permission_package_name
+    ? { name: staff.permission_package_name }
+    : null;
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
   const setStatus = (val) => setForm((f) => ({ ...f, status: val }));
@@ -155,9 +345,25 @@ const StaffFormModal = ({ staff, onClose, onSubmit, isSubmitting }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const createPayload = { ...form };
-    delete createPayload.username;
-    onSubmit(isEdit ? form : createPayload);
+
+    if (!isEdit && !permissionPackageId) {
+      toast.error('Please select a permission package.');
+      return;
+    }
+
+    const payload = { ...form };
+    delete payload.username;
+
+    if (isEdit) {
+      // Only send permission_package_id if it actually changed from the original.
+      if (permissionPackageId !== originalPermissionPackageId) {
+        payload.permission_package_id = permissionPackageId; // string id, or null to remove
+      }
+      onSubmit(payload);
+    } else {
+      payload.permission_package_id = permissionPackageId;
+      onSubmit(payload);
+    }
   };
 
   const inputCls =
@@ -256,6 +462,27 @@ const StaffFormModal = ({ staff, onClose, onSubmit, isSubmitting }) => {
 
         <div className="h-px w-full bg-gray-200 dark:bg-gray-700"></div>
 
+        {/* Permission Package */}
+        <div>
+          <h4 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
+            <Shield size={15} className="text-indigo-500 dark:text-indigo-400" /> Permission Package {!isEdit && <span className="text-red-500">*</span>}
+          </h4>
+          <PermissionPackagePicker
+            value={permissionPackageId}
+            onChange={setPermissionPackageId}
+            allowRemove={isEdit}
+            placeholder={isEdit ? 'Keep current / select new package' : 'Select a permission package'}
+            initialDetail={initialPackageDetail}
+          />
+          {isEdit && (
+            <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1.5">
+              Leave as-is to keep the current package. Choose "Remove permission package" to revoke it.
+            </p>
+          )}
+        </div>
+
+        <div className="h-px w-full bg-gray-200 dark:bg-gray-700"></div>
+
         {/* Profile Image */}
         <div>
           <h4 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3">Profile Image</h4>
@@ -293,9 +520,100 @@ const StaffFormModal = ({ staff, onClose, onSubmit, isSubmitting }) => {
   );
 };
 
+// ─── Bulk Permissions Modal ─────────────────────────────────────────────────────
+
+const BulkPermissionsModal = ({ staffList, onClose, onSaved }) => {
+  // One package applied to every selected staff member.
+  // string id = assign that package to all; null = remove package from all; undefined = nothing picked yet
+  const [packageValue, setPackageValue] = useState(undefined);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (packageValue === undefined) {
+      toast.error('Please select a permission package (or choose to remove).');
+      return;
+    }
+
+    const usernames = staffList.map((s) => s.username);
+
+    setIsSaving(true);
+    try {
+      const response = await apiCall('/api/admin/permissions/package/assign', 'PUT', {
+        usernames,
+        permission_package_id: packageValue, // string id for all, or null to remove from all
+      });
+      const json = await response.json();
+      if (json.success) {
+        toast.success('Permissions updated successfully.');
+        onSaved();
+      } else {
+        toast.error(json.message || 'Failed to update permissions.');
+      }
+    } catch {
+      toast.error('Error connecting to server.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <Modal
+      isOpen={true}
+      onClose={() => !isSaving && onClose()}
+      title="Manage Permissions"
+      icon={ShieldCheck}
+      size="2xl"
+      contentClassName="p-5 space-y-5"
+      closeText="Cancel"
+      footer={
+        <button
+          disabled={isSaving || packageValue === undefined}
+          onClick={handleSave}
+          className="px-5 py-2.5 rounded-lg bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2 disabled:opacity-50"
+        >
+          {isSaving ? 'Saving...' : 'Apply to Selected'}
+        </button>
+      }
+    >
+      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+        <Users2 size={16} />
+        <span>Applying to {staffList.length} staff member{staffList.length === 1 ? '' : 's'}</span>
+      </div>
+
+      {/* Selected staff preview */}
+      <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto rounded-lg border border-gray-200 dark:border-gray-700 p-2.5 bg-gray-50 dark:bg-gray-900/40">
+        {staffList.map((s) => (
+          <span
+            key={s.username}
+            className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs text-gray-700 dark:text-gray-200"
+          >
+            <StaffAvatar staff={s} size="sm" />
+            {s.full_name}
+          </span>
+        ))}
+      </div>
+
+      {/* Single package picker for the whole batch */}
+      <div>
+        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
+          Permission Package
+        </label>
+        <PermissionPackagePicker
+          value={packageValue}
+          onChange={setPackageValue}
+          placeholder="Select a package to assign to everyone selected"
+        />
+        <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1.5">
+          This will assign the chosen package to every selected staff member, replacing whatever they currently have. Choose "Remove permission package" to revoke it from all of them instead.
+        </p>
+      </div>
+    </Modal>
+  );
+};
+
 // ─── Staff Card (Card View) ───────────────────────────────────────────────────
 
-const StaffManagementCard = ({ staff, index, onView, onEdit, onLogout, onNavigate }) => (
+const StaffManagementCard = ({ staff, index, onView, onEdit, onLogout, onNavigate, selected, onToggleSelect }) => (
   <ManagementCard
     key={staff.username}
     delay={index * 0.05}
@@ -303,7 +621,18 @@ const StaffManagementCard = ({ staff, index, onView, onEdit, onLogout, onNavigat
     eyebrow={`@${staff.username}`}
     title={staff.full_name}
     subtitle={staff.email}
-    icon={<StaffAvatar staff={staff} size="sm" />}
+    icon={
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          checked={selected}
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => { e.stopPropagation(); onToggleSelect(staff.username); }}
+          className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+        />
+        <StaffAvatar staff={staff} size="sm" />
+      </div>
+    }
     badge={<StaffStatusBadge status={staff.status} />}
     onClick={() => onNavigate(staff)}
     hoverable
@@ -314,12 +643,13 @@ const StaffManagementCard = ({ staff, index, onView, onEdit, onLogout, onNavigat
     ]}
     menuId={`staff-card-${staff.username}`}
   >
-    <div className="mt-1">
+    <div className="mt-1 space-y-1.5">
       {staff.mobile && (
         <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
           <Phone size={10} className="text-gray-400 dark:text-gray-500" /> {staff.mobile}
         </p>
       )}
+      <PermissionPackageBadge staff={staff} />
     </div>
   </ManagementCard>
 );
@@ -344,6 +674,10 @@ export default function Staffs() {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [staffToLogout, setStaffToLogout] = useState(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // Bulk selection + bulk permissions
+  const [selectedUsernames, setSelectedUsernames] = useState(new Set());
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const handleLimitChange = (limit) => { setItemsPerPage(limit); setCurrentPage(1); };
@@ -373,12 +707,33 @@ export default function Staffs() {
     if (lastFetchRef.current.page === currentPage && lastFetchRef.current.search === searchTerm && lastFetchRef.current.limit === itemsPerPage) return;
     lastFetchRef.current = { page: currentPage, search: searchTerm, limit: itemsPerPage };
     fetchStaffs();
+    // Selection is scoped to the current page/filter view
+    setSelectedUsernames(new Set());
   }, [currentPage, searchTerm, itemsPerPage]);
 
   const handleRefresh = () => {
     setRefreshing(true);
     fetchStaffs();
   };
+
+  // ── Selection Handlers ───────────────────────────────────────────────────
+  const toggleSelectOne = (username) => {
+    setSelectedUsernames((prev) => {
+      const next = new Set(prev);
+      if (next.has(username)) next.delete(username);
+      else next.add(username);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedUsernames((prev) => {
+      if (prev.size === staffs.length) return new Set();
+      return new Set(staffs.map((s) => s.username));
+    });
+  };
+
+  const clearSelection = () => setSelectedUsernames(new Set());
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleView = (staff) => { setSelectedStaff(staff); setIsViewModalOpen(true); };
@@ -430,8 +785,36 @@ export default function Staffs() {
     }
   };
 
+  const handleBulkPermissionsSaved = () => {
+    setIsBulkModalOpen(false);
+    clearSelection();
+    fetchStaffs();
+  };
+
   // ── Table Columns ─────────────────────────────────────────────────────────
   const columns = [
+    {
+      key: '__select',
+      headerClassName: 'w-12 text-center px-0 sm:px-2',
+      className: 'w-12 text-center px-0 sm:px-2',
+      label: (
+        <input
+          type="checkbox"
+          checked={staffs.length > 0 && selectedUsernames.size === staffs.length}
+          onChange={toggleSelectAll}
+          className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+        />
+      ),
+      render: (row) => (
+        <input
+          type="checkbox"
+          checked={selectedUsernames.has(row.username)}
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => { e.stopPropagation(); toggleSelectOne(row.username); }}
+          className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+        />
+      ),
+    },
     {
       key: 'full_name', label: 'Staff Member', render: (row) => (
         <div className="flex items-center gap-2">
@@ -446,8 +829,14 @@ export default function Staffs() {
     { key: 'last_name', label: 'Last Name', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">{row.last_name || '—'}</span> },
     { key: 'email', label: 'Email', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300">{row.email || '—'}</span> },
     { key: 'mobile', label: 'Mobile', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">{row.mobile || '—'}</span> },
+    { key: 'permission_package', label: 'Permission Package', render: (row) => <PermissionPackageBadge staff={row} /> },
     { key: 'status', label: 'Status', render: (row) => <StaffStatusBadge status={row.status} /> },
   ];
+
+  const selectedStaffObjects = useMemo(
+    () => staffs.filter((s) => selectedUsernames.has(s.username)),
+    [staffs, selectedUsernames]
+  );
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -497,6 +886,33 @@ export default function Staffs() {
             <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="blue" />
           </div>
         </motion.div>
+
+        {/* Bulk Actions Bar */}
+        <AnimatePresence>
+          {selectedUsernames.size > 0 && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="flex items-center justify-between gap-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg px-4 py-2.5"
+            >
+              <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                {selectedUsernames.size} staff member{selectedUsernames.size === 1 ? '' : 's'} selected
+              </span>
+              <div className="flex items-center gap-2">
+                <button onClick={clearSelection} className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 px-3 py-1.5">
+                  Clear
+                </button>
+                <button
+                  onClick={() => setIsBulkModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 dark:bg-blue-500 text-white text-xs font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all"
+                >
+                  <ShieldCheck size={14} /> Manage Permissions
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Loading State */}
         {loading && (
@@ -556,6 +972,8 @@ export default function Staffs() {
                         onEdit={handleEdit}
                         onLogout={handleLogoutRequest}
                         onNavigate={(row) => navigate(`/staffs/${row.username}`)}
+                        selected={selectedUsernames.has(staff.username)}
+                        onToggleSelect={toggleSelectOne}
                       />
                     ))}
                   </AnimatePresence>
@@ -596,6 +1014,17 @@ export default function Staffs() {
             onClose={() => setIsFormModalOpen(false)}
             onSubmit={handleFormSubmit}
             isSubmitting={isSubmitting}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Bulk Permissions Modal */}
+      <AnimatePresence>
+        {isBulkModalOpen && selectedStaffObjects.length > 0 && (
+          <BulkPermissionsModal
+            staffList={selectedStaffObjects}
+            onClose={() => setIsBulkModalOpen(false)}
+            onSaved={handleBulkPermissionsSaved}
           />
         )}
       </AnimatePresence>
