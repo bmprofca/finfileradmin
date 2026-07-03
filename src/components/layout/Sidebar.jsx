@@ -95,6 +95,7 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
       icon: Settings,
       label: 'Settings',
       path: '/settings',
+      modules:['setting']
     }
   ];
 

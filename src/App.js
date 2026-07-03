@@ -81,9 +81,9 @@ function App() {
                     <Route path="payments" element={<PermissionRoute modules="payment"><Payments /></PermissionRoute>} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="blogs" element={<PermissionRoute modules="blog"><Blogs /></PermissionRoute>} />
-                    <Route path="permissions" element={<PermissionRoute modules={['permission', 'permissions']}><AccessManagement /></PermissionRoute>} />
-                    <Route path="permission-packages" element={<PermissionRoute modules={['permission_package', 'permission', 'permissions']}><AccessManagement /></PermissionRoute>} />
-                    <Route path="settings" element={<Settings />} />
+                    <Route path="permissions" element={<PermissionRoute modules={['permissions']}><AccessManagement /></PermissionRoute>} />
+                    <Route path="permission-packages" element={<PermissionRoute modules={['permission_package']}><AccessManagement /></PermissionRoute>} />
+                    <Route path="settings" element={<PermissionRoute modules={['setting']}><Settings /></PermissionRoute>} />
                   </Route>
                 </Route>
 
