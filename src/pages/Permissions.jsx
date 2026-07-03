@@ -19,8 +19,8 @@ const StatusBadge = ({ status }) => {
   const isActive = status === true || status === 1;
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${isActive
-        ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700'
-        : 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600'
+      ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700'
+      : 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600'
       }`}>
       {isActive ? <CheckCircle size={10} /> : <XCircle size={10} />}
       {isActive ? 'Active' : 'Inactive'}
@@ -47,7 +47,7 @@ const ModuleBadge = ({ module }) => (
 const PermissionManagementCard = ({ permission, index, onToggle, toggling }) => {
   const isActive = permission.status === true || permission.status === 1;
   const isTogglingThis = toggling === permission.permission_id;
-  
+
   return (
     <ManagementCard
       key={permission.permission_id}
@@ -164,8 +164,8 @@ export default function Permissions({ tabs, activeTab, onTabChange }) {
       render: (row) => (
         <div className="flex items-center gap-2">
           <div className={`p-1.5 rounded-lg ${row.status === true || row.status === 1
-              ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-400'
+            ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
+            : 'bg-gray-100 dark:bg-gray-700 text-gray-400'
             }`}>
             <Shield size={13} />
           </div>
@@ -209,9 +209,9 @@ export default function Permissions({ tabs, activeTab, onTabChange }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-sm border border-gray-100 dark:border-gray-700 shadow-sm"
+          className="flex items-center justify-between gap-4 bg-white dark:bg-gray-800   p-1 lg:p-4 rounded-sm border border-gray-100 dark:border-gray-700 shadow-sm"
         >
-          <div className="flex items-center gap-4 flex-1">
+          <div className="flex-1 max-w-lg items-center gap-4 ">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
               <input
@@ -230,13 +230,10 @@ export default function Permissions({ tabs, activeTab, onTabChange }) {
                 </button>
               )}
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 hidden xl:block whitespace-nowrap">
-              <span className="font-semibold text-gray-800 dark:text-gray-200">{filtered.length}</span> permission{filtered.length !== 1 ? 's' : ''}
-              {searchTerm && <span className="ml-1 text-violet-600 dark:text-violet-400">· "{searchTerm}"</span>}
-            </p>
+
           </div>
 
-          <div className="flex items-center gap-2 w-full lg:w-auto justify-end">
+          <div className="">
             <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} />
           </div>
         </motion.div>

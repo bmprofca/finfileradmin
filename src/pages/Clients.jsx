@@ -449,9 +449,9 @@ export default function Clients() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-sm border border-gray-100 dark:border-gray-700 shadow-sm"
+          className="flex items-center justify-between gap-4 bg-white dark:bg-gray-800   p-1 lg:p-4 rounded-sm border border-gray-100 dark:border-gray-700 shadow-sm"
         >
-          <div className="flex items-center gap-4 flex-1">
+          <div className="flex-1 max-w-lg items-center gap-4 ">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
               <input
@@ -467,13 +467,10 @@ export default function Clients() {
                 </button>
               )}
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 hidden xl:block whitespace-nowrap">
-              <span className="font-semibold text-gray-800 dark:text-gray-200">{totalItems}</span> client{totalItems !== 1 ? 's' : ''}
-              {searchTerm && <span className="ml-1 text-violet-600 dark:text-violet-400">· "{searchTerm}"</span>}
-            </p>
+
           </div>
 
-          <div className="flex items-center gap-2 w-full lg:w-auto justify-end">
+          <div className="">
             <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="violet" />
           </div>
         </motion.div>

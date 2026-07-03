@@ -264,8 +264,8 @@ export default function Settings() {
     >
       <div className="space-y-6">
         {/* Toolbar */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
-          <div className="flex items-center gap-4 flex-1">
+        <div className="flex items-center justify-between gap-4 bg-white dark:bg-gray-900 p-1 lg:p-4 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div className="flex-1 max-w-lg items-center gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
               <input
@@ -283,7 +283,7 @@ export default function Settings() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="">
             <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="indigo" />
           </div>
         </div>
