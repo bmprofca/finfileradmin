@@ -55,11 +55,11 @@ const Navbar = ({
                 className="flex items-center gap-2 rounded-lg transition-opacity duration-200 hover:opacity-90 focus:outline-none"
               >
                 <div className="w-10 h-8 flex items-center justify-center">
-                  <img src="/logo.jpg" alt="FinFiler Logo" className="w-10 h-8 object-contain" />
+                  <img src="/logo192.png" alt="FinFiler Logo" className="w-10 h-8 object-contain" />
                 </div>
                 <div>
                   <span className="text-xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">
-                    FinFiler<span className="font-light text-gray-600 dark:text-gray-400">Admin</span>
+                    FinFiler<span className="font-light text-gray-600 dark:text-gray-400"> Office</span>
                   </span>
                 </div>
               </button>

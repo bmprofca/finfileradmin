@@ -163,7 +163,7 @@ function KpiCell({ metric, value, index }) {
 
 function KpiStrip({ overview }) {
   return (
-    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3 lg:grid-cols-8">
+    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
       {KPI_STRIP.map((metric, index) => (
         <KpiCell key={metric.key} metric={metric} value={overview[metric.key]} index={index} />
       ))}
@@ -374,7 +374,7 @@ function DashboardSkeleton() {
         <div className="h-4 w-44 animate-pulse rounded bg-gray-200 dark:bg-white/10" />
         <div className="h-8 w-32 animate-pulse rounded-full bg-gray-200 dark:bg-white/10" />
       </div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="h-[72px] animate-pulse rounded-2xl border border-gray-200 bg-white dark:border-white/10 dark:bg-[#0F172A]" />
         ))}

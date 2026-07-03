@@ -6,9 +6,7 @@ import {
 import toast from 'react-hot-toast';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
-import ManagementCard from '../components/common/ManagementCard';
-import ManagementGrid from '../components/common/ManagementGrid';
-import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
+
 import PaginationComponent from '../components/common/PaginationComponent';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
@@ -44,7 +42,7 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchInput, setSearchInput] = useState('');
-  const [viewMode, setViewMode] = useState('table');
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalAdmins, setTotalAdmins] = useState(0);
@@ -217,31 +215,6 @@ export default function Settings() {
     { key: 'status', label: 'Status', render: (row) => <StatusBadge status={row.status} /> },
   ];
 
-  const renderCard = (admin, index) => (
-    <ManagementCard
-      key={admin.username || index}
-      delay={index * 0.05}
-      accent="indigo"
-      eyebrow={admin.username ? `@${admin.username}` : 'Admin'}
-      title={admin.full_name || `${admin.first_name || ''} ${admin.last_name || ''}`.trim()}
-      subtitle={admin.email || 'No email provided'}
-      icon={<AdminAvatar admin={admin} />}
-      badge={<StatusBadge status={admin.status} />}
-      onClick={() => openEditModal(admin)}
-      hoverable
-      actions={[
-        { label: 'Edit Admin', icon: <Edit size={12} />, onClick: () => openEditModal(admin), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
-      ]}
-      menuId={`admin-menu-${admin.username || index}`}
-      footer={
-        <div className="flex items-center justify-between w-full text-xs text-gray-500 dark:text-gray-400">
-          <span className="flex items-center gap-1"><Phone size={12} className="text-gray-400" /> {admin.mobile || 'N/A'}</span>
-          <span className="text-[10px] uppercase font-semibold text-gray-400">{admin.middle_name || ''}</span>
-        </div>
-      }
-    />
-  );
-
   const inputCls =
     'w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all';
 
@@ -283,13 +256,10 @@ export default function Settings() {
             </div>
           </div>
 
-          <div className="">
-            <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="indigo" />
-          </div>
         </div>
 
         {/* Loading */}
-        {loading && <PageContentSkeleton viewMode={viewMode} rows={5} columns={5} />}
+        {loading && <PageContentSkeleton rows={5} columns={5} />}
 
         {/* Empty State */}
         {!loading && admins.length === 0 && (
@@ -304,24 +274,16 @@ export default function Settings() {
         {!loading && admins.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <div className="rounded-xl bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
-              {viewMode === 'table' ? (
-                <ManagementTable
-                  columns={columns}
-                  rows={admins}
-                  rowKey="username"
-                  accent="indigo"
-                  onRowClick={(row) => openEditModal(row)}
-                  getActions={(row) => [
-                    { label: 'Edit Admin', icon: <Edit size={12} />, onClick: () => openEditModal(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
-                  ]}
-                />
-              ) : (
-                <ManagementGrid viewMode="card" className="p-4 bg-gray-50/50 dark:bg-gray-800/30">
-                  <AnimatePresence>
-                    {admins.map((admin, idx) => renderCard(admin, idx))}
-                  </AnimatePresence>
-                </ManagementGrid>
-              )}
+              <ManagementTable
+                columns={columns}
+                rows={admins}
+                rowKey="username"
+                accent="indigo"
+                onRowClick={(row) => openEditModal(row)}
+                getActions={(row) => [
+                  { label: 'Edit Admin', icon: <Edit size={12} />, onClick: () => openEditModal(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
+                ]}
+              />
             </div>
 
             <div className="mt-4">

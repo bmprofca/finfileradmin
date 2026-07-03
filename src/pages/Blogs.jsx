@@ -21,9 +21,7 @@ import {
 
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
-import ManagementCard from '../components/common/ManagementCard';
-import ManagementGrid from '../components/common/ManagementGrid';
-import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
+
 import PaginationComponent from '../components/common/PaginationComponent';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
@@ -651,43 +649,11 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isSubmitting }) => {
   );
 };
 
-// ─── Blog Card (Card View) ─────────────────────────────────────────────────────
-
-const BlogManagementCard = ({ blog, index, onView, onEdit, onDelete }) => (
-  <ManagementCard
-    key={blog.blog_id}
-    delay={index * 0.05}
-    accent="fuchsia"
-    eyebrow={blog.path ? `/${blog.path}` : null}
-    title={blog.title}
-    subtitle={blog.summary || docToText(blog.content).slice(0, 60)}
-    icon={<BlogThumb blog={blog} size="sm" />}
-    badge={<StatusBadge status={blog.status} />}
-    onClick={() => onView(blog)}
-    hoverable
-    actions={[
-      { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(blog), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
-      { label: 'Edit Post', icon: <Edit size={12} />, onClick: () => onEdit(blog), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
-      { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => onDelete(blog), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
-    ]}
-    menuId={`blog-card-${blog.blog_id}`}
-    footer={
-      <div className="flex items-center justify-between w-full text-xs text-gray-500 dark:text-gray-400">
-        <span className="flex items-center gap-1">
-          <Calendar size={10} className="text-fuchsia-400" />
-          {blog.published_at ? new Date(blog.published_at).toLocaleDateString() : '—'}
-        </span>
-      </div>
-    }
-  />
-);
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Blogs() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('table');
   const [blogs, setBlogs] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -864,13 +830,10 @@ export default function Blogs() {
             
           </div>
 
-          <div className="">
-            <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="fuchsia" />
-          </div>
         </motion.div>
 
         {/* Loading */}
-        {loading && <PageContentSkeleton viewMode={viewMode} rows={6} columns={5} />}
+        {loading && <PageContentSkeleton rows={6} columns={5} />}
 
         {/* Empty State */}
         {!loading && blogs.length === 0 && (
@@ -896,37 +859,18 @@ export default function Blogs() {
           <>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
 
-              {viewMode === 'table' && (
-                <ManagementTable
-                  columns={columns}
-                  rows={blogs}
-                  rowKey="blog_id"
-                  onRowClick={(row) => handleView(row)}
-                  getActions={(row) => [
-                    { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
-                    { label: 'Edit Post', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
-                    { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
-                  ]}
-                  accent="fuchsia"
-                />
-              )}
-
-              {viewMode === 'card' && (
-                <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4">
-                  <AnimatePresence>
-                    {blogs.map((blog, index) => (
-                      <BlogManagementCard
-                        key={blog.blog_id}
-                        blog={blog}
-                        index={index}
-                        onView={handleView}
-                        onEdit={handleEdit}
-                        onDelete={handleDeleteRequest}
-                      />
-                    ))}
-                  </AnimatePresence>
-                </ManagementGrid>
-              )}
+              <ManagementTable
+                columns={columns}
+                rows={blogs}
+                rowKey="blog_id"
+                onRowClick={(row) => handleView(row)}
+                getActions={(row) => [
+                  { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
+                  { label: 'Edit Post', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
+                  { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
+                ]}
+                accent="fuchsia"
+              />
             </motion.div>
 
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-4">

@@ -8,9 +8,6 @@ import {
 } from 'lucide-react';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
-import ManagementCard from '../components/common/ManagementCard';
-import ManagementGrid from '../components/common/ManagementGrid';
-import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
 import PaginationComponent from '../components/common/PaginationComponent';
 import Modal from '../components/common/Modal';
 import SelectField from '../components/common/SelectField';
@@ -57,13 +54,6 @@ const getRowHighlightClass = (order) => {
   return hasAssignedStaff
     ? 'bg-blue-50/40 hover:bg-blue-100/50 dark:bg-blue-900/10 dark:hover:bg-blue-900/20'
     : 'bg-yellow-50/60 hover:bg-yellow-100/70 dark:bg-yellow-900/10 dark:hover:bg-yellow-900/20';
-};
-
-const getCardHighlightClass = (order) => {
-  const hasAssignedStaff = order.assigned_staff && order.assigned_staff.length > 0;
-  return hasAssignedStaff
-    ? 'border-blue-200 bg-blue-50/30 shadow-blue-100/50 dark:border-blue-800/50 dark:bg-blue-900/20'
-    : 'border-yellow-300 bg-yellow-50/50 shadow-yellow-100/50 dark:border-yellow-700/50 dark:bg-yellow-900/20';
 };
 
 const PaymentText = ({ order }) => {
@@ -609,68 +599,6 @@ const OrderStatusModal = ({ order, onClose, onSubmit, isSubmitting }) => {
   );
 };
 
-/* ─── Order Card ─── */
-const OrderCard = ({ order, index, getActions, onClick, onManageStaff, onViewDocuments }) => {
-  const hasAssignedStaff = order.assigned_staff && order.assigned_staff.length > 0;
-  const documentsCount = order.documents?.length || 0;
-
-  return (
-    <ManagementCard
-      delay={index * 0.05}
-      accent="indigo"
-      className={getCardHighlightClass(order)}
-      eyebrow={`Date: ${new Date(order.create_date).toLocaleDateString()}`}
-      title={order.order_name}
-      subtitle={order.service_name}
-      onClick={() => onClick && onClick(order)}
-      icon={
-        <div className="w-10 h-10 rounded-sm bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shrink-0">
-          <Briefcase size={20} />
-        </div>
-      }
-      badge={<StatusBadge status={order.status} />}
-      menuId={`order-card-${order.order_id}`}
-      actions={getActions ? getActions(order) : undefined}
-      footer={
-        <div className="flex items-center justify-between w-full text-xs text-gray-500 dark:text-gray-400">
-          <span className="flex items-center gap-1">
-            <Hash size={10} className="text-indigo-400 dark:text-indigo-500" /> {order.order_id}
-          </span>
-          <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrency(order.fees)}</span>
-        </div>
-      }
-    >
-      <div className="mt-1 space-y-1">
-        <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-          <User size={10} className="text-gray-400 dark:text-gray-500" />
-          Client: {order.client_name || order.client_username}
-        </p>
-        <button
-          onClick={(e) => { e.stopPropagation(); onViewDocuments && onViewDocuments(order); }}
-          className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold flex items-center gap-1.5 mt-1"
-        >
-          <FileText size={12} /> {documentsCount} Documents
-        </button>
-        {hasAssignedStaff ? (
-          <button
-            onClick={(e) => { e.stopPropagation(); onManageStaff && onManageStaff(order); }}
-            className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold flex items-center gap-1.5 mt-1"
-          >
-            <Users size={12} /> {order.assigned_staff.length} Staff Assigned
-          </button>
-        ) : (
-          <button
-            onClick={(e) => { e.stopPropagation(); onManageStaff && onManageStaff(order); }}
-            className="text-xs text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold flex items-center gap-1.5 mt-1"
-          >
-            <UserPlus size={12} /> Assign Staff
-          </button>
-        )}
-      </div>
-    </ManagementCard>
-  );
-};
-
 /* ═══════════════════════════════════════════════
    MAIN COMPONENT
    ═══════════════════════════════════════════════ */
@@ -682,7 +610,6 @@ export default function Orders() {
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [viewMode, setViewMode] = useState('table');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
 
@@ -1062,14 +989,11 @@ export default function Orders() {
                 <span className="font-semibold text-gray-800 dark:text-gray-200">{totalOrders}</span> orders
               </p>
             </div>
-            <div className="flex items-center gap-2 w-full lg:w-auto justify-end">
-              <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="indigo" />
-            </div>
           </motion.div>
 
           {/* Loading */}
           {loading && (
-            <PageContentSkeleton viewMode={viewMode} rows={6} columns={6} />
+            <PageContentSkeleton rows={6} columns={6} />
           )}
 
           {/* Empty */}
@@ -1096,37 +1020,15 @@ export default function Orders() {
                 transition={{ delay: 0.2 }}
                 className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50"
               >
-                {/* Table View */}
-                {viewMode === 'table' && (
-                  <ManagementTable
-                    columns={columns}
-                    rows={orders}
-                    rowKey="order_id"
-                    accent="indigo"
-                    getActions={getActions}
-                    onRowClick={(row) => openDetailModal(row)}
-                    rowClassName={(row) => getRowHighlightClass(row)}
-                  />
-                )}
-
-                {/* Card View */}
-                {viewMode === 'card' && (
-                  <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4">
-                    <AnimatePresence>
-                      {orders.map((order, index) => (
-                        <OrderCard
-                          key={order.order_id}
-                          order={order}
-                          index={index}
-                          getActions={getActions}
-                          onClick={openDetailModal}
-                          onManageStaff={openStaffModal}
-                          onViewDocuments={openDocumentsPage}
-                        />
-                      ))}
-                    </AnimatePresence>
-                  </ManagementGrid>
-                )}
+                <ManagementTable
+                  columns={columns}
+                  rows={orders}
+                  rowKey="order_id"
+                  accent="indigo"
+                  getActions={getActions}
+                  onRowClick={(row) => openDetailModal(row)}
+                  rowClassName={(row) => getRowHighlightClass(row)}
+                />
               </motion.div>
 
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-4">

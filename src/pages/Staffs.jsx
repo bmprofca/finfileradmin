@@ -9,9 +9,6 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
-import ManagementCard from '../components/common/ManagementCard';
-import ManagementGrid from '../components/common/ManagementGrid';
-import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
 import PaginationComponent from '../components/common/PaginationComponent';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
@@ -611,56 +608,12 @@ const BulkPermissionsModal = ({ staffList, onClose, onSaved }) => {
   );
 };
 
-// ─── Staff Card (Card View) ───────────────────────────────────────────────────
-
-const StaffManagementCard = ({ staff, index, onView, onEdit, onLogout, onNavigate, selected, onToggleSelect }) => (
-  <ManagementCard
-    key={staff.username}
-    delay={index * 0.05}
-    accent="blue"
-    eyebrow={`@${staff.username}`}
-    title={staff.full_name}
-    subtitle={staff.email}
-    icon={
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          checked={selected}
-          onClick={(e) => e.stopPropagation()}
-          onChange={(e) => { e.stopPropagation(); onToggleSelect(staff.username); }}
-          className="w-3 h-3 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-        />
-        <StaffAvatar staff={staff} size="sm" />
-      </div>
-    }
-    badge={<StaffStatusBadge status={staff.status} />}
-    onClick={() => onNavigate(staff)}
-    hoverable
-    actions={[
-      { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(staff), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
-      { label: 'Edit Staff', icon: <Edit size={12} />, onClick: () => onEdit(staff), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
-      { label: 'Force Logout', icon: <LogOut size={12} />, onClick: () => onLogout(staff), className: 'text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/30 dark:text-orange-400 dark:hover:text-orange-300' },
-    ]}
-    menuId={`staff-card-${staff.username}`}
-  >
-    <div className="mt-1 space-y-1.5">
-      {staff.mobile && (
-        <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-          <Phone size={10} className="text-gray-400 dark:text-gray-500" /> {staff.mobile}
-        </p>
-      )}
-      <PermissionPackageBadge staff={staff} />
-    </div>
-  </ManagementCard>
-);
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Staffs() {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('table');
   const [staffs, setStaffs] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -891,9 +844,6 @@ export default function Staffs() {
 
           </div>
 
-          <div className="">
-            <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="blue" />
-          </div>
         </motion.div>
 
         {/* Bulk Actions Bar */}
@@ -925,7 +875,7 @@ export default function Staffs() {
 
         {/* Loading State */}
         {loading && (
-          <PageContentSkeleton viewMode={viewMode} rows={6} columns={6} />
+          <PageContentSkeleton rows={6} columns={6} />
         )}
 
         {/* Empty State */}
@@ -952,42 +902,18 @@ export default function Staffs() {
           <>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
 
-              {/* Table View */}
-              {viewMode === 'table' && (
-                <ManagementTable
-                  columns={columns}
-                  rows={staffs}
-                  rowKey="username"
-                  onRowClick={(row) => navigate(`/staffs/${row.username}`)}
-                  getActions={(row) => [
-                    { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
-                    { label: 'Edit Staff', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
-                    { label: 'Force Logout', icon: <LogOut size={12} />, onClick: () => handleLogoutRequest(row), className: 'text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/30 dark:text-orange-400 dark:hover:text-orange-300' },
-                  ]}
-                  accent="blue"
-                />
-              )}
-
-              {/* Card View */}
-              {viewMode === 'card' && (
-                <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4">
-                  <AnimatePresence>
-                    {staffs.map((staff, index) => (
-                      <StaffManagementCard
-                        key={staff.username}
-                        staff={staff}
-                        index={index}
-                        onView={handleView}
-                        onEdit={handleEdit}
-                        onLogout={handleLogoutRequest}
-                        onNavigate={(row) => navigate(`/staffs/${row.username}`)}
-                        selected={selectedUsernames.has(staff.username)}
-                        onToggleSelect={toggleSelectOne}
-                      />
-                    ))}
-                  </AnimatePresence>
-                </ManagementGrid>
-              )}
+              <ManagementTable
+                columns={columns}
+                rows={staffs}
+                rowKey="username"
+                onRowClick={(row) => navigate(`/staffs/${row.username}`)}
+                getActions={(row) => [
+                  { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
+                  { label: 'Edit Staff', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
+                  { label: 'Force Logout', icon: <LogOut size={12} />, onClick: () => handleLogoutRequest(row), className: 'text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/30 dark:text-orange-400 dark:hover:text-orange-300' },
+                ]}
+                accent="blue"
+              />
             </motion.div>
 
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-4">

@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  User, Phone, Mail, ArrowLeft, Shield, ShieldCheck, CheckCircle, Briefcase, Hash, Search, X
+  User, Phone, Mail, ArrowLeft, Shield, ShieldCheck, CheckCircle, Briefcase, Search, X
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
-import ManagementCard from '../components/common/ManagementCard';
-import ManagementGrid from '../components/common/ManagementGrid';
-import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
+
 import PaginationComponent from '../components/common/PaginationComponent';
 import Button from '../components/common/Button';
 import RefreshButton from '../components/common/RefreshButton';
@@ -37,35 +35,6 @@ const StatusBadge = ({ status }) => {
     </span>
   );
 };
-
-const OrderCard = ({ order, index }) => (
-  <ManagementCard
-    delay={index * 0.05}
-    accent="indigo"
-    eyebrow={`Date: ${new Date(order.create_date).toLocaleDateString()}`}
-    title={order.name}
-    subtitle={order.service_name}
-    icon={
-      <div className="w-10 h-10 rounded-sm bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-        <Briefcase size={20} />
-      </div>
-    }
-    badge={<StatusBadge status={order.status} />}
-    menuId={`order-card-${order.order_id}`}
-    footer={
-      <div className="flex items-center justify-between w-full text-xs text-gray-500 dark:text-gray-400">
-        <span className="flex items-center gap-1"><Hash size={10} className="text-indigo-400 dark:text-indigo-500" /> {order.order_id}</span>
-        <span className="font-semibold text-gray-700 dark:text-gray-300">₹{order.fees}</span>
-      </div>
-    }
-  >
-    <div className="mt-1">
-      <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-        <User size={10} className="text-gray-400 dark:text-gray-500" /> Client: {order.client_username}
-      </p>
-    </div>
-  </ManagementCard>
-);
 
 const InfoItem = ({ icon: Icon, label, value }) => (
   <div className="flex items-start gap-3 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 p-4">
@@ -97,7 +66,7 @@ export default function StaffProfile() {
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('table');
+
   const [currentPage, setCurrentPage] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -421,9 +390,6 @@ export default function StaffProfile() {
                     
                   </div>
 
-                  <div className="">
-                    <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="indigo" />
-                  </div>
                 </div>
 
                 {/* Empty state */}
@@ -437,33 +403,19 @@ export default function StaffProfile() {
 
                 {/* Loading State */}
                 {ordersLoading && (
-                  <PageContentSkeleton viewMode={viewMode} rows={6} columns={5} />
+                  <PageContentSkeleton rows={6} columns={5} />
                 )}
 
                 {/* Content */}
                 {!ordersLoading && orders.length > 0 && (
                   <>
                     <div className="rounded-xl bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
-                      {/* Table View */}
-                      {viewMode === 'table' && (
-                        <ManagementTable
-                          columns={columns}
-                          rows={orders}
-                          rowKey="order_id"
-                          accent="indigo"
-                        />
-                      )}
-
-                      {/* Card View */}
-                      {viewMode === 'card' && (
-                        <ManagementGrid viewMode={viewMode} className="p-4 bg-gray-50/50 dark:bg-gray-800/30">
-                          <AnimatePresence>
-                            {orders.map((order, index) => (
-                              <OrderCard key={order.order_id} order={order} index={index} />
-                            ))}
-                          </AnimatePresence>
-                        </ManagementGrid>
-                      )}
+                      <ManagementTable
+                        columns={columns}
+                        rows={orders}
+                        rowKey="order_id"
+                        accent="indigo"
+                      />
                     </div>
 
                     <div className="mt-4">

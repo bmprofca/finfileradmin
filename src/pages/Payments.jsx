@@ -9,9 +9,7 @@ import {
 import toast from 'react-hot-toast';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
-import ManagementCard from '../components/common/ManagementCard';
-import ManagementGrid from '../components/common/ManagementGrid';
-import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
+
 import PaginationComponent from '../components/common/PaginationComponent';
 import Modal from '../components/common/Modal';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
@@ -236,62 +234,6 @@ const ViewPaymentModal = ({ payment, onClose }) => {
   );
 };
 
-// ─── Payment Card (Card View) ───────────────────────────────────────────────────
-
-const PaymentCard = ({ payment, index, onView }) => {
-  const isPartial = payment.is_partial || (payment.payments && payment.payments.length > 1);
-  const paymentCount = payment.payments?.length || 1;
-
-  return (
-    <ManagementCard
-      key={payment.id || payment.payment_id}
-      delay={index * 0.05}
-      accent="emerald"
-      eyebrow={payment.client_name}
-      title={payment.order_name}
-      subtitle={formatDate(payment.create_date)}
-      icon={
-        <div className="w-8 h-8 rounded-sm bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shrink-0">
-          <CreditCard size={14} className="text-white" />
-        </div>
-      }
-      badge={<PaymentStatusBadge status={payment.status} />}
-      onClick={() => onView(payment)}
-      hoverable
-      actions={[
-        {
-          label: 'View Details',
-          icon: <Eye size={12} />,
-          onClick: () => onView(payment),
-          className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400'
-        },
-      ]}
-      menuId={`payment-card-${payment.id || payment.payment_id}`}
-    >
-      <div className="mt-2 space-y-2">
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">
-            {formatAmount(payment.amount)}
-          </span>
-          {isPartial && (
-            <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
-              <Layers size={10} /> {paymentCount} payments
-            </span>
-          )}
-        </div>
-        {payment.utr && (
-          <p className="text-[10px] text-gray-400 dark:text-gray-500 font-mono truncate">
-            UTR: {payment.utr}
-          </p>
-        )}
-        <p className="text-[10px] text-gray-400 dark:text-gray-500 font-mono truncate">
-          {payment.payment_id}
-        </p>
-      </div>
-    </ManagementCard>
-  );
-};
-
 // ─── Filter Select Component ────────────────────────────────────────────────
 
 const FilterSelect = ({ options, value, onChange, placeholder, icon: Icon, label }) => {
@@ -328,7 +270,6 @@ export default function Payments() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('table');
   const [payments, setPayments] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -600,7 +541,6 @@ export default function Payments() {
                   <X size={14} /> Clear All
                 </button>
               )}
-              <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="emerald" />
             </div>
           </div>
 
@@ -670,7 +610,7 @@ export default function Payments() {
         </motion.div>
 
         {/* Loading */}
-        {loading && <PageContentSkeleton viewMode={viewMode} rows={6} columns={8} />}
+        {loading && <PageContentSkeleton rows={6} columns={8} />}
 
         {/* Empty State */}
         {!loading && payments.length === 0 && (
@@ -704,40 +644,21 @@ export default function Payments() {
               transition={{ delay: 0.2 }}
               className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50"
             >
-              {/* Table View */}
-              {viewMode === 'table' && (
-                <ManagementTable
-                  columns={columns}
-                  rows={payments}
-                  rowKey="id"
-                  onRowClick={(row) => handleView(row)}
-                  getActions={(row) => [
-                    {
-                      label: 'View Details',
-                      icon: <Eye size={12} />,
-                      onClick: () => handleView(row),
-                      className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300'
-                    },
-                  ]}
-                  accent="emerald"
-                />
-              )}
-
-              {/* Card View */}
-              {viewMode === 'card' && (
-                <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4">
-                  <AnimatePresence>
-                    {payments.map((payment, index) => (
-                      <PaymentCard
-                        key={payment.id || payment.payment_id}
-                        payment={payment}
-                        index={index}
-                        onView={handleView}
-                      />
-                    ))}
-                  </AnimatePresence>
-                </ManagementGrid>
-              )}
+              <ManagementTable
+                columns={columns}
+                rows={payments}
+                rowKey="id"
+                onRowClick={(row) => handleView(row)}
+                getActions={(row) => [
+                  {
+                    label: 'View Details',
+                    icon: <Eye size={12} />,
+                    onClick: () => handleView(row),
+                    className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300'
+                  },
+                ]}
+                accent="emerald"
+              />
             </motion.div>
 
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-4">

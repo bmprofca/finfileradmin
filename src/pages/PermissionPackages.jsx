@@ -7,9 +7,7 @@ import {
 import toast from 'react-hot-toast';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
-import ManagementCard from '../components/common/ManagementCard';
-import ManagementGrid from '../components/common/ManagementGrid';
-import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
+
 import PaginationComponent from '../components/common/PaginationComponent';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
@@ -281,52 +279,6 @@ const DeleteModal = ({ pkg, onClose, onConfirm, isDeleting }) => (
   </Modal>
 );
 
-// ─── Package Card (card view) ─────────────────────────────────────────────────
-
-const PackageManagementCard = ({ pkg, index, allPermissions, onView, onEdit, onDelete }) => (
-  <ManagementCard
-    key={pkg.permission_package_id}
-    delay={index * 0.05}
-    accent="indigo"
-    eyebrow={`${pkg.assigned_permissions?.length || 0} permission${pkg.assigned_permissions?.length !== 1 ? 's' : ''}`}
-    title={pkg.name}
-    subtitle={pkg.remark || ''}
-    icon={
-      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white">
-        <Package size={14} />
-      </div>
-    }
-    badge={<StatusBadge status={pkg.status} />}
-    actions={[
-      { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(pkg), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400' },
-      { label: 'Edit', icon: <Edit size={12} />, onClick: () => onEdit(pkg), className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400' },
-      { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => onDelete(pkg), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400' },
-    ]}
-    menuId={`pkg-card-${pkg.permission_package_id}`}
-  >
-    {pkg.assigned_permissions?.length > 0 && (
-      <div className="mt-2 flex flex-wrap gap-1">
-        {pkg.assigned_permissions.slice(0, 3).map((permId) => {
-          const perm = allPermissions.find((p) => p.permission_id === permId);
-          return (
-            <span
-              key={permId}
-              className="inline-flex items-center px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 text-[10px] font-medium"
-            >
-              {perm ? perm.name : permId}
-            </span>
-          );
-        })}
-        {pkg.assigned_permissions.length > 3 && (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-[10px] font-medium">
-            +{pkg.assigned_permissions.length - 3} more
-          </span>
-        )}
-      </div>
-    )}
-  </ManagementCard>
-);
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function PermissionPackages({ tabs, activeTab, onTabChange }) {
@@ -335,7 +287,7 @@ export default function PermissionPackages({ tabs, activeTab, onTabChange }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('table');
+
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(20);
@@ -575,13 +527,10 @@ export default function PermissionPackages({ tabs, activeTab, onTabChange }) {
 
           </div>
 
-          <div className="">
-            <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} />
-          </div>
         </motion.div>
 
         {/* Loading */}
-        {loading && <PageContentSkeleton viewMode={viewMode} rows={6} columns={4} />}
+        {loading && <PageContentSkeleton rows={6} columns={4} />}
 
         {/* Empty State */}
         {!loading && packages.length === 0 && (
@@ -615,39 +564,17 @@ export default function PermissionPackages({ tabs, activeTab, onTabChange }) {
               transition={{ delay: 0.2 }}
               className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50"
             >
-              {/* Table View */}
-              {viewMode === 'table' && (
-                <ManagementTable
-                  columns={columns}
-                  rows={packages}
-                  rowKey="permission_package_id"
-                  getActions={(row) => [
-                    { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400' },
-                    { label: 'Edit Package', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400' },
-                    { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400' },
-                  ]}
-                  accent="indigo"
-                />
-              )}
-
-              {/* Card View */}
-              {viewMode === 'card' && (
-                <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4">
-                  <AnimatePresence>
-                    {packages.map((pkg, index) => (
-                      <PackageManagementCard
-                        key={pkg.permission_package_id}
-                        pkg={pkg}
-                        index={index}
-                        allPermissions={allPermissions}
-                        onView={handleView}
-                        onEdit={handleEdit}
-                        onDelete={handleDeleteRequest}
-                      />
-                    ))}
-                  </AnimatePresence>
-                </ManagementGrid>
-              )}
+              <ManagementTable
+                columns={columns}
+                rows={packages}
+                rowKey="permission_package_id"
+                getActions={(row) => [
+                  { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400' },
+                  { label: 'Edit Package', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400' },
+                  { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400' },
+                ]}
+                accent="indigo"
+              />
             </motion.div>
 
             <motion.div
