@@ -54,8 +54,8 @@ const Navbar = ({
                 onClick={() => navigate('/dashboard')}
                 className="flex items-center gap-2 rounded-lg transition-opacity duration-200 hover:opacity-90 focus:outline-none"
               >
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md">
-                  <span className="text-white font-bold text-sm">FF</span>
+                <div className="w-10 h-8 flex items-center justify-center">
+                  <img src="/logo.jpg" alt="FinFiler Logo" className="w-10 h-8 object-contain" />
                 </div>
                 <div>
                   <span className="text-xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">

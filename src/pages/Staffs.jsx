@@ -539,7 +539,7 @@ const BulkPermissionsModal = ({ staffList, onClose, onSaved }) => {
     setIsSaving(true);
     try {
       const response = await apiCall('/api/admin/permissions/package/assign', 'PUT', {
-        staff_usernames:usernames,
+        staff_usernames: usernames,
         permission_package_id: packageValue, // string id for all, or null to remove from all
       });
       const json = await response.json();
@@ -628,7 +628,7 @@ const StaffManagementCard = ({ staff, index, onView, onEdit, onLogout, onNavigat
           checked={selected}
           onClick={(e) => e.stopPropagation()}
           onChange={(e) => { e.stopPropagation(); onToggleSelect(staff.username); }}
-          className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+          className="w-3 h-3 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
         />
         <StaffAvatar staff={staff} size="sm" />
       </div>
@@ -802,7 +802,7 @@ export default function Staffs() {
           type="checkbox"
           checked={staffs.length > 0 && selectedUsernames.size === staffs.length}
           onChange={toggleSelectAll}
-          className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+          className="w-3 h-3 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
         />
       ),
       render: (row) => (
@@ -811,7 +811,7 @@ export default function Staffs() {
           checked={selectedUsernames.has(row.username)}
           onClick={(e) => e.stopPropagation()}
           onChange={(e) => { e.stopPropagation(); toggleSelectOne(row.username); }}
-          className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+          className="w-3 h-3 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
         />
       ),
     },
