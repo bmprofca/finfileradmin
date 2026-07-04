@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 
@@ -16,6 +16,12 @@ const MainLayout = ({ children }) => {
     }
   });
   const sidebarRef = useRef(null);
+  const mainRef = useRef(null);
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    if (mainRef.current) mainRef.current.scrollTop = 0;
+  }, [pathname]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -93,6 +99,7 @@ const MainLayout = ({ children }) => {
         )}
 
         <main
+          ref={mainRef}
           className={`
             flex-1 transition-all duration-300 ease-out
             ${getContentMargin()}
