@@ -42,14 +42,14 @@ const ViewPackageModal = ({ pkg, allPermissions, onClose, onEdit }) => (
     footer={
       <button
         onClick={() => onEdit(pkg)}
-        className="px-5 py-2.5 rounded-sm bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2"
+        className="px-5 py-2.5 rounded-lg bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2"
       >
         <Edit size={16} /> Edit Package
       </button>
     }
   >
     <div className="flex items-start gap-4 pb-4 border-b dark:border-gray-700">
-      <div className="p-3 rounded-sm bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400">
+      <div className="p-3 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400">
         <Package size={22} />
       </div>
       <div>
@@ -103,7 +103,7 @@ const PackageFormModal = ({ pkg, allPermissions, onClose, onSubmit, isSubmitting
   });
 
   const inputCls =
-    'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm dark:text-gray-100';
+    'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm dark:text-gray-100';
 
   const togglePermission = (permId) => {
     setForm((f) => ({
@@ -218,7 +218,7 @@ const PackageFormModal = ({ pkg, allPermissions, onClose, onSubmit, isSubmitting
                     key={perm.permission_id}
                     type="button"
                     onClick={() => togglePermission(perm.permission_id)}
-                    className={`flex items-start gap-2.5 px-3 py-2.5 rounded-sm border text-left transition-all ${selected
+                    className={`flex items-start gap-2.5 px-3 py-2.5 rounded-lg border text-left transition-all ${selected
                       ? 'bg-indigo-50 border-indigo-300 dark:bg-indigo-900/20 dark:border-indigo-600'
                       : 'bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50'
                       }`}
@@ -260,7 +260,7 @@ const DeleteModal = ({ pkg, onClose, onConfirm, isDeleting }) => (
       <button
         disabled={isDeleting}
         onClick={onConfirm}
-        className="px-5 py-2.5 rounded-sm bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 transition-all flex items-center gap-2 disabled:opacity-50"
+        className="px-5 py-2.5 rounded-lg bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 transition-all flex items-center gap-2 disabled:opacity-50"
       >
         {isDeleting ? 'Deleting...' : 'Yes, Delete'}
       </button>
@@ -505,7 +505,7 @@ export default function PermissionPackages({ tabs, activeTab, onTabChange }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex items-center justify-between gap-4 bg-white dark:bg-gray-800   p-1 lg:p-4 rounded-sm border border-gray-100 dark:border-gray-700 shadow-sm"
+          className="flex items-center justify-between gap-4 bg-white dark:bg-gray-800   p-1 lg:p-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm"
         >
           <div className="flex-1 max-w-lg items-center gap-4 ">
             <div className="relative flex-1">
@@ -539,7 +539,7 @@ export default function PermissionPackages({ tabs, activeTab, onTabChange }) {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-16 bg-white dark:bg-gray-800 rounded-sm shadow-xl dark:shadow-gray-950/50"
+            className="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-gray-950/50"
           >
             <Package className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
             <p className="text-xl text-gray-500 dark:text-gray-400">No packages found</p>
@@ -549,7 +549,7 @@ export default function PermissionPackages({ tabs, activeTab, onTabChange }) {
             {!searchTerm && (
               <button
                 onClick={handleCreateNew}
-                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-sm bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-all"
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-all"
               >
                 <Plus size={16} /> Create First Package
               </button>
@@ -564,7 +564,7 @@ export default function PermissionPackages({ tabs, activeTab, onTabChange }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50"
+              className="rounded-lg bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50"
             >
               <ManagementTable
                 columns={columns}

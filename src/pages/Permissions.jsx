@@ -164,7 +164,7 @@ export default function Permissions({ tabs, activeTab, onTabChange }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex items-center justify-between gap-4 bg-white dark:bg-gray-800   p-1 lg:p-4 rounded-sm border border-gray-100 dark:border-gray-700 shadow-sm"
+          className="flex items-center justify-between gap-4 bg-white dark:bg-gray-800   p-1 lg:p-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm"
         >
           <div className="flex-1 max-w-lg items-center gap-4 ">
             <div className="relative flex-1">
@@ -198,7 +198,7 @@ export default function Permissions({ tabs, activeTab, onTabChange }) {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-16 bg-white dark:bg-gray-800 rounded-sm shadow-xl dark:shadow-gray-950/50"
+            className="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-gray-950/50"
           >
             <Lock className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
             <p className="text-xl text-gray-500 dark:text-gray-400">No permissions found</p>
@@ -214,7 +214,7 @@ export default function Permissions({ tabs, activeTab, onTabChange }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50"
+            className="rounded-lg bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50"
           >
             <ManagementTable
               columns={columns}

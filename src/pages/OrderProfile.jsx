@@ -202,7 +202,7 @@ const StaffManagementModal = ({ order, allStaff, staffLoading, onClose, onSubmit
       <div className="space-y-4">
         <p className="text-sm text-gray-500 dark:text-gray-400">Use the arrow buttons to move staff between available and assigned lists.</p>
         <div className="flex flex-col gap-4 lg:flex-row md:flex-row items-stretch">
-          <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-sm p-3 bg-gray-50 dark:bg-gray-900/30">
+          <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-900/30">
             <div className="flex items-center justify-between mb-2">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2"><UserPlus size={14} className="text-indigo-500" /> Available ({leftStaff.length})</h4>
               {leftStaff.length > 0 && <button onClick={moveAllToRight} className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 font-semibold flex items-center gap-1"><ChevronRight size={14} /> All</button>}
@@ -219,7 +219,7 @@ const StaffManagementModal = ({ order, allStaff, staffLoading, onClose, onSubmit
             <button onClick={moveAllToLeft} disabled={rightStaff.length === 0} className="p-2 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-all disabled:opacity-30 disabled:cursor-not-allowed border border-indigo-200 dark:border-indigo-700"><ChevronLeft size={20} /></button>
             <div className="text-xs text-gray-400 font-medium text-center">{rightStaff.length} / {allStaff.length}</div>
           </div>
-          <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-sm p-3 bg-gray-50 dark:bg-gray-900/30">
+          <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-900/30">
             <div className="flex items-center justify-between mb-2">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2"><UserCheck size={14} className="text-green-500" /> Assigned ({rightStaff.length})</h4>
               {rightStaff.length > 0 && <button onClick={moveAllToLeft} className="text-xs text-red-600 dark:text-red-400 hover:text-red-700 font-semibold flex items-center gap-1"><ChevronLeft size={14} /> All</button>}
@@ -260,8 +260,8 @@ const OrderUpdateModal = ({ order, services, servicesLoading, onClose, onSubmit,
     partial_payment_allowed: order?.partial_payment_allowed ?? true,
   });
 
-  const inputCls = 'w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none';
-  const readOnlyCls = 'w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-100 dark:bg-gray-600/50 text-gray-500 dark:text-gray-400 cursor-not-allowed outline-none';
+  const inputCls = 'w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none';
+  const readOnlyCls = 'w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-100 dark:bg-gray-600/50 text-gray-500 dark:text-gray-400 cursor-not-allowed outline-none';
   const handleNumberKeyPress = (e) => { if (!/[0-9.]/.test(e.key)) e.preventDefault(); };
   const handleNumberChange = (e) => { const { name, value } = e.target; setForm(prev => ({ ...prev, [name]: value === '' ? '' : Number(value) })); };
 
@@ -343,7 +343,7 @@ const OrderUpdateModal = ({ order, services, servicesLoading, onClose, onSubmit,
           <div><label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 flex items-center gap-1">Final Fees <span className="text-xs text-gray-400 font-normal">(auto)</span></label><input type="text" value={form.fees} readOnly className={`${readOnlyCls} font-semibold text-gray-700 dark:text-gray-200`} placeholder="—" /></div>
         </div>
         {(Number(form.base_price) > 0) && (
-          <div className="mt-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-sm text-xs text-indigo-700 dark:text-indigo-300 flex flex-wrap gap-x-4 gap-y-1">
+          <div className="mt-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg text-xs text-indigo-700 dark:text-indigo-300 flex flex-wrap gap-x-4 gap-y-1">
             <span>Base <strong>{form.base_price}</strong></span><span>+ Tax <strong>{form.tax_value || 0}</strong></span><span>= Total <strong>{form.total_fees || 0}</strong></span>
             {isDiscountApplicable && <span>− Discount <strong>{form.discount_value || 0}</strong></span>}
             <span className="font-bold">= Final <strong>{form.fees || 0}</strong></span>
@@ -353,7 +353,7 @@ const OrderUpdateModal = ({ order, services, servicesLoading, onClose, onSubmit,
       <hr className="border-gray-200 dark:border-gray-700" />
       <section>
         <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 border-b pb-2 dark:border-gray-700">Options</h3>
-        <label className="flex items-center gap-3 rounded-sm border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200">
+        <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200">
           <input type="checkbox" checked={form.partial_payment_allowed} onChange={(e) => setForm(prev => ({ ...prev, partial_payment_allowed: e.target.checked }))} className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500" />
           Partial payment allowed
         </label>
@@ -385,12 +385,12 @@ const OrderUpdateModal = ({ order, services, servicesLoading, onClose, onSubmit,
 const OrderStatusModal = ({ order, onClose, onSubmit, isSubmitting }) => {
   const { orderStatusOptions } = ConstantOptions();
   const [form, setForm] = useState({ status: (order?.status || 'created').toString().toLowerCase(), remark: order?.remark || '' });
-  const inputCls = 'w-full px-3 py-2.5 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-sm focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm';
+  const inputCls = 'w-full px-3 py-2.5 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm';
   const handleSubmit = (e) => { e.preventDefault(); onSubmit(form); };
 
   return (
     <Modal isOpen={true} onClose={onClose} title={`Update Status · ${order?.order_name || ''}`} icon={RefreshCw} size="md" contentClassName="p-5" closeText="Cancel"
-      footer={<button type="submit" form="order-status-form-profile" disabled={isSubmitting} className="px-5 py-2.5 rounded-sm bg-emerald-600 dark:bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-all flex items-center gap-2 disabled:opacity-50"><RefreshCw size={14} /> {isSubmitting ? 'Updating...' : 'Update Status'}</button>}
+      footer={<button type="submit" form="order-status-form-profile" disabled={isSubmitting} className="px-5 py-2.5 rounded-lg bg-emerald-600 dark:bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-all flex items-center gap-2 disabled:opacity-50"><RefreshCw size={14} /> {isSubmitting ? 'Updating...' : 'Update Status'}</button>}
     >
       <form id="order-status-form-profile" onSubmit={handleSubmit} className="space-y-4">
         <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Status</label><SelectField options={orderStatusOptions} value={orderStatusOptions.find(o => o.value === form.status) || orderStatusOptions[0]} onChange={(selected) => setForm(prev => ({ ...prev, status: selected?.value || 'created' }))} /></div>
@@ -608,27 +608,33 @@ export default function OrderProfile() {
   /* ─── Document columns ─── */
   const docColumns = [
     { key: 'serial_no', label: '#', className: 'w-[48px] !max-w-[48px]', headerClassName: 'w-[48px]', render: (_r, i) => <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{(docsPage - 1) * docsLimit + i + 1}</span> },
-    { key: 'name', label: 'Document', className: '!max-w-none', render: (row) => (
-      <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">{getDocumentIcon(row)}</div>
-        <p className="truncate text-sm font-semibold text-gray-800 dark:text-gray-100">{row.name || row.document_name || 'Document'}</p>
-      </div>
-    )},
-    { key: 'file_type', label: 'Type', className: 'w-[110px] !max-w-[110px]', headerClassName: 'w-[110px]', render: (row) => {
-      const info = getFileTypeInfo(row); const ext = getDocumentExtension(row);
-      return <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border ${info.color}`}>{info.label}{ext && <span className="opacity-60 uppercase">.{ext}</span>}</span>;
-    }},
+    {
+      key: 'name', label: 'Document', className: '!max-w-none', render: (row) => (
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">{getDocumentIcon(row)}</div>
+          <p className="truncate text-sm font-semibold text-gray-800 dark:text-gray-100">{row.name || row.document_name || 'Document'}</p>
+        </div>
+      )
+    },
+    {
+      key: 'file_type', label: 'Type', className: 'w-[110px] !max-w-[110px]', headerClassName: 'w-[110px]', render: (row) => {
+        const info = getFileTypeInfo(row); const ext = getDocumentExtension(row);
+        return <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border ${info.color}`}>{info.label}{ext && <span className="opacity-60 uppercase">.{ext}</span>}</span>;
+      }
+    },
     { key: 'size', label: 'Size', className: 'w-[90px] !max-w-[90px]', headerClassName: 'w-[90px]', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300">{formatFileSize(row.size)}</span> },
-    { key: 'actions_inline', label: 'Actions', className: 'w-[90px] !max-w-[90px]', headerClassName: 'w-[90px]', render: (row) => (
-      <div className="flex items-center gap-0.5">
-        {row.file_url && (
-          <>
-            <button onClick={(e) => { e.stopPropagation(); window.open(row.file_url, '_blank'); }} title="View" className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/30 transition-colors"><ExternalLink size={15} /></button>
-            <button onClick={(e) => { e.stopPropagation(); handleDownloadDocument(row); }} title="Download" className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30 transition-colors"><Download size={15} /></button>
-          </>
-        )}
-      </div>
-    )},
+    {
+      key: 'actions_inline', label: 'Actions', className: 'w-[90px] !max-w-[90px]', headerClassName: 'w-[90px]', render: (row) => (
+        <div className="flex items-center gap-0.5">
+          {row.file_url && (
+            <>
+              <button onClick={(e) => { e.stopPropagation(); window.open(row.file_url, '_blank'); }} title="View" className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/30 transition-colors"><ExternalLink size={15} /></button>
+              <button onClick={(e) => { e.stopPropagation(); handleDownloadDocument(row); }} title="Download" className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30 transition-colors"><Download size={15} /></button>
+            </>
+          )}
+        </div>
+      )
+    },
   ];
 
   /* ─── Payment columns ─── */
@@ -636,10 +642,12 @@ export default function OrderProfile() {
     { key: 'serial_no', label: '#', className: 'w-[48px] !max-w-[48px]', headerClassName: 'w-[48px]', render: (_r, i) => <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{i + 1}</span> },
     { key: 'payment_id', label: 'Payment ID', className: 'w-[140px] !max-w-[140px]', headerClassName: 'w-[140px]', render: (row) => <span className="text-xs font-mono text-gray-600 dark:text-gray-300 truncate">{row.payment_id}</span> },
     { key: 'amount', label: 'Amount', className: 'w-[100px] !max-w-[100px]', headerClassName: 'w-[100px]', render: (row) => <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">{formatCurrency(row.amount)}</span> },
-    { key: 'status', label: 'Status', className: 'w-[100px] !max-w-[100px]', headerClassName: 'w-[100px]', render: (row) => {
-      const cls = PAYMENT_STATUS_MAP[row.status] || 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
-      return <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${cls}`}>{(row.status || 'unknown').replace(/\b\w/g, l => l.toUpperCase())}</span>;
-    }},
+    {
+      key: 'status', label: 'Status', className: 'w-[100px] !max-w-[100px]', headerClassName: 'w-[100px]', render: (row) => {
+        const cls = PAYMENT_STATUS_MAP[row.status] || 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+        return <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${cls}`}>{(row.status || 'unknown').replace(/\b\w/g, l => l.toUpperCase())}</span>;
+      }
+    },
     { key: 'utr', label: 'UTR', className: '!max-w-none', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 truncate">{row.utr || '—'}</span> },
     { key: 'gateway', label: 'Gateway', className: 'w-[100px] !max-w-[100px]', headerClassName: 'w-[100px]', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300">{row.gateway || '—'}</span> },
     { key: 'create_date', label: 'Date', className: 'w-[100px] !max-w-[100px]', headerClassName: 'w-[100px]', render: (row) => <span className="text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">{row.create_date ? new Date(row.create_date).toLocaleDateString() : '—'}</span> },

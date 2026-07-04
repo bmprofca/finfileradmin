@@ -301,7 +301,7 @@ export default function OrdersTab({ username, refreshTrigger }) {
       title={order.name}
       subtitle={`Service: ${order.service_id || '—'}`}
       icon={
-        <div className="w-10 h-10 rounded-sm bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
           <Briefcase size={20} />
         </div>
       }
@@ -325,7 +325,7 @@ export default function OrdersTab({ username, refreshTrigger }) {
     <div className="space-y-3">
       {/* Filters */}
       {/* Filters */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white dark:bg-gray-800 p-3 rounded-sm border border-gray-200 dark:border-gray-700">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
 
         {/* Search */}
         <div className="relative flex-1 w-full shrink-0">
@@ -380,7 +380,7 @@ export default function OrdersTab({ username, refreshTrigger }) {
       </div>
 
       {orders?.length === 0 ? (
-        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-sm border border-gray-200 dark:border-gray-700">
+        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
           <ShoppingBag className="text-gray-300 dark:text-gray-600 mx-auto mb-3" size={48} />
           <p className="text-gray-500 dark:text-gray-400">No orders found</p>
           {(searchTerm || hasActiveFilters) && (
@@ -390,11 +390,11 @@ export default function OrdersTab({ username, refreshTrigger }) {
       ) : (
         <>
           {viewMode === 'table' ? (
-            <div className="bg-white dark:bg-gray-800 rounded-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
               <ManagementTable columns={columns} rows={orders || []} rowKey="order_id" accent="emerald" getActions={getActions} onRowClick={(row) => fetchOrderDetails(row.order_id)} rowClassName={getRowHighlightClass} />
             </div>
           ) : (
-            <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-sm border border-gray-200 dark:border-gray-700">
+            <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <AnimatePresence>
                 {orders.map((order) => (
                   <OrderCard key={order.order_id} order={order} />
@@ -498,8 +498,8 @@ export default function OrdersTab({ username, refreshTrigger }) {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className={`text-xs px-2 py-0.5 rounded-full ${payment.status === 'paid'
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                            : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                          ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                          : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
                           }`}>
                           {payment.status}
                         </span>

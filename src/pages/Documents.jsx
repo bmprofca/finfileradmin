@@ -282,12 +282,12 @@ export default function Documents() {
         {loading ? (
           <PageContentSkeleton viewMode="table" rows={5} columns={3} />
         ) : documents.length === 0 ? (
-          <div className="rounded-sm border border-gray-200 bg-white py-16 text-center dark:border-gray-700 dark:bg-gray-800 shadow-sm">
+          <div className="rounded-lg border border-gray-200 bg-white py-16 text-center dark:border-gray-700 dark:bg-gray-800 shadow-sm">
             <FileText className="mx-auto mb-3 text-gray-300 dark:text-gray-600" size={56} />
             <p className="text-xl text-gray-500 dark:text-gray-400">No documents found</p>
           </div>
         ) : (
-          <div className="rounded-sm bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700">
             <ManagementTable
               columns={columns}
               rows={documents}

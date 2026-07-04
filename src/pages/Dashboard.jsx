@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
   AlertCircle,
   Briefcase,
@@ -50,10 +51,10 @@ const KPI_STRIP = [
   { label: "Staff", key: "total_staff", icon: Briefcase, tint: "#2563eb" },
   { label: "Firms", key: "total_firms", icon: Building2, tint: "#d97706" },
   { label: "Services", key: "total_services", icon: Wrench, tint: "#059669" },
-  { label: "Orders", key: "total_orders", icon: ShoppingCart, tint: "#db2777" },
-  { label: "Assigned", key: "assigned_orders", icon: CheckCircle2, tint: "#059669" },
-  { label: "Unassigned", key: "unassigned_orders", icon: Clock, tint: "#ea580c" },
-  { label: "Today", key: "today_orders", icon: CalendarDays, tint: "#2563eb" },
+  { label: "Orders", key: "total_orders", icon: ShoppingCart, tint: "#db2777", link: "/orders" },
+  { label: "Assigned", key: "assigned_orders", icon: CheckCircle2, tint: "#059669", link: "/orders?tab=assigned" },
+  { label: "Unassigned", key: "unassigned_orders", icon: Clock, tint: "#ea580c", link: "/orders?tab=unassigned" },
+  { label: "Today", key: "today_orders", icon: CalendarDays, tint: "#2563eb", link: "/orders?tab=today" },
 ];
 
 /* ────────────────────────────────────────────────────────────
@@ -102,7 +103,7 @@ function SectionTitle({ children }) {
   );
 }
 
-function Panel({ children, className = "", index = 0, noPad = false, accent }) {
+function Panel({ children, className = "", index = 0, noPad = false, accent, onClick }) {
   return (
     <motion.div
       variants={fadeUp}
@@ -111,6 +112,7 @@ function Panel({ children, className = "", index = 0, noPad = false, accent }) {
       animate="show"
       whileHover={{ y: -2 }}
       transition={{ type: "spring", stiffness: 300, damping: 24 }}
+      onClick={onClick}
       className={`relative overflow-hidden rounded-2xl border border-gray-200/70 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-shadow hover:shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:border-white/10 dark:bg-[#0F172A] dark:hover:shadow-none ${
         noPad ? "" : "p-4 sm:p-5"
       } ${className}`}
@@ -124,9 +126,10 @@ function Panel({ children, className = "", index = 0, noPad = false, accent }) {
 /* ────────────────────────────────────────────────────────────
    KPI strip — individual elevated cells, icon chips, count-up
    ──────────────────────────────────────────────────────────── */
-function KpiCell({ metric, value, index }) {
+function KpiCell({ metric, value, index, onNavigate }) {
   const count = useCountUp(value ?? 0, 650, index * 35);
   const Icon = metric.icon;
+  const isClickable = Boolean(metric.link);
 
   return (
     <motion.div
@@ -136,7 +139,10 @@ function KpiCell({ metric, value, index }) {
       animate="show"
       whileHover={{ y: -2 }}
       transition={{ type: "spring", stiffness: 320, damping: 22 }}
-      className="relative flex items-center gap-2.5 overflow-hidden rounded-2xl border bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] dark:bg-[#0F172A] sm:gap-3 sm:p-4"
+      onClick={isClickable ? () => onNavigate(metric.link) : undefined}
+      className={`relative flex items-center gap-2.5 overflow-hidden rounded-2xl border bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] dark:bg-[#0F172A] sm:gap-3 sm:p-4 ${
+        isClickable ? "cursor-pointer hover:shadow-[0_4px_16px_rgba(15,23,42,0.10)] transition-shadow" : ""
+      }`}
       style={{ borderColor: `${metric.tint}26` }}
     >
       <div
@@ -157,15 +163,22 @@ function KpiCell({ metric, value, index }) {
           {metric.label}
         </div>
       </div>
+      {isClickable && (
+        <div className="absolute top-2 right-2 opacity-30">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path d="M2 8L8 2M8 2H4M8 2V6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+      )}
     </motion.div>
   );
 }
 
-function KpiStrip({ overview }) {
+function KpiStrip({ overview, onNavigate }) {
   return (
     <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
       {KPI_STRIP.map((metric, index) => (
-        <KpiCell key={metric.key} metric={metric} value={overview[metric.key]} index={index} />
+        <KpiCell key={metric.key} metric={metric} value={overview[metric.key]} index={index} onNavigate={onNavigate} />
       ))}
     </div>
   );
@@ -269,9 +282,13 @@ function FinancialHero({ overview }) {
   );
 }
 
-function PaymentDueCard({ value, index }) {
+function PaymentDueCard({ value, index, onNavigate }) {
   return (
-    <Panel index={index} className="flex flex-col justify-between">
+    <Panel
+      index={index}
+      className="flex flex-col justify-between cursor-pointer hover:shadow-[0_4px_16px_rgba(15,23,42,0.10)] transition-shadow"
+      onClick={() => onNavigate("/orders?tab=payment_due")}
+    >
       <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 dark:text-gray-500">
         <AlertCircle className="h-3.5 w-3.5 text-amber-500" />
         Payment Due Leads
@@ -285,7 +302,7 @@ function PaymentDueCard({ value, index }) {
 /* ────────────────────────────────────────────────────────────
    Order assignment — ranked horizontal bars (clean, legible)
    ──────────────────────────────────────────────────────────── */
-function RankedBars({ data }) {
+function RankedBars({ data, onNavigate }) {
   const max = Math.max(...data.map((d) => d.value), 1);
   const [mounted, setMounted] = useState(false);
 
@@ -297,9 +314,13 @@ function RankedBars({ data }) {
   return (
     <div className="flex flex-col gap-4">
       {data.map((item, i) => (
-        <div key={item.name}>
+        <div
+          key={item.name}
+          onClick={item.link && onNavigate ? () => onNavigate(item.link) : undefined}
+          className={item.link ? "cursor-pointer group" : ""}
+        >
           <div className="mb-1.5 flex items-center justify-between text-xs">
-            <span className="font-medium text-gray-600 dark:text-gray-300">{item.name}</span>
+            <span className={`font-medium text-gray-600 dark:text-gray-300 ${item.link ? "group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" : ""}`}>{item.name}</span>
             <span className="font-semibold tabular-nums text-gray-900 dark:text-white">{item.value}</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/5">
@@ -399,6 +420,7 @@ export default function AdminDashboard() {
   const [time, setTime] = useState(new Date());
   const dashboardFetchInFlightRef = useRef(false);
   const dashboardLoadedRef = useRef(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -485,9 +507,9 @@ export default function AdminDashboard() {
   })).filter((item) => item.value > 0);
 
   const assignmentData = [
-    { name: "Assigned", value: overview.assigned_orders, fill: "#10b981" },
-    { name: "Unassigned", value: overview.unassigned_orders, fill: "#f97316" },
-    { name: "Today", value: overview.today_orders, fill: "#3b82f6" },
+    { name: "Assigned", value: overview.assigned_orders, fill: "#10b981", link: "/orders?tab=assigned" },
+    { name: "Unassigned", value: overview.unassigned_orders, fill: "#f97316", link: "/orders?tab=unassigned" },
+    { name: "Today", value: overview.today_orders, fill: "#3b82f6", link: "/orders?tab=today" },
   ];
 
   return (
@@ -521,7 +543,7 @@ export default function AdminDashboard() {
       {/* KPI strip */}
       <section>
         <SectionTitle>Overview</SectionTitle>
-        <KpiStrip overview={overview} />
+        <KpiStrip overview={overview} onNavigate={navigate} />
       </section>
 
       {/* Financial hero + payment due */}
@@ -531,7 +553,7 @@ export default function AdminDashboard() {
           <div className="lg:col-span-3">
             <FinancialHero overview={overview} />
           </div>
-          <PaymentDueCard value={overview.payment_due_leads} index={2} />
+          <PaymentDueCard value={overview.payment_due_leads} index={2} onNavigate={navigate} />
         </div>
       </section>
 
@@ -541,7 +563,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <Panel index={1}>
             <h3 className="mb-5 text-xs font-semibold text-gray-700 dark:text-gray-300">Order assignment</h3>
-            <RankedBars data={assignmentData} />
+            <RankedBars data={assignmentData} onNavigate={navigate} />
           </Panel>
 
           <Panel index={2}>

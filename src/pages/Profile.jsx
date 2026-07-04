@@ -68,7 +68,7 @@ function DetailItem({ icon: Icon, label, value, index }) {
       className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900"
     >
       <div className="flex items-start gap-3">
-        <div className="rounded-sm bg-blue-50 p-2 dark:bg-blue-500/10">
+        <div className="rounded-lg bg-blue-50 p-2 dark:bg-blue-500/10">
           <Icon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
         </div>
         <div className="min-w-0 flex-1">

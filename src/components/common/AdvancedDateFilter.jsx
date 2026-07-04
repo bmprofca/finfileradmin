@@ -208,8 +208,8 @@ function MonthYearPicker({ month, year, onMonthChange, onYearChange }) {
               key={y}
               onClick={() => onYearChange(y)}
               className={`py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors ${year === y
-                  ? "bg-blue-500 text-white dark:bg-blue-600"
-                  : "border border-gray-100 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700/50"
+                ? "bg-blue-500 text-white dark:bg-blue-600"
+                : "border border-gray-100 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700/50"
                 }`}
             >
               {y}
@@ -228,8 +228,8 @@ function MonthYearPicker({ month, year, onMonthChange, onYearChange }) {
                 key={name}
                 onClick={() => onMonthChange(val)}
                 className={`py-2 rounded-lg text-[11px] sm:text-xs font-medium transition-colors ${month === val
-                    ? "bg-blue-500 text-white dark:bg-blue-600"
-                    : "border border-gray-100 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700/50"
+                  ? "bg-blue-500 text-white dark:bg-blue-600"
+                  : "border border-gray-100 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700/50"
                   }`}
               >
                 {name}
@@ -433,7 +433,7 @@ export default function AdvancedDateFilter({
   return (
     <div className="relative inline-block w-full">
       {/* Trigger */}
-      <div className={shouldShowStepper ? "flex w-full rounded-lg border border-slate-200 dark:border-gray-700 min-w-[260px] items-stretch" : ""}>
+      <div className={shouldShowStepper ? "flex w-full rounded-lg border border-slate-200 dark:border-gray-700 min-w-[200px] items-stretch" : ""}>
         {shouldShowStepper && (
           <button
             type="button"
@@ -448,7 +448,7 @@ export default function AdvancedDateFilter({
           ref={triggerRef}
           type="button"
           onClick={() => setIsOpen(prev => !prev)}
-          className={`${buttonClassName} flex min-w-[180px] flex-1 items-center justify-between gap-2`.trim()}
+          className={`${buttonClassName} flex min-w-[120px] flex-1 items-center justify-center gap-2`.trim()}
           aria-haspopup="dialog"
           aria-expanded={isOpen}
         >
@@ -465,8 +465,8 @@ export default function AdvancedDateFilter({
             }}
             disabled={!canStepForward}
             className={`flex w-9 flex-shrink-0 items-center justify-center rounded-r-xl bg-blue-50 text-blue-600 transition hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-800/40 ${canStepForward
-                ? "border-blue-100 bg-blue-50 text-blue-600 dark:border-blue-800/30 dark:bg-blue-900/30 dark:text-blue-400"
-                : "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-600"
+              ? "border-blue-100 bg-blue-50 text-blue-600 dark:border-blue-800/30 dark:bg-blue-900/30 dark:text-blue-400"
+              : "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-600"
               }`}
             title={canStepForward ? "Next day" : "Future dates are not available"}
           >
@@ -507,7 +507,7 @@ export default function AdvancedDateFilter({
             </button>
 
             {/* Panel */}
-            <div className="w-full rounded-sm border border-gray-200 bg-white shadow-lg overflow-hidden font-sans flex flex-col dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-950/50">
+            <div className="w-full rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden font-sans flex flex-col dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-950/50">
 
               {/* Header — selected label */}
               <div className="px-3 sm:px-4 pt-2.5 sm:pt-3 pb-2 border-b border-gray-100 dark:border-gray-700">
@@ -523,8 +523,8 @@ export default function AdvancedDateFilter({
                       key={t.key}
                       onClick={() => setActiveTab(t.key)}
                       className={`min-w-0 flex-1 py-2 text-[10px] sm:text-[11px] font-medium transition-colors border-b-2 ${activeTab === t.key
-                          ? "border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400"
-                          : "border-transparent text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                        ? "border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400"
+                        : "border-transparent text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                         }`}
                     >
                       {t.label}

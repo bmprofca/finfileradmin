@@ -30,7 +30,7 @@ const ClientStatusBadge = ({ status }) => {
 };
 
 const InfoItem = ({ icon: Icon, label, value }) => (
-  <div className="flex items-start gap-2 rounded-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
+  <div className="flex items-start gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
     <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600">
       <Icon size={14} className="dark:text-gray-300" />
     </div>
@@ -47,10 +47,10 @@ const ClientAvatar = ({ client, size = 'md' }) => {
   const sizes = { sm: 'w-8 h-8 text-xs', md: 'w-10 h-10 text-sm', lg: 'w-16 h-16 text-xl' };
   const cls = sizes[size] || sizes.md;
   if (client.image) {
-    return <img src={client.image} alt={client.full_name} className={`${cls} rounded-sm object-cover shrink-0`} />;
+    return <img src={client.image} alt={client.full_name} className={`${cls} rounded-lg object-cover shrink-0`} />;
   }
   return (
-    <div className={`${cls} rounded-sm bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold shrink-0`}>
+    <div className={`${cls} rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold shrink-0`}>
       {client.full_name?.charAt(0)?.toUpperCase() || <User size={16} />}
     </div>
   );
@@ -107,7 +107,7 @@ const ClientFormModal = ({ client, onClose, onSubmit, isSubmitting }) => {
   };
 
   const inputCls =
-    'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-sm focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all text-sm dark:text-gray-100';
+    'w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all text-sm dark:text-gray-100';
 
   return (
     <Modal
@@ -123,7 +123,7 @@ const ClientFormModal = ({ client, onClose, onSubmit, isSubmitting }) => {
           type="submit"
           form="client-form"
           disabled={isSubmitting}
-          className="px-5 py-2.5 rounded-sm bg-violet-600 dark:bg-violet-500 text-white text-sm font-semibold hover:bg-violet-700 dark:hover:bg-violet-600 transition-all flex items-center gap-2 disabled:opacity-50"
+          className="px-5 py-2.5 rounded-lg bg-violet-600 dark:bg-violet-500 text-white text-sm font-semibold hover:bg-violet-700 dark:hover:bg-violet-600 transition-all flex items-center gap-2 disabled:opacity-50"
         >
           {isSubmitting ? 'Saving...' : isEdit ? 'Update Client' : 'Create Client'}
         </button>
@@ -209,7 +209,7 @@ const ClientFormModal = ({ client, onClose, onSubmit, isSubmitting }) => {
             htmlFor="client-image-upload"
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleImageDrop}
-            className={`mt-2 flex cursor-pointer justify-center rounded-sm border-2 border-dashed border-gray-300 dark:border-gray-600 px-6 py-8 bg-gray-50 dark:bg-gray-800/50 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus-within:ring-4 focus-within:ring-violet-500/10 ${isUploading ? 'pointer-events-none opacity-50' : ''}`}
+            className={`mt-2 flex cursor-pointer justify-center rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 px-6 py-8 bg-gray-50 dark:bg-gray-800/50 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus-within:ring-4 focus-within:ring-violet-500/10 ${isUploading ? 'pointer-events-none opacity-50' : ''}`}
           >
             <div className="text-center flex flex-col items-center">
               {form.image && !isUploading ? (
@@ -416,7 +416,7 @@ export default function Clients() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex items-center justify-between gap-4 bg-white dark:bg-gray-800   p-1 lg:p-4 rounded-sm border border-gray-100 dark:border-gray-700 shadow-sm"
+          className="flex items-center justify-between gap-4 bg-white dark:bg-gray-800   p-1 lg:p-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm"
         >
           <div className="flex-1 max-w-lg items-center gap-4 ">
             <div className="relative flex-1">
@@ -446,7 +446,7 @@ export default function Clients() {
 
         {/* Empty State */}
         {!loading && clients.length === 0 && (
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-sm shadow-xl dark:shadow-gray-950/50">
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-gray-950/50">
             <Users className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
             <p className="text-xl text-gray-500 dark:text-gray-400">No clients found</p>
             <p className="text-gray-400 dark:text-gray-500 mt-2">
@@ -455,7 +455,7 @@ export default function Clients() {
             {!searchTerm && (
               <button
                 onClick={handleCreateNew}
-                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-sm bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-all"
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-all"
               >
                 <Plus size={16} /> Add First Client
               </button>
@@ -466,7 +466,7 @@ export default function Clients() {
         {/* Content */}
         {!loading && clients.length > 0 && (
           <>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-lg bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
 
               <ManagementTable
                 columns={columns}

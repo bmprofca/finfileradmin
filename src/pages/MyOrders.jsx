@@ -68,8 +68,8 @@ const PaymentText = ({ order }) => {
 
   return (
     <span className={`whitespace-nowrap text-xs font-semibold ${isPaid
-        ? 'text-emerald-700 dark:text-emerald-300'
-        : 'text-amber-700 dark:text-amber-300'
+      ? 'text-emerald-700 dark:text-emerald-300'
+      : 'text-amber-700 dark:text-amber-300'
       }`}>
       {isPaid ? 'Paid' : `Due ${formatCurrency(order.due_amount)}`}
     </span>
@@ -251,7 +251,7 @@ export default function MyOrders() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-4 rounded-sm border border-slate-200 dark:border-gray-700 shadow-sm dark:shadow-gray-950/30"
+            className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-4 rounded-lg border border-slate-200 dark:border-gray-700 shadow-sm dark:shadow-gray-950/30"
           >
             <div className="flex items-center gap-4 flex-1">
               <div className="relative flex-1">
@@ -278,7 +278,7 @@ export default function MyOrders() {
 
           {/* Empty state */}
           {!loading && orders.length === 0 && (
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-sm shadow-xl dark:shadow-gray-950/50">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-gray-950/50">
               <Briefcase className="text-gray-300 dark:text-gray-600 mx-auto mb-4" size={64} />
               <p className="text-xl text-gray-500 dark:text-gray-400">No orders found</p>
               <p className="text-gray-400 dark:text-gray-500 mt-2">{searchTerm ? 'Try adjusting your search' : 'You do not have any assigned orders yet'}</p>
@@ -293,7 +293,7 @@ export default function MyOrders() {
           {/* Content */}
           {!loading && orders.length > 0 && (
             <>
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-lg bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
 
                 <ManagementTable
                   columns={columns}

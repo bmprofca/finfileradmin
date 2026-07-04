@@ -134,7 +134,7 @@ const Navbar = ({
                       className="fixed inset-0 z-40"
                       onClick={() => setOpenDropdown(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-sm shadow-xl dark:shadow-gray-950/50 border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
+                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-gray-950/50 border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
                       {/* Mobile user info */}
                       <div className="md:hidden p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">

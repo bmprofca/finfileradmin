@@ -147,7 +147,7 @@ export default function OrderDocumentUpload() {
       <div className="space-y-4">
         <form
           onSubmit={handleSubmit}
-          className="rounded-sm border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-5"
+          className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-5"
         >
           <div className="space-y-5">
             {/* Order ID display removed as per user request */}
@@ -160,7 +160,7 @@ export default function OrderDocumentUpload() {
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`flex min-h-[150px] cursor-pointer flex-col items-center justify-center rounded-sm border-2 border-dashed px-4 py-6 text-center transition-colors ${isDragging
+                className={`flex min-h-[150px] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-6 text-center transition-colors ${isDragging
                   ? 'border-indigo-500 bg-indigo-100 dark:border-indigo-500 dark:bg-indigo-900/40'
                   : 'border-indigo-200 bg-indigo-50/60 hover:bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/30'
                   } ${isUploadingFiles ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
@@ -179,7 +179,7 @@ export default function OrderDocumentUpload() {
             </div>
 
             {files.length > 0 && (
-              <div className="rounded-sm border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900">
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900">
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
                     {files.length} file{files.length === 1 ? '' : 's'} selected

@@ -132,7 +132,7 @@ const AdminLogin = () => {
                   { icon: "🛡️", label: "Security" },
                   { icon: "📈", label: "Growth" },
                 ].map((item, i) => (
-                  <div key={i} className="bg-white/12 backdrop-blur-sm border border-white/20 rounded-sm p-3 flex flex-col gap-1.5">
+                  <div key={i} className="bg-white/12 backdrop-blur-sm border border-white/20 rounded-lg p-3 flex flex-col gap-1.5">
                     <div className="w-7 h-7 rounded-lg bg-white/25 flex items-center justify-center text-sm">
                       {item.icon}
                     </div>
@@ -145,15 +145,15 @@ const AdminLogin = () => {
               </div>
 
               {/* Floating badges */}
-              <div className="absolute -top-2 -right-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-sm px-3.5 py-2 flex items-center gap-2 animate-[float1_3.5s_ease-in-out_infinite] shadow-lg">
+              <div className="absolute -top-2 -right-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg px-3.5 py-2 flex items-center gap-2 animate-[float1_3.5s_ease-in-out_infinite] shadow-lg">
                 <span className="text-sm">✓</span>
                 <span className="text-xs text-white font-medium">Compliant</span>
               </div>
-              <div className="absolute -bottom-2 -left-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-sm px-3.5 py-2 flex items-center gap-2 animate-[float3_4s_ease-in-out_infinite_0.5s] shadow-lg">
+              <div className="absolute -bottom-2 -left-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg px-3.5 py-2 flex items-center gap-2 animate-[float3_4s_ease-in-out_infinite_0.5s] shadow-lg">
                 <span className="text-sm">🔒</span>
                 <span className="text-xs text-white font-medium">SSL secured</span>
               </div>
-              <div className="absolute top-20 -right-5 bg-white/20 backdrop-blur-sm border border-white/30 rounded-sm px-3.5 py-2 flex items-center gap-2 animate-[float2_3s_ease-in-out_infinite_1s] shadow-lg">
+              <div className="absolute top-20 -right-5 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg px-3.5 py-2 flex items-center gap-2 animate-[float2_3s_ease-in-out_infinite_1s] shadow-lg">
                 <span className="text-sm">🔔</span>
                 <span className="text-xs text-white font-medium">Live alerts</span>
               </div>
@@ -186,8 +186,8 @@ const AdminLogin = () => {
                 <div
                   key={n}
                   className={`h-1.5 rounded-full transition-all duration-500 ${n <= step
-                      ? "bg-gradient-to-r from-purple-600 to-indigo-600 w-10"
-                      : "bg-gray-200 dark:bg-gray-700 w-7"
+                    ? "bg-gradient-to-r from-purple-600 to-indigo-600 w-10"
+                    : "bg-gray-200 dark:bg-gray-700 w-7"
                     }`}
                 />
               ))}
@@ -199,7 +199,7 @@ const AdminLogin = () => {
                 <div className="relative mb-4">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base pointer-events-none">📱</span>
                   <input
-                    className="w-full py-3 px-4 pl-11 border-2 border-gray-200 dark:border-gray-700 rounded-sm text-sm text-gray-900 dark:text-gray-100 bg-gray-50/80 dark:bg-gray-900/50 outline-none transition-all duration-200 focus:bg-white dark:focus:bg-gray-800 focus:border-purple-500 dark:focus:border-purple-500"
+                    className="w-full py-3 px-4 pl-11 border-2 border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 bg-gray-50/80 dark:bg-gray-900/50 outline-none transition-all duration-200 focus:bg-white dark:focus:bg-gray-800 focus:border-purple-500 dark:focus:border-purple-500"
                     type="tel"
                     placeholder="Enter your mobile number"
                     value={mobile}
@@ -211,7 +211,7 @@ const AdminLogin = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 rounded-sm border-none cursor-pointer text-sm font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 text-white flex items-center justify-center gap-2 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/25 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full py-3 rounded-lg border-none cursor-pointer text-sm font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 text-white flex items-center justify-center gap-2 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/25 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {loading ? <Spinner /> : <>📤 Request OTP</>}
                 </button>
@@ -245,7 +245,7 @@ const AdminLogin = () => {
                     <input
                       key={i}
                       id={`otp-${i}`}
-                      className="w-9 h-11 xs:w-10 xs:h-12 sm:w-12 sm:h-14 border-2 border-gray-200 dark:border-gray-700 rounded-sm text-lg sm:text-2xl font-bold text-center bg-gray-50/80 dark:bg-gray-900/50 text-gray-900 dark:text-gray-100 font-mono outline-none transition-all duration-200 focus:bg-white dark:focus:bg-gray-800 focus:border-purple-500 dark:focus:border-purple-500"
+                      className="w-9 h-11 xs:w-10 xs:h-12 sm:w-12 sm:h-14 border-2 border-gray-200 dark:border-gray-700 rounded-lg text-lg sm:text-2xl font-bold text-center bg-gray-50/80 dark:bg-gray-900/50 text-gray-900 dark:text-gray-100 font-mono outline-none transition-all duration-200 focus:bg-white dark:focus:bg-gray-800 focus:border-purple-500 dark:focus:border-purple-500"
                       type="text"
                       inputMode="numeric"
                       maxLength={1}
@@ -261,7 +261,7 @@ const AdminLogin = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 rounded-sm border-none cursor-pointer text-sm font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 text-white flex items-center justify-center gap-2 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/25 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full py-3 rounded-lg border-none cursor-pointer text-sm font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 text-white flex items-center justify-center gap-2 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/25 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {loading ? <Spinner /> : "✓ Verify & Login"}
                 </button>
@@ -269,7 +269,7 @@ const AdminLogin = () => {
                 <div className="flex gap-2 mt-3">
                   <button
                     type="button"
-                    className="flex-1 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-sm bg-transparent cursor-pointer text-sm font-medium text-gray-600 dark:text-gray-400 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                    className="flex-1 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-transparent cursor-pointer text-sm font-medium text-gray-600 dark:text-gray-400 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                     disabled={loading}
                     onClick={resendOtp}
                   >
@@ -277,7 +277,7 @@ const AdminLogin = () => {
                   </button>
                   <button
                     type="button"
-                    className="flex-1 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-sm bg-transparent cursor-pointer text-sm font-medium text-gray-600 dark:text-gray-400 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                    className="flex-1 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-transparent cursor-pointer text-sm font-medium text-gray-600 dark:text-gray-400 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                     onClick={() => { setOtpSent(false); setOtp(["", "", "", "", "", ""]); }}
                   >
                     ← Back

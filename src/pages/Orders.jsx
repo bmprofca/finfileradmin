@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import {
   Search,
   X,
@@ -18,16 +18,62 @@ import {
   Upload,
   Download,
   Phone,
+  List,
+  CalendarDays,
+  AlertCircle,
 } from "lucide-react";
 import ManagementHub from "../components/common/ManagementHub";
 import ManagementTable from "../components/common/ManagementTable";
 import PaginationComponent from "../components/common/PaginationComponent";
 import Modal from "../components/common/Modal";
 import SelectField from "../components/common/SelectField";
+import AdvancedDateFilter from "../components/common/AdvancedDateFilter";
+import AsyncSelectField from "../components/common/AsyncSelectField";
 import { PageContentSkeleton } from "../components/SkeletonComponent";
 import { ConstantOptions } from "../contexts/ConstantOptionsContext";
 import apiCall from "../utils/apiCall";
 import toast from "react-hot-toast";
+
+/* ─── Tab Configuration ─── */
+const getTodayISO = () => new Date().toISOString().split("T")[0];
+
+const TAB_CONFIG = [
+  {
+    key: "all",
+    label: "All Orders",
+    icon: List,
+    getParams: () => ({}),
+    emptyLabel: "No orders found",
+  },
+  {
+    key: "assigned",
+    label: "Assigned",
+    icon: Users,
+    getParams: () => ({ assigned: true }),
+    emptyLabel: "No assigned orders found",
+  },
+  {
+    key: "unassigned",
+    label: "Unassigned",
+    icon: UserPlus,
+    getParams: () => ({ assigned: false }),
+    emptyLabel: "No unassigned orders found",
+  },
+  {
+    key: "today",
+    label: "Today",
+    icon: CalendarDays,
+    getParams: () => ({ from_date: getTodayISO(), to_date: getTodayISO() }),
+    emptyLabel: "No orders created today",
+  },
+  {
+    key: "payment_due",
+    label: "Payment Due",
+    icon: AlertCircle,
+    getParams: () => ({ payment_overdue: true }),
+    emptyLabel: "No payment overdue orders",
+  },
+];
 
 /* ─── Status Badge ─── */
 const STATUS_COLORS = {
@@ -96,11 +142,10 @@ const PaymentText = ({ order }) => {
 
   return (
     <span
-      className={`whitespace-nowrap text-xs font-semibold ${
-        isPaid
+      className={`whitespace-nowrap text-xs font-semibold ${isPaid
           ? "text-emerald-700 dark:text-emerald-300"
           : "text-amber-700 dark:text-amber-300"
-      }`}
+        }`}
     >
       {isPaid ? "Paid" : `Due ${formatCurrency(order.due_amount)}`}
     </span>
@@ -300,7 +345,7 @@ const StaffManagementModal = ({
 
         <div className="flex flex-col gap-4 lg:flex-row md:flex-row items-stretch">
           {/* Left Column - Available Staff */}
-          <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-sm p-3 bg-gray-50 dark:bg-gray-900/30">
+          <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-900/30">
             <div className="flex items-center justify-between mb-2">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
                 <UserPlus size={14} className="text-indigo-500" />
@@ -369,7 +414,7 @@ const StaffManagementModal = ({
           </div>
 
           {/* Right Column - Assigned Staff */}
-          <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-sm p-3 bg-gray-50 dark:bg-gray-900/30">
+          <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-900/30">
             <div className="flex items-center justify-between mb-2">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
                 <UserCheck size={14} className="text-green-500" />
@@ -475,9 +520,9 @@ const OrderUpdateModal = ({
   });
 
   const inputCls =
-    "w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none";
+    "w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none";
   const readOnlyCls =
-    "w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-100 dark:bg-gray-600/50 text-gray-500 dark:text-gray-400 cursor-not-allowed outline-none";
+    "w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-100 dark:bg-gray-600/50 text-gray-500 dark:text-gray-400 cursor-not-allowed outline-none";
 
   const handleNumberKeyPress = (e) => {
     if (!/[0-9.]/.test(e.key)) e.preventDefault();
@@ -816,7 +861,7 @@ const OrderUpdateModal = ({
           </div>
 
           {Number(form.base_price) > 0 && (
-            <div className="mt-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-sm text-xs text-indigo-700 dark:text-indigo-300 flex flex-wrap gap-x-4 gap-y-1">
+            <div className="mt-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg text-xs text-indigo-700 dark:text-indigo-300 flex flex-wrap gap-x-4 gap-y-1">
               <span>
                 Base <strong>{form.base_price}</strong>
               </span>
@@ -845,7 +890,7 @@ const OrderUpdateModal = ({
           <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 border-b pb-2 dark:border-gray-700">
             Options
           </h3>
-          <label className="flex items-center gap-3 rounded-sm border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200">
+          <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200">
             <input
               type="checkbox"
               checked={form.partial_payment_allowed}
@@ -873,7 +918,7 @@ const OrderStatusModal = ({ order, onClose, onSubmit, isSubmitting }) => {
   });
 
   const inputCls =
-    "w-full px-3 py-2.5 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-sm focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm";
+    "w-full px-3 py-2.5 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm";
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -894,7 +939,7 @@ const OrderStatusModal = ({ order, onClose, onSubmit, isSubmitting }) => {
           type="submit"
           form="order-status-form"
           disabled={isSubmitting}
-          className="px-5 py-2.5 rounded-sm bg-emerald-600 dark:bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-all flex items-center gap-2 disabled:opacity-50"
+          className="px-5 py-2.5 rounded-lg bg-emerald-600 dark:bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-all flex items-center gap-2 disabled:opacity-50"
         >
           <RefreshCw size={14} />
           {isSubmitting ? "Updating..." : "Update Status"}
@@ -948,13 +993,24 @@ const OrderStatusModal = ({ order, onClose, onSubmit, isSubmitting }) => {
    MAIN COMPONENT
    ═══════════════════════════════════════════════ */
 export default function Orders() {
-  const { orderStatusOptions } = ConstantOptions();
+  const { orderStatusOptions, paymentStatusOptions } = ConstantOptions();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Derive active tab from URL ?tab= param
+  const tabFromUrl = searchParams.get("tab") || "all";
+  const activeTab = TAB_CONFIG.find((t) => t.key === tabFromUrl) ? tabFromUrl : "all";
+  const activeTabConfig = TAB_CONFIG.find((t) => t.key === activeTab);
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState({ date: new Date().toISOString().split('T')[0] });
+  const [staffFilter, setStaffFilter] = useState("");
+  const [partialPaymentFilter, setPartialPaymentFilter] = useState("");
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
 
@@ -1051,11 +1107,33 @@ export default function Orders() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const statusParam = statusFilter
-        ? `&status=${encodeURIComponent(statusFilter)}`
-        : "";
+      // Build query params: tab fixed params + user filters
+      const tabParams = activeTabConfig?.getParams() || {};
+      const params = new URLSearchParams();
+      params.set("page_no", currentPage);
+      params.set("limit", itemsPerPage);
+      if (searchTerm) params.set("search", searchTerm);
+      if (statusFilter) params.set("status", statusFilter);
+      if (staffFilter) params.set("staff_username", staffFilter);
+      if (partialPaymentFilter) params.set("partial_payment_allowed", partialPaymentFilter);
+      if (paymentStatusFilter) params.set("payment_status", paymentStatusFilter);
+      Object.entries(tabParams).forEach(([k, v]) => params.set(k, v));
+
+      // Add date filter only if the active tab is not 'today' (which has its own date logic)
+      if (activeTab !== 'today' && dateFilter) {
+        if (dateFilter.date) {
+          params.set('date', dateFilter.date);
+        } else if (dateFilter.month && dateFilter.year) {
+          params.set('month', dateFilter.month);
+          params.set('year', dateFilter.year);
+        } else if (dateFilter.from_date && dateFilter.to_date) {
+          params.set('from_date', dateFilter.from_date);
+          params.set('to_date', dateFilter.to_date);
+        }
+      }
+
       const res = await apiCall(
-        `/api/admin/orders/list?page_no=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}${statusParam}`,
+        `/api/admin/orders/list?${params.toString()}`,
         "GET",
       );
       const data = await res.json();
@@ -1096,24 +1174,49 @@ export default function Orders() {
     page: null,
     search: null,
     status: null,
+    date: null,
+    staff: null,
+    partialPayment: null,
+    paymentStatus: null,
     limit: null,
+    tab: null,
   });
   useEffect(() => {
     if (
       lastOrderFetchRef.current.page === currentPage &&
       lastOrderFetchRef.current.search === searchTerm &&
       lastOrderFetchRef.current.status === statusFilter &&
-      lastOrderFetchRef.current.limit === itemsPerPage
+      lastOrderFetchRef.current.date === JSON.stringify(dateFilter) &&
+      lastOrderFetchRef.current.staff === staffFilter &&
+      lastOrderFetchRef.current.partialPayment === partialPaymentFilter &&
+      lastOrderFetchRef.current.paymentStatus === paymentStatusFilter &&
+      lastOrderFetchRef.current.limit === itemsPerPage &&
+      lastOrderFetchRef.current.tab === activeTab
     )
       return;
     lastOrderFetchRef.current = {
       page: currentPage,
       search: searchTerm,
       status: statusFilter,
+      date: JSON.stringify(dateFilter),
+      staff: staffFilter,
+      partialPayment: partialPaymentFilter,
+      paymentStatus: paymentStatusFilter,
       limit: itemsPerPage,
+      tab: activeTab,
     };
     fetchOrders();
-  }, [currentPage, searchTerm, statusFilter, itemsPerPage]);
+  }, [
+    currentPage,
+    searchTerm,
+    statusFilter,
+    dateFilter,
+    staffFilter,
+    partialPaymentFilter,
+    paymentStatusFilter,
+    itemsPerPage,
+    activeTab,
+  ]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -1443,66 +1546,228 @@ export default function Orders() {
     },
   ];
 
+  const switchTab = (tabKey) => {
+    setSearchParams({ tab: tabKey });
+    setCurrentPage(1);
+    setDateFilter({ date: new Date().toISOString().split('T')[0] });
+    setStaffFilter("");
+    setPartialPaymentFilter("");
+    setPaymentStatusFilter("");
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("");
+    setDateFilter(null);
+    setStaffFilter("");
+    setPartialPaymentFilter("");
+    setPaymentStatusFilter("");
+    setCurrentPage(1);
+  };
+
+  const hasActiveFilters =
+    searchTerm ||
+    statusFilter ||
+    dateFilter ||
+    staffFilter ||
+    partialPaymentFilter ||
+    paymentStatusFilter;
+
   /* ─── Render ─── */
   return (
     <ManagementHub
-      title="All Orders"
+      title={activeTabConfig?.label ?? "All Orders"}
       description="Manage and track all client orders in the system."
       accent="indigo"
       onRefresh={handleRefresh}
       refreshing={refreshing}
     >
-      <div className="space-y-6">
+      <div className="space-y-4">
+
+        {/* ── Tab Bar ── */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex items-center gap-1 overflow-x-auto bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-700 rounded-lg px-2 py-1.5 shadow-sm dark:shadow-gray-950/30 no-scrollbar"
+        >
+          {TAB_CONFIG.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => switchTab(tab.key)}
+                className={`relative flex items-center gap-1.5 px-3.5 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-200 ${isActive
+                    ? "text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
+              >
+                <Icon size={14} className={isActive ? "text-indigo-500 dark:text-indigo-400" : ""} />
+                {tab.label}
+                {isActive && (
+                  <motion.span
+                    layoutId="tab-underline"
+                    className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-indigo-500 dark:bg-indigo-400"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+                {isActive && totalOrders > 0 && (
+                  <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-indigo-100 dark:bg-indigo-800/50 text-indigo-700 dark:text-indigo-300">
+                    {totalOrders}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </motion.div>
+
         <div className="space-y-3">
           {/* Filters Bar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-4 rounded-sm border border-slate-200 dark:border-gray-700 shadow-sm dark:shadow-gray-950/30"
+            className="flex flex-wrap xl:flex-nowrap items-center gap-3 bg-white dark:bg-gray-900 p-3 rounded-lg border border-slate-200 dark:border-gray-700 shadow-sm dark:shadow-gray-950/30"
           >
-            <div className="flex items-center gap-4 flex-1">
-              <div className="relative flex-1">
-                <Search
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-                  size={18}
-                />
-                <input
-                  type="text"
-                  placeholder="Search orders..."
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="w-full pl-11 pr-10 py-2 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-950 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm min-h-[42px]"
-                />
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
-                  >
-                    <X size={14} />
-                  </button>
+            {/* Search */}
+            <div className="relative flex-[1.5] min-w-[180px] lg:max-w-md w-full">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+                size={16}
+              />
+              <input
+                type="text"
+                placeholder={`Search ${activeTabConfig?.label?.toLowerCase() ?? "orders"}...`}
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full pl-9 pr-8 py-2 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-950 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm h-[42px]"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            {/* Order Status */}
+            <div className="flex-1 min-w-[130px] w-full lg:w-auto">
+              <SelectField
+                options={orderStatusOptions}
+                value={
+                  orderStatusOptions.find(
+                    (option) => option.value === statusFilter,
+                  ) || null
+                }
+                onChange={(selected) => {
+                  setStatusFilter(selected?.value || "");
+                  setCurrentPage(1);
+                }}
+                placeholder="Order Status"
+                isClearable
+              />
+            </div>
+
+            {/* Payment Status */}
+            <div className="flex-1 min-w-[130px] w-full lg:w-auto">
+              <SelectField
+                options={paymentStatusOptions}
+                value={
+                  paymentStatusOptions.find(
+                    (option) => option.value === paymentStatusFilter,
+                  ) || null
+                }
+                onChange={(selected) => {
+                  setPaymentStatusFilter(selected?.value || "");
+                  setCurrentPage(1);
+                }}
+                placeholder="Payment Status"
+                isClearable
+              />
+            </div>
+
+            {/* Partial Payment */}
+            <div className="flex-1 min-w-[130px] w-full lg:w-auto">
+              <SelectField
+                options={[
+                  { value: "true", label: "Allowed" },
+                  { value: "false", label: "Not Allowed" },
+                ]}
+                value={
+                  [
+                    { value: "true", label: "Allowed" },
+                    { value: "false", label: "Not Allowed" },
+                  ].find((option) => option.value === partialPaymentFilter) || null
+                }
+                onChange={(selected) => {
+                  setPartialPaymentFilter(selected?.value || "");
+                  setCurrentPage(1);
+                }}
+                placeholder="Partial Payment"
+                isClearable
+              />
+            </div>
+
+            {/* Staff Username */}
+            <div className="flex-[1.5] min-w-[160px] lg:max-w-md w-full lg:w-auto">
+              <AsyncSelectField
+                fetchUrl="/api/admin/staff/list"
+                dataKey="staffs"
+                labelKey="username"
+                valueKey="username"
+                value={staffFilter}
+                onChange={(val) => {
+                  setStaffFilter(val || "");
+                  setCurrentPage(1);
+                }}
+                placeholder="Staff Username"
+                formatOptionLabel={(option) => (
+                  <div className="flex flex-col">
+                    <span className="font-medium">{option.username}</span>
+                    {option.email && (
+                      <span className="text-[10px] text-gray-500">
+                        {option.email}
+                      </span>
+                    )}
+                  </div>
                 )}
-              </div>
-              <div className="min-w-[180px] w-full sm:w-auto">
-                <SelectField
-                  options={orderStatusOptions}
-                  value={
-                    orderStatusOptions.find(
-                      (option) => option.value === statusFilter,
-                    ) || null
-                  }
-                  onChange={(selected) => {
-                    setStatusFilter(selected?.value || "");
+              />
+            </div>
+
+            {/* Date */}
+            {activeTab !== "today" && (
+              <div className="flex-none w-full lg:w-auto">
+                <AdvancedDateFilter
+                  value={dateFilter}
+                  onChange={(val) => {
+                    setDateFilter(val);
                     setCurrentPage(1);
                   }}
-                  placeholder="All Status"
-                  isClearable
+                  placeholder="Date or range"
+                  tabOptions={["date", "month", "range"]}
+                  showDateStepper
+                  buttonClassName="h-[42px] w-full bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm text-gray-700 dark:text-gray-100 outline-none transition-all"
                 />
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 hidden xl:block whitespace-nowrap">
+            )}
+
+            {/* Clear All & Count */}
+            <div className="flex items-center gap-3 w-full lg:w-auto justify-end xl:flex-shrink-0">
+              {hasActiveFilters && (
+                <button
+                  onClick={clearAllFilters}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 rounded-lg transition-colors whitespace-nowrap"
+                >
+                  <X size={14} /> Clear
+                </button>
+              )}
+              <p className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
                 <span className="font-semibold text-gray-800 dark:text-gray-200">
                   {totalOrders}
                 </span>{" "}
@@ -1519,19 +1784,19 @@ export default function Orders() {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-16 bg-white dark:bg-gray-800 rounded-sm shadow-xl dark:shadow-gray-950/50"
+              className="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-gray-950/50"
             >
               <Briefcase
                 className="text-gray-300 dark:text-gray-600 mx-auto mb-4"
                 size={64}
               />
               <p className="text-xl text-gray-500 dark:text-gray-400">
-                No orders found
+                {activeTabConfig?.emptyLabel ?? "No orders found"}
               </p>
               <p className="text-gray-400 dark:text-gray-500 mt-2">
                 {searchTerm
                   ? "Try adjusting your search"
-                  : "There are no orders yet"}
+                  : "Nothing to show here"}
               </p>
             </motion.div>
           )}
@@ -1543,7 +1808,7 @@ export default function Orders() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50"
+                className="rounded-lg bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50"
               >
                 <ManagementTable
                   columns={columns}

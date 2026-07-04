@@ -36,7 +36,7 @@ const Sidebar = ({
       if (parsed && parsed.user_type) {
         userType = parsed.user_type;
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   const allMenuItems = [
@@ -140,7 +140,7 @@ const Sidebar = ({
             {/* User Profile Section */}
             <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-2xl">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-sm bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
                   A
                 </div>
                 <div>
@@ -165,22 +165,20 @@ const Sidebar = ({
                     to={item.path}
                     onClick={() => toggleSidebar()}
                     className={`
-                      flex items-center px-3 py-3 rounded-sm transition-all duration-200 mb-1
-                      ${
-                        isActive
-                          ? "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 text-blue-700 dark:text-blue-400"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400"
+                      flex items-center px-3 py-3 rounded-lg transition-all duration-200 mb-1
+                      ${isActive
+                        ? "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 text-blue-700 dark:text-blue-400"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400"
                       }
                     `}
                   >
                     <div
                       className={`
-                      p-2 rounded-sm mr-3
-                      ${
-                        isActive
+                      p-2 rounded-lg mr-3
+                      ${isActive
                           ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400"
                           : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
-                      }
+                        }
                     `}
                     >
                       <Icon className="w-4 h-4" />
@@ -208,25 +206,23 @@ const Sidebar = ({
         key={item.label}
         to={item.path}
         className={`
-          flex items-center rounded-sm transition-all duration-200 group
+          flex items-center rounded-lg transition-all duration-200 group
           ${isExpandedState ? "px-3 py-2.5 gap-3" : "px-0 py-2.5 justify-center"}
-          ${
-            isActive
-              ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400"
-              : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400"
+          ${isActive
+            ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400"
+            : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400"
           }
         `}
         title={!isExpandedState ? item.label : ""}
       >
         <div
           className={`
-          p-2 rounded-sm transition-all duration-200
+          p-2 rounded-lg transition-all duration-200
           ${isExpandedState ? "" : "mx-auto"}
-          ${
-            isActive
+          ${isActive
               ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400"
               : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400"
-          }
+            }
         `}
         >
           <Icon className="w-4 h-4" />

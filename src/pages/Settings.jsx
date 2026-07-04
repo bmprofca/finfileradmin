@@ -28,10 +28,10 @@ const StatusBadge = ({ status }) => {
 
 const AdminAvatar = ({ admin }) => {
   if (admin.image) {
-    return <img src={admin.image} alt={admin.full_name || admin.first_name} className="w-10 h-10 rounded-sm object-cover shrink-0" />;
+    return <img src={admin.image} alt={admin.full_name || admin.first_name} className="w-10 h-10 rounded-lg object-cover shrink-0" />;
   }
   return (
-    <div className="w-10 h-10 rounded-sm bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shrink-0">
+    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shrink-0">
       {(admin.full_name || admin.first_name || 'A').charAt(0).toUpperCase()}
     </div>
   );

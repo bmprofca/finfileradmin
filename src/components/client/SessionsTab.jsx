@@ -76,8 +76,8 @@ export default function SessionsTab({ username, refreshTrigger }) {
       label: 'Status',
       render: (row) => (
         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${row.is_active
-            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+          : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
           }`}>
           <span className={`w-1.5 h-1.5 rounded-full ${row.is_active ? 'bg-green-500' : 'bg-red-500'}`} />
           {row.is_active ? 'Active' : 'Expired'}
@@ -122,12 +122,12 @@ export default function SessionsTab({ username, refreshTrigger }) {
       </div>
 
       {sessions?.length === 0 ? (
-        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-sm border border-gray-200 dark:border-gray-700">
+        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
           <Key className="text-gray-300 dark:text-gray-600 mx-auto mb-3" size={48} />
           <p className="text-gray-500 dark:text-gray-400">No sessions found</p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
           <ManagementTable columns={columns} rows={sessions || []} rowKey="id" accent="emerald" />
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
             <PaginationComponent

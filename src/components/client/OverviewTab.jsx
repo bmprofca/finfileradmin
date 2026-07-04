@@ -83,7 +83,7 @@ export default function OverviewTab({ username, refreshTrigger }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05 }}
-              className="bg-white dark:bg-gray-800 rounded-sm border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-shadow"
+              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -104,7 +104,7 @@ export default function OverviewTab({ username, refreshTrigger }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="bg-white dark:bg-gray-800 rounded-sm border border-gray-200 dark:border-gray-700 p-6 shadow-sm"
+        className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm"
       >
         <div className="flex items-start gap-6">
           {/* Avatar */}
@@ -113,10 +113,10 @@ export default function OverviewTab({ username, refreshTrigger }) {
               <img
                 src={client.image}
                 alt={client.first_name}
-                className="w-20 h-20 rounded-sm object-cover border-2 border-gray-200 dark:border-gray-700"
+                className="w-20 h-20 rounded-lg object-cover border-2 border-gray-200 dark:border-gray-700"
               />
             ) : (
-              <div className="w-20 h-20 rounded-sm bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-3xl font-bold">
+              <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-3xl font-bold">
                 {getInitials(client?.first_name, client?.last_name)}
               </div>
             )}

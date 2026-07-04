@@ -81,7 +81,7 @@ export default function ClientProfile() {
     >
       <div className="space-y-6">
         {/* Tabs */}
-        <div className="flex flex-wrap gap-1 bg-white dark:bg-gray-800 p-1 rounded-sm border border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="flex flex-wrap gap-1 bg-white dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.key;
