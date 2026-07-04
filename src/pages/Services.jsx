@@ -6,10 +6,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ManagementHub from '../components/common/ManagementHub';
-import ManagementCard from '../components/common/ManagementCard';
-import ManagementGrid from '../components/common/ManagementGrid';
 import ManagementTable from '../components/common/ManagementTable';
-import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
 import PaginationComponent from '../components/common/PaginationComponent';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
@@ -166,41 +163,6 @@ const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
   </Modal>
 );
 
-// ─── Service Card (Card View) ─────────────────────────────────────────────────
-
-const ServiceManagementCard = ({ service, index, onView, onEdit, onDelete }) => (
-  <ManagementCard
-    key={service.service_id}
-    title={service.name}
-    subtitle={`₹${service.fees}`}
-    icon={<Briefcase className="w-4 h-4" />}
-    accent="emerald"
-    delay={index * 0.1}
-    badge={<ServiceStatusBadge status={service.status} />}
-    onClick={() => onView(service)}
-    hoverable
-    actions={[
-      { label: 'View Details', icon: <Eye size={12} />, onClick: () => onView(service), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
-      { label: 'Edit Service', icon: <Edit size={12} />, onClick: () => onEdit(service), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
-      { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => onDelete(service), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
-    ]}
-    menuId={`service-card-${service.service_id}`}
-  >
-    <div className="py-1.5">
-      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{service.description || 'No description.'}</p>
-    </div>
-    <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-      <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-        <FileText className="w-3.5 h-3.5" />
-        <span className="truncate max-w-[120px]">{service.type}</span>
-      </div>
-      <div className="flex items-center gap-1.5 text-xs">
-        <span className="text-gray-500 dark:text-gray-400">{service.delivery_time}</span>
-      </div>
-    </div>
-  </ManagementCard>
-);
-
 // ─── Active Filter Pills ──────────────────────────────────────────────────────
 
 const ActiveFilters = ({ searchTerm, typeFilter, statusFilter, onClearSearch, onClearType, onClearStatus, onClearAll }) => {
@@ -248,9 +210,6 @@ export default function Services() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-
-  // UI
-  const [viewMode, setViewMode] = useState('table');
 
   // Modals
   const [selectedService, setSelectedService] = useState(null);
@@ -490,9 +449,7 @@ export default function Services() {
               <p className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap hidden xl:block">
                 <span className="font-semibold text-gray-800 dark:text-gray-200">{totalServices}</span> services
               </p>
-              <div className="flex items-center gap-2 justify-end w-full">
-                <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="emerald" />
-              </div>
+              
             </div>
           </div>
 
@@ -509,7 +466,7 @@ export default function Services() {
         </motion.div>
 
         {/* Loading */}
-        {loading && <PageContentSkeleton viewMode={viewMode} rows={6} columns={8} />}
+        {loading && <PageContentSkeleton rows={6} columns={8} />}
 
         {/* Empty state */}
         {!loading && services.length === 0 && (
@@ -530,37 +487,18 @@ export default function Services() {
         {/* Content */}
         {!loading && services.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
-            {viewMode === 'card' && (
-              <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4">
-                <AnimatePresence>
-                  {services.map((service, index) => (
-                    <ServiceManagementCard
-                      key={service.service_id}
-                      service={service}
-                      index={index}
-                      onView={handleView}
-                      onEdit={handleEdit}
-                      onDelete={handleDeleteRequest}
-                    />
-                  ))}
-                </AnimatePresence>
-              </ManagementGrid>
-            )}
-
-            {viewMode === 'table' && (
-              <ManagementTable
-                columns={tableColumns}
-                rows={services}
-                rowKey="service_id"
-                onRowClick={(row) => handleView(row)}
-                getActions={(row) => [
-                  { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
-                  { label: 'Edit Service', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
-                  { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
-                ]}
-                accent="emerald"
-              />
-            )}
+            <ManagementTable
+              columns={tableColumns}
+              rows={services}
+              rowKey="service_id"
+              onRowClick={(row) => handleView(row)}
+              getActions={(row) => [
+                { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
+                { label: 'Edit Service', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
+                { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
+              ]}
+              accent="emerald"
+            />
           </motion.div>
         )}
 

@@ -2,15 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom'; // Added
 import {
-  Search, X, Eye, User, Phone, Mail,
+  Search, X, Eye, User, Mail,
   Plus, Trash2, Edit, CheckCircle, XCircle, Users, Calendar
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
-import ManagementCard from '../components/common/ManagementCard';
-import ManagementGrid from '../components/common/ManagementGrid';
-import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
 import PaginationComponent from '../components/common/PaginationComponent';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
@@ -242,44 +239,12 @@ const ClientFormModal = ({ client, onClose, onSubmit, isSubmitting }) => {
   );
 };
 
-// ─── Client Card (Card View) ──────────────────────────────────────────────────
-
-const ClientManagementCard = ({ client, index, onView, onEdit, onDelete }) => (
-  <ManagementCard
-    key={client.username}
-    delay={index * 0.05}
-    accent="violet"
-    eyebrow={`@${client.username}`}
-    title={client.full_name}
-    subtitle={client.email}
-    icon={<ClientAvatar client={client} size="sm" />}
-    badge={<ClientStatusBadge status={client.status} />}
-    onClick={() => onView(client)}
-    hoverable
-    actions={[
-      { label: 'View Profile', icon: <User size={12} />, onClick: () => onView(client), className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300' },
-      { label: 'Edit Client', icon: <Edit size={12} />, onClick: () => onEdit(client), className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300' },
-      { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => onDelete(client), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
-    ]}
-    menuId={`client-card-${client.username}`}
-  >
-    <div className="mt-1">
-      {client.mobile && (
-        <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-          <Phone size={10} className="text-gray-400 dark:text-gray-500" /> {client.mobile}
-        </p>
-      )}
-    </div>
-  </ManagementCard>
-);
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Clients() {
   const navigate = useNavigate(); // Added
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('table');
   const [clients, setClients] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -470,14 +435,11 @@ export default function Clients() {
 
           </div>
 
-          <div className="">
-            <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="violet" />
-          </div>
         </motion.div>
 
         {/* Loading State */}
         {loading && (
-          <PageContentSkeleton viewMode={viewMode} rows={6} columns={6} />
+          <PageContentSkeleton rows={6} columns={6} />
         )}
 
         {/* Empty State */}
@@ -504,54 +466,33 @@ export default function Clients() {
           <>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
 
-              {/* Table View */}
-              {viewMode === 'table' && (
-                <ManagementTable
-                  columns={columns}
-                  rows={clients}
-                  rowKey="username"
-                  onRowClick={(row) => navigate(`/clients/${row.username}`)}
-                  getActions={(row) => [
-                    {
-                      label: 'View Profile',
-                      icon: <User size={12} />,
-                      onClick: () => navigate(`/clients/${row.username}`),
-                      className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300'
-                    },
-                    {
-                      label: 'Edit Client',
-                      icon: <Edit size={12} />,
-                      onClick: () => handleEdit(row),
-                      className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300'
-                    },
-                    {
-                      label: 'Delete',
-                      icon: <Trash2 size={12} />,
-                      onClick: () => handleDeleteRequest(row),
-                      className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300'
-                    },
-                  ]}
-                  accent="violet"
-                />
-              )}
-
-              {/* Card View */}
-              {viewMode === 'card' && (
-                <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4">
-                  <AnimatePresence>
-                    {clients.map((client, index) => (
-                      <ClientManagementCard
-                        key={client.username}
-                        client={client}
-                        index={index}
-                        onView={() => navigate(`/clients/${client.username}`)}
-                        onEdit={handleEdit}
-                        onDelete={handleDeleteRequest}
-                      />
-                    ))}
-                  </AnimatePresence>
-                </ManagementGrid>
-              )}
+              <ManagementTable
+                columns={columns}
+                rows={clients}
+                rowKey="username"
+                onRowClick={(row) => navigate(`/clients/${row.username}`)}
+                getActions={(row) => [
+                  {
+                    label: 'View Profile',
+                    icon: <User size={12} />,
+                    onClick: () => navigate(`/clients/${row.username}`),
+                    className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300'
+                  },
+                  {
+                    label: 'Edit Client',
+                    icon: <Edit size={12} />,
+                    onClick: () => handleEdit(row),
+                    className: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:text-indigo-400 dark:hover:text-indigo-300'
+                  },
+                  {
+                    label: 'Delete',
+                    icon: <Trash2 size={12} />,
+                    onClick: () => handleDeleteRequest(row),
+                    className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300'
+                  },
+                ]}
+                accent="violet"
+              />
             </motion.div>
 
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-4">

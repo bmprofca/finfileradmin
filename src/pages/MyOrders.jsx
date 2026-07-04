@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
-  Search, X, Briefcase, Hash, User, FileText, Download
+  Search, X, Briefcase, FileText, Download
 } from 'lucide-react';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
-import ManagementCard from '../components/common/ManagementCard';
-import ManagementGrid from '../components/common/ManagementGrid';
-import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
 import PaginationComponent from '../components/common/PaginationComponent';
 import apiCall from '../utils/apiCall';
 import { useAuth } from '../contexts/AuthContext';
@@ -64,19 +61,6 @@ const getPaymentHighlightClass = (order) => {
   return '';
 };
 
-const getPaymentCardClass = (order) => {
-  const paymentState = getPaymentState(order);
-
-  if (paymentState === 'paid') {
-    return 'border-emerald-300 bg-emerald-50/50 shadow-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/20';
-  }
-
-  if (paymentState === 'due') {
-    return 'border-amber-300 bg-amber-50/60 shadow-amber-100 dark:border-amber-800 dark:bg-amber-950/20';
-  }
-
-  return '';
-};
 
 const PaymentText = ({ order }) => {
   const paymentState = getPaymentState(order);
@@ -92,43 +76,6 @@ const PaymentText = ({ order }) => {
   );
 };
 
-const OrderCard = ({ order, index, actions, onViewDocuments }) => (
-  <ManagementCard
-    delay={index * 0.05}
-    accent="indigo"
-    className={getPaymentCardClass(order)}
-    eyebrow={`Date: ${new Date(order.create_date).toLocaleDateString()}`}
-    title={order.name}
-    subtitle={order.service_name}
-    icon={
-      <div className="w-10 h-10 rounded-sm bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-        <Briefcase size={20} />
-      </div>
-    }
-    badge={<StatusBadge status={order.status} />}
-    menuId={`myorder-card-${order.order_id}`}
-    actions={actions}
-    footer={
-      <div className="flex items-center justify-between w-full text-xs text-gray-500 dark:text-gray-400">
-        <span className="flex items-center gap-1"><Hash size={10} className="text-indigo-400 dark:text-indigo-500" /> {order.order_id}</span>
-        <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrency(order.fees)}</span>
-      </div>
-    }
-  >
-    <div className="mt-1 space-y-1">
-      <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-        <User size={10} className="text-gray-400 dark:text-gray-500" /> Client: {order.client_name || order.client_username}
-      </p>
-      <button
-        onClick={(e) => { e.stopPropagation(); onViewDocuments && onViewDocuments(order); }}
-        className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold flex items-center gap-1.5 mt-1"
-      >
-        <FileText size={12} /> {order.documents?.length || 0} Documents
-      </button>
-    </div>
-  </ManagementCard>
-);
-
 export default function MyOrders() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -137,7 +84,6 @@ export default function MyOrders() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('table');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
 
@@ -328,9 +274,6 @@ export default function MyOrders() {
               </p>
             </div>
 
-            <div className="flex items-center gap-2 w-full lg:w-auto justify-end">
-              <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} accent="indigo" />
-            </div>
           </motion.div>
 
           {/* Empty state */}
@@ -344,7 +287,7 @@ export default function MyOrders() {
 
           {/* Loading State */}
           {loading && (
-            <PageContentSkeleton viewMode={viewMode} rows={6} columns={5} />
+            <PageContentSkeleton rows={6} columns={5} />
           )}
 
           {/* Content */}
@@ -352,34 +295,14 @@ export default function MyOrders() {
             <>
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50">
 
-                {/* Table View */}
-                {viewMode === 'table' && (
-                  <ManagementTable
-                    columns={columns}
-                    rows={orders}
-                    rowKey="order_id"
-                    accent="indigo"
-                    getActions={getActions}
-                    rowClassName={(row) => getPaymentHighlightClass(row)}
-                  />
-                )}
-
-                {/* Card View */}
-                {viewMode === 'card' && (
-                  <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4">
-                    <AnimatePresence>
-                      {orders.map((order, index) => (
-                        <OrderCard
-                          key={order.order_id}
-                          order={order}
-                          index={index}
-                          actions={getActions(order)}
-                          onViewDocuments={openDocumentsPage}
-                        />
-                      ))}
-                    </AnimatePresence>
-                  </ManagementGrid>
-                )}
+                <ManagementTable
+                  columns={columns}
+                  rows={orders}
+                  rowKey="order_id"
+                  accent="indigo"
+                  getActions={getActions}
+                  rowClassName={(row) => getPaymentHighlightClass(row)}
+                />
               </motion.div>
 
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-4">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Search, X, Shield, CheckCircle, XCircle,
   ToggleLeft, ToggleRight, RefreshCw, Lock,
@@ -7,9 +7,6 @@ import {
 import toast from 'react-hot-toast';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
-import ManagementCard from '../components/common/ManagementCard';
-import ManagementGrid from '../components/common/ManagementGrid';
-import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
 import apiCall from '../utils/apiCall';
 
@@ -42,47 +39,6 @@ const ModuleBadge = ({ module }) => (
   </span>
 );
 
-// ─── Permission Card (card view) ──────────────────────────────────────────────
-
-const PermissionManagementCard = ({ permission, index, onToggle, toggling }) => {
-  const isActive = permission.status === true || permission.status === 1;
-  const isTogglingThis = toggling === permission.permission_id;
-
-  return (
-    <ManagementCard
-      key={permission.permission_id}
-      delay={index * 0.05}
-      accent="violet"
-      eyebrow={permission.module}
-      title={permission.name}
-      subtitle={permission.description}
-      icon={
-        <Shield
-          size={15}
-          className={isActive ? 'text-emerald-500' : 'text-gray-400'}
-        />
-      }
-      badge={<StatusBadge status={permission.status} />}
-      menuId={`perm-card-${permission.permission_id}`}
-      actions={[
-        {
-          label: isTogglingThis ? 'Saving...' : (isActive ? 'Disable' : 'Enable'),
-          icon: isTogglingThis ? <RefreshCw size={12} className="animate-spin" /> : (isActive ? <ToggleRight size={12} /> : <ToggleLeft size={12} />),
-          onClick: () => onToggle(permission),
-          disabled: isTogglingThis,
-          className: isActive
-            ? 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300'
-            : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 dark:text-emerald-400 dark:hover:text-emerald-300'
-        }
-      ]}
-    >
-      <div className="mt-2 flex items-center justify-between gap-2">
-        <ModuleBadge module={permission.module} />
-      </div>
-    </ManagementCard>
-  );
-};
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Permissions({ tabs, activeTab, onTabChange }) {
@@ -90,7 +46,6 @@ export default function Permissions({ tabs, activeTab, onTabChange }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('table');
   const [toggling, setToggling] = useState(null);
 
   // ── Fetch ─────────────────────────────────────────────────────────────────
@@ -233,13 +188,10 @@ export default function Permissions({ tabs, activeTab, onTabChange }) {
 
           </div>
 
-          <div className="">
-            <ManagementViewSwitcher viewMode={viewMode} onChange={setViewMode} />
-          </div>
         </motion.div>
 
         {/* Loading */}
-        {loading && <PageContentSkeleton viewMode={viewMode} rows={4} columns={5} />}
+        {loading && <PageContentSkeleton rows={4} columns={5} />}
 
         {/* Empty State */}
         {!loading && filtered.length === 0 && (
@@ -264,47 +216,27 @@ export default function Permissions({ tabs, activeTab, onTabChange }) {
             transition={{ delay: 0.2 }}
             className="rounded-sm bg-white dark:bg-gray-800 shadow-xl dark:shadow-gray-950/50"
           >
-            {/* Table View */}
-            {viewMode === 'table' && (
-              <ManagementTable
-                columns={columns}
-                rows={filtered}
-                rowKey="permission_id"
-                accent="violet"
-                getActions={(row) => {
-                  const isActive = row.status === true || row.status === 1;
-                  const isTogglingThis = toggling === row.permission_id;
-                  return [
-                    {
-                      label: isTogglingThis ? 'Saving...' : (isActive ? 'Disable' : 'Enable'),
-                      icon: isTogglingThis ? <RefreshCw size={12} className="animate-spin" /> : (isActive ? <ToggleRight size={12} /> : <ToggleLeft size={12} />),
-                      onClick: () => handleToggle(row),
-                      disabled: isTogglingThis,
-                      className: isActive
-                        ? 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300'
-                        : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 dark:text-emerald-400 dark:hover:text-emerald-300'
-                    }
-                  ];
-                }}
-              />
-            )}
-
-            {/* Card View */}
-            {viewMode === 'card' && (
-              <ManagementGrid viewMode={viewMode} className="p-3 sm:p-4">
-                <AnimatePresence>
-                  {filtered.map((permission, index) => (
-                    <PermissionManagementCard
-                      key={permission.permission_id}
-                      permission={permission}
-                      index={index}
-                      onToggle={handleToggle}
-                      toggling={toggling}
-                    />
-                  ))}
-                </AnimatePresence>
-              </ManagementGrid>
-            )}
+            <ManagementTable
+              columns={columns}
+              rows={filtered}
+              rowKey="permission_id"
+              accent="violet"
+              getActions={(row) => {
+                const isActive = row.status === true || row.status === 1;
+                const isTogglingThis = toggling === row.permission_id;
+                return [
+                  {
+                    label: isTogglingThis ? 'Saving...' : (isActive ? 'Disable' : 'Enable'),
+                    icon: isTogglingThis ? <RefreshCw size={12} className="animate-spin" /> : (isActive ? <ToggleRight size={12} /> : <ToggleLeft size={12} />),
+                    onClick: () => handleToggle(row),
+                    disabled: isTogglingThis,
+                    className: isActive
+                      ? 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300'
+                      : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 dark:text-emerald-400 dark:hover:text-emerald-300'
+                  }
+                ];
+              }}
+            />
           </motion.div>
         )}
       </div>

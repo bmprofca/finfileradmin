@@ -3,7 +3,6 @@ import {
   House,
   Users,
   ConciergeBell,
-  LifeBuoy,
   Briefcase,
   ClipboardList,
   FileBox,
@@ -172,14 +171,6 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
               })}
             </nav>
 
-            {/* Help Section */}
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-sm p-4">
-                <LifeBuoy className="text-blue-600 dark:text-blue-400 mb-2" size={20} />
-                <p className="text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">Need Help?</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Contact our support team</p>
-              </div>
-            </div>
           </div>
         </div>
       </>
@@ -266,16 +257,6 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
           {menuItems.map((item) => renderMenuItem(item, isSidebarExpanded))}
         </nav>
 
-        {/* Footer Section */}
-        {isSidebarExpanded && (
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-sm p-3">
-              <LifeBuoy className="text-blue-600 dark:text-blue-400 mb-2" size={16} />
-              <p className="text-xs font-semibold text-gray-700 dark:text-gray-200">Need Help?</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Support</p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
