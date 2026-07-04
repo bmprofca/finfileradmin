@@ -47,10 +47,10 @@ const STATUS_CONFIG = [
 ];
 
 const KPI_STRIP = [
-  { label: "Clients", key: "total_clients", icon: Users, tint: "#7c3aed" },
-  { label: "Staff", key: "total_staff", icon: Briefcase, tint: "#2563eb" },
-  { label: "Firms", key: "total_firms", icon: Building2, tint: "#d97706" },
-  { label: "Services", key: "total_services", icon: Wrench, tint: "#059669" },
+  { label: "Clients", key: "total_clients", icon: Users, tint: "#7c3aed", link: "/clients" },
+  { label: "Staff", key: "total_staff", icon: Briefcase, tint: "#2563eb", link: "/staff" },
+  { label: "Firms", key: "total_firms", icon: Building2, tint: "#d97706", link: "/firms" },
+  { label: "Services", key: "total_services", icon: Wrench, tint: "#059669", link: "/services" },
   { label: "Orders", key: "total_orders", icon: ShoppingCart, tint: "#db2777", link: "/orders" },
   { label: "Assigned", key: "assigned_orders", icon: CheckCircle2, tint: "#059669", link: "/orders?tab=assigned" },
   { label: "Unassigned", key: "unassigned_orders", icon: Clock, tint: "#ea580c", link: "/orders?tab=unassigned" },
