@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import {
-    FaChevronLeft,
-    FaChevronRight,
-    FaAngleDoubleLeft,
-    FaAngleDoubleRight,
-    FaLevelDownAlt
-} from 'react-icons/fa';
 import SelectField from './SelectField';
+import {
+    ChevronLeft,
+    ChevronRight,
+    ChevronsLeft,
+    ChevronsRight,
+} from 'lucide-react';
 
 const Pagination = ({
     currentPage,
@@ -32,35 +30,44 @@ const Pagination = ({
     const handleJump = (e) => {
         e.preventDefault();
         const page = Number.parseInt(jumpPage, 10);
-        if (page && page >= 1 && page <= totalPages) {
+        if (page >= 1 && page <= totalPages) {
             onPageChange(page);
         } else {
             setJumpPage(String(currentPage));
         }
     };
 
+    const limitOptions = availableLimits.map((limit) => ({
+        value: limit,
+        label: String(limit),
+    }));
+
     const getPageNumbers = () => {
-        const delta = 2;
+        const delta = 1;
         const range = [];
         const rangeWithDots = [];
-        let l;
+        let last;
 
-        for (let i = 1; i <= totalPages; i++) {
-            if (i === 1 || i === totalPages || (i >= currentPage - delta && i <= currentPage + delta)) {
+        for (let i = 1; i <= totalPages; i += 1) {
+            if (
+                i === 1 ||
+                i === totalPages ||
+                (i >= currentPage - delta && i <= currentPage + delta)
+            ) {
                 range.push(i);
             }
         }
 
         range.forEach((i) => {
-            if (l) {
-                if (i - l === 2) {
-                    rangeWithDots.push(l + 1);
-                } else if (i - l !== 1) {
+            if (last) {
+                if (i - last === 2) {
+                    rangeWithDots.push(last + 1);
+                } else if (i - last !== 1) {
                     rangeWithDots.push('...');
                 }
             }
             rangeWithDots.push(i);
-            l = i;
+            last = i;
         });
 
         return rangeWithDots;
@@ -68,109 +75,123 @@ const Pagination = ({
 
     if (totalItems === 0) return null;
 
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`w-full lg:flex lg:justify-between lg:items-center bg-white dark:bg-gray-800 rounded-sm border border-slate-200 dark:border-gray-700 mt-6 p-3 sm:p-4 ${className}`.trim()}
-        >
-            {/* ── ROW 1 (mobile): Info + Page controls side by side ── */}
-            <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+    const navBtnClass =
+        'inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-primary text-secondary-foreground transition hover:border-indigo-500/40 hover:bg-indigo-500/5 hover:text-indigo-600 disabled:pointer-events-none disabled:opacity-35 dark:hover:text-indigo-400';
 
-                {/* Showing X–Y of Z — hidden on very small if needed, but kept visible */}
+    const pageBtnClass = (active) =>
+        `inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-sm font-semibold transition ${active
+            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/25'
+            : 'text-secondary-foreground hover:bg-secondary hover:text-indigo-600 dark:hover:text-indigo-400'
+        }`;
+
+    return (
+        <div
+            className={`rounded-sm border border-border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:border-gray-800/50 px-3 py-3 sm:px-4 sm:py-3.5 ${className}`.trim()}
+        >
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                {/* Info */}
                 {showInfo && (
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-gray-400 font-medium whitespace-nowrap shrink-0">
+                    <p className="text-center text-xs text-secondary-foreground sm:text-left sm:text-sm">
                         Showing{' '}
-                        <span className="text-slate-900 dark:text-gray-100 font-semibold">{startItem}–{endItem}</span>
-                        {' '}of{' '}
-                        <span className="text-slate-900 dark:text-gray-100 font-semibold">{totalItems}</span>
+                        <span className="font-semibold text-primary-foreground">
+                            {startItem}–{endItem}
+                        </span>{' '}
+                        of{' '}
+                        <span className="font-semibold text-primary-foreground">{totalItems}</span>
                     </p>
                 )}
 
-                {/* Page number buttons */}
-                <div className="flex items-center justify-center flex-wrap gap-1 mt-2 sm:mt-0">
+                {/* Page controls */}
+                <div className="flex items-center justify-center gap-1">
                     <button
+                        type="button"
                         onClick={() => onPageChange(1)}
                         disabled={currentPage === 1}
-                        className="p-1.5 rounded-lg border border-slate-100 dark:border-gray-700 text-slate-400 dark:text-gray-500 hover:bg-slate-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                        title="First Page"
+                        className={navBtnClass}
+                        title="First page"
+                        aria-label="First page"
                     >
-                        <FaAngleDoubleLeft size={11} />
+                        <ChevronsLeft size={15} />
                     </button>
-
                     <button
+                        type="button"
                         onClick={() => onPageChange(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className="p-1.5 rounded-lg border border-slate-100 dark:border-gray-700 text-slate-400 dark:text-gray-500 hover:bg-slate-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                        title="Previous Page"
+                        className={navBtnClass}
+                        title="Previous page"
+                        aria-label="Previous page"
                     >
-                        <FaChevronLeft size={11} />
+                        <ChevronLeft size={15} />
                     </button>
 
-                    <div className="flex items-center gap-0.5 px-0.5">
+                    <div className="flex items-center gap-0.5 px-1">
                         {getPageNumbers().map((page, idx) =>
                             page === '...' ? (
-                                <span key={`dots-${idx}`} className="px-1 text-slate-400 dark:text-gray-500 text-xs">...</span>
+                                <span
+                                    key={`dots-${idx}`}
+                                    className="inline-flex h-8 w-6 items-center justify-center text-xs text-secondary-foreground"
+                                >
+                                    …
+                                </span>
                             ) : (
                                 <button
                                     key={page}
+                                    type="button"
                                     onClick={() => onPageChange(page)}
-                                    className={`
-                                        min-w-[28px] h-7 sm:min-w-[36px] sm:h-9 rounded-lg text-xs sm:text-sm font-bold transition-all
-                                        ${currentPage === page
-                                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 dark:shadow-indigo-900/50'
-                                            : 'text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400'
-                                        }
-                                    `}
+                                    className={pageBtnClass(currentPage === page)}
+                                    aria-label={`Page ${page}`}
+                                    aria-current={currentPage === page ? 'page' : undefined}
                                 >
                                     {page}
                                 </button>
-                            )
+                            ),
                         )}
                     </div>
 
                     <button
+                        type="button"
                         onClick={() => onPageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className="p-1.5 rounded-lg border border-slate-100 dark:border-gray-700 text-slate-400 dark:text-gray-500 hover:bg-slate-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                        title="Next Page"
+                        className={navBtnClass}
+                        title="Next page"
+                        aria-label="Next page"
                     >
-                        <FaChevronRight size={11} />
+                        <ChevronRight size={15} />
                     </button>
-
                     <button
+                        type="button"
                         onClick={() => onPageChange(totalPages)}
                         disabled={currentPage === totalPages}
-                        className="p-1.5 rounded-lg border border-slate-100 dark:border-gray-700 text-slate-400 dark:text-gray-500 hover:bg-slate-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                        title="Last Page"
+                        className={navBtnClass}
+                        title="Last page"
+                        aria-label="Last page"
                     >
-                        <FaAngleDoubleRight size={11} />
+                        <ChevronsRight size={15} />
                     </button>
                 </div>
-            </div>
 
-            {/* ── ROW 2 (mobile): Show limit + Go to ── */}
-            <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-slate-100 dark:border-gray-700 sm:mt-0 sm:pt-0 sm:border-0 sm:hidden">
-
-                {/* Show limit */}
-                {onLimitChange && (
-                    <div className="flex items-center gap-1.5">
-                        <span className="text-xs text-slate-500 dark:text-gray-400 font-medium">Show:</span>
-                        <div className="relative min-w-[80px]">
+                {/* Limit + jump */}
+                <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-end">
+                    {onLimitChange && (
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium text-secondary-foreground sm:text-sm">
+                                Rows
+                            </span>
                             <SelectField
-                                value={{ value: itemsPerPage, label: String(itemsPerPage) }}
-                                onChange={(selectedOption) => onLimitChange(Number(selectedOption.value))}
-                                options={availableLimits.map(limit => ({ value: limit, label: String(limit) }))}
-                                menuPlacement="auto"
+                                options={limitOptions}
+                                value={limitOptions.find((option) => option.value === itemsPerPage)}
+                                onChange={(selected) => onLimitChange(selected.value)}
+                                isSearchable={false}
+                                menuPlacement="top"
+                                classNamePrefix="react-select"
                             />
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* Go to page */}
-                <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-slate-500 dark:text-gray-400 font-medium">Go to:</span>
-                    <form onSubmit={handleJump} className="relative group">
+                    <form onSubmit={handleJump} className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-secondary-foreground sm:text-sm">
+                            Page
+                        </span>
                         <input
                             type="text"
                             inputMode="numeric"
@@ -179,95 +200,60 @@ const Pagination = ({
                                 const val = e.target.value.replace(/[^0-9]/g, '');
                                 setJumpPage(val);
                             }}
-                            className="w-14 bg-white dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-lg px-2 py-1 pr-7 text-xs font-bold text-slate-700 dark:text-gray-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-center"
+                            className="h-8 w-12 rounded-lg border border-border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600/50  text-center text-sm font-semibold text-primary-foreground outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15"
+                            aria-label="Go to page"
                         />
-                        <button
-                            type="submit"
-                            className="absolute right-1 top-1/2 -translate-y-1/2 p-0.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-all opacity-0 group-focus-within:opacity-100"
-                        >
-                            <FaLevelDownAlt size={8} className="rotate-90" />
-                        </button>
+                        <span className="text-xs text-secondary-foreground sm:text-sm">
+                            of <span className="font-semibold text-primary-foreground">{totalPages}</span>
+                        </span>
                     </form>
-                    <span className="text-xs text-slate-500 dark:text-gray-400">of <span className="text-slate-900 dark:text-gray-100 font-bold">{totalPages}</span></span>
                 </div>
             </div>
-
-            {/* ── Desktop layout (sm+): original single row ── */}
-            <div className="hidden sm:flex items-center justify-between gap-4 mt-3 pt-3 border-t lg:border-none border-slate-100 dark:border-gray-700 lg:mt-0 lg:pt-0">
-                {onLimitChange && (
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-slate-500 dark:text-gray-400 font-medium">Show:</span>
-                        <div className="relative min-w-[90px]">
-                            <SelectField
-                                value={{ value: itemsPerPage, label: String(itemsPerPage) }}
-                                onChange={(selectedOption) => onLimitChange(Number(selectedOption.value))}
-                                options={availableLimits.map(limit => ({ value: limit, label: String(limit) }))}
-                                menuPlacement="auto"
-                            />
-                        </div>
-                    </div>
-                )}
-                <div className="flex items-center gap-2">
-                    <span className="text-sm text-slate-500 dark:text-gray-400 font-medium">Go to:</span>
-                    <form onSubmit={handleJump} className="relative group">
-                        <input
-                            type="text"
-                            inputMode="numeric"
-                            value={jumpPage}
-                            onChange={(e) => {
-                                const val = e.target.value.replace(/[^0-9]/g, '');
-                                setJumpPage(val);
-                            }}
-                            placeholder="Page No"
-                            className="w-full bg-white dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-lg px-3 py-1.5 pr-10 text-sm font-bold text-slate-700 dark:text-gray-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-center"
-                        />
-                        <button
-                            type="submit"
-                            className="absolute right-1 top-1/2 -translate-y-1/2 p-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-all opacity-0 group-focus-within:opacity-100"
-                        >
-                            <FaLevelDownAlt size={10} className="rotate-90" />
-                        </button>
-                    </form>
-                    <span className="text-sm text-slate-500 dark:text-gray-400 font-medium">of <span className="text-slate-900 dark:text-gray-100 font-bold">{totalPages}</span> pages</span>
-                </div>
-            </div>
-        </motion.div>
+        </div>
     );
 };
 
-// Hook — unchanged
-export const usePagination = (initialPage = 1, initialLimit = 10) => {
+export const usePagination = (initialPage = 1, initialLimit = 20) => {
     const [pagination, setPagination] = useState({
         page: initialPage,
         limit: initialLimit,
         total: 0,
         total_pages: 1,
-        is_last_page: true
+        is_last_page: true,
     });
 
     const updatePagination = useCallback((data) => {
-        setPagination(prev => {
+        setPagination((prev) => {
             const page = data.page || prev.page;
             const limit = data.limit || prev.limit;
             const total = data.total ?? prev.total;
             const total_pages = data.total_pages || Math.ceil(total / limit) || 1;
             return {
-                page, limit, total, total_pages,
-                is_last_page: data.is_last_page ?? (page >= total_pages)
+                page,
+                limit,
+                total,
+                total_pages,
+                is_last_page: data.is_last_page ?? page >= total_pages,
             };
         });
     }, []);
 
     const goToPage = useCallback((page) => {
-        setPagination(prev => ({ ...prev, page }));
+        setPagination((prev) => ({ ...prev, page }));
     }, []);
 
     const changeLimit = useCallback((limit) => {
-        setPagination(prev => ({ ...prev, limit, page: 1 }));
+        setPagination((prev) => ({ ...prev, limit, page: 1 }));
     }, []);
 
     const resetPagination = useCallback(() => {
-        setPagination({ page: initialPage, limit: initialLimit, total: 0, total_pages: 1, is_last_page: true });
+        setPagination({
+            page: initialPage,
+            limit: initialLimit,
+            total: 0,
+            total_pages: 1,
+            is_last_page: true,
+        });
     }, [initialPage, initialLimit]);
 
     return { pagination, updatePagination, goToPage, changeLimit, resetPagination };
