@@ -3,7 +3,7 @@ import { Plus, Trash2, Briefcase } from 'lucide-react';
 import Modal from './Modal';
 import SelectField from './SelectField';
 import { ConstantOptions } from '../../contexts/ConstantOptionsContext';
-import { uploadFile } from '../../utils/apiCall';
+import apiCall, { uploadFile } from '../../utils/apiCall';
 import toast from 'react-hot-toast';
 
 const DEFAULT_FIELDS = {
@@ -64,7 +64,29 @@ const normalizeDocumentForForm = (document) => {
 };
 
 export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitting }) {
-  const { serviceTypeOptions, discountTypeOptions } = ConstantOptions();
+  const { discountTypeOptions } = ConstantOptions();
+
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await apiCall('/api/admin/services/categories');
+        const data = await response.json();
+        if (data.success) {
+          const categories = data.data?.categories || [];
+          setCategoryOptions(categories.map((category) => ({ value: category, label: category })));
+        }
+      } catch (error) {
+        toast.error('Failed to load service categories');
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -336,10 +358,11 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Type/Category *</label>
               <SelectField
-                options={serviceTypeOptions}
-                value={serviceTypeOptions.find((option) => option.value === formData.type) || null}
+                options={categoryOptions}
+                value={categoryOptions.find((option) => option.value === formData.type) || null}
                 onChange={(selected) => handleSelectChange('type', selected)}
-                placeholder="Select category..."
+                placeholder={loadingCategories ? 'Loading categories...' : 'Select category...'}
+                isLoading={loadingCategories}
                 styles={selectStyles}
               />
             </div>

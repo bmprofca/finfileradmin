@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from './AuthContext';
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
@@ -15,51 +16,63 @@ export const usePermissions = () => {
 
 /**
  * PermissionsProvider
- * - Must be placed INSIDE AuthProvider (needs navigate) but OUTSIDE ServiceOptionsProvider.
- * - Fetches /permissions/user once on mount.
+ * - Must be placed INSIDE AuthProvider (needs the authenticated `user` + navigate).
+ * - Fetches /permissions/user whenever the logged-in user changes (login/logout),
+ *   not just once on mount — so permissions are fresh immediately after login
+ *   without requiring a full page refresh.
  * - On 401 Unauthorized → clears local session and redirects to /login immediately,
  *   children are NOT rendered so no other API (constants, etc.) is called.
  * - On success → renders children and exposes permission helpers via context.
  */
 export const PermissionsProvider = ({ children }) => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
 
   const [permissions, setPermissions] = useState([]); // array of permission objects
   const [loading, setLoading] = useState(true);       // true while fetching
   const [authorized, setAuthorized] = useState(true); // false if got 401
 
-  const hasFetched = useRef(false);
+  // Tracks the username permissions were last fetched for, so we only refetch
+  // when the logged-in user actually changes (login/logout/switch account),
+  // and avoid duplicate fetches on unrelated rerenders / StrictMode double-invoke.
+  const fetchedForRef = useRef(undefined);
 
   useEffect(() => {
-    // Guard: only fetch once even in StrictMode double-invoke
-    if (hasFetched.current) return;
-    hasFetched.current = true;
+    // Wait until AuthContext has resolved the current session from storage.
+    if (authLoading) return;
+
+    // No logged-in user (logged out, or session cleared) — reset and stop.
+    if (!user) {
+      fetchedForRef.current = undefined;
+      setPermissions([]);
+      setAuthorized(true);
+      setLoading(false);
+      return;
+    }
+
+    // Already fetched permissions for this exact user — skip refetching.
+    if (fetchedForRef.current === user.username) return;
+    fetchedForRef.current = user.username;
+
+    let cancelled = false;
+    setLoading(true);
 
     const loadPermissions = async () => {
-      // If no session exists at all, skip the API call — ProtectedRoute will handle redirect
-      const session = localStorage.getItem('user_data');
-      if (!session) {
-        setLoading(false);
-        return;
-      }
-
       try {
         const res = await fetch(
           // Use the same base as apiCall but call directly to intercept 401 ourselves
           `${process.env.REACT_APP_BASE_API_URL || ''}/api/admin/permissions/user`,
           {
             method: 'GET',
-            headers: (() => {
-              const headers = { 'Content-Type': 'application/json' };
-              try {
-                const { token, username } = JSON.parse(session);
-                if (token) headers['Authorization'] = `Bearer ${token}`;
-                if (username) headers['username'] = username;
-              } catch {}
-              return headers;
-            })(),
+            headers: {
+              'Content-Type': 'application/json',
+              ...(user.token ? { Authorization: `Bearer ${user.token}` } : {}),
+              ...(user.username ? { username: user.username } : {}),
+            },
           }
         );
+
+        if (cancelled) return;
 
         // 401 → session is invalid → clear everything and go to login
         // Block child rendering so no subsequent APIs (constants, etc.) fire
@@ -78,12 +91,16 @@ export const PermissionsProvider = ({ children }) => {
       } catch {
         // Network error: let the app load, ServerUnreachable page will handle it
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     loadPermissions();
-  }, [navigate]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, authLoading, navigate]);
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -119,7 +136,7 @@ export const PermissionsProvider = ({ children }) => {
   if (!authorized) return null;
 
   // ── Show nothing while loading (no flash of unauthorized content) ─────────
-  if (loading) return null;
+  if (authLoading || loading) return null;
 
   return (
     <PermissionsContext.Provider
