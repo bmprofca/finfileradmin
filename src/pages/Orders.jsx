@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, X, Briefcase, Hash, User, Users, UserPlus, UserMinus,
   Eye, Calendar, IndianRupee, FileText, Tag, Edit, RefreshCw,
-  ChevronLeft, ChevronRight, Upload, Download
+  ChevronLeft, ChevronRight, Upload, Download, Phone
 } from 'lucide-react';
 import ManagementHub from '../components/common/ManagementHub';
 import ManagementTable from '../components/common/ManagementTable';
@@ -70,12 +70,28 @@ const PaymentText = ({ order }) => {
   );
 };
 
+/* ─── Staff Skeleton ─── */
+const StaffCardSkeleton = () => (
+  <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 animate-pulse">
+    <div className="flex items-center gap-3">
+      <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700" />
+      <div>
+        <div className="h-3.5 w-24 bg-gray-200 dark:bg-gray-700 rounded mb-1.5" />
+        <div className="h-3 w-20 bg-gray-100 dark:bg-gray-700/50 rounded" />
+      </div>
+    </div>
+    <div className="w-7 h-7 bg-gray-100 dark:bg-gray-700 rounded-lg" />
+  </div>
+);
+
 /* ─── Staff Management Modal ─── */
-const StaffManagementModal = ({ order, allStaff, onClose, onSubmit, isSubmitting }) => {
+const StaffManagementModal = ({ order, allStaff, staffLoading, onClose, onSubmit, isSubmitting }) => {
   const [leftStaff, setLeftStaff] = useState([]);
   const [rightStaff, setRightStaff] = useState([]);
   const [hasChanges, setHasChanges] = useState(false);
   const [initialRightStaff, setInitialRightStaff] = useState([]);
+  const [leftSearch, setLeftSearch] = useState('');
+  const [rightSearch, setRightSearch] = useState('');
 
   useEffect(() => {
     if (order && allStaff.length > 0) {
@@ -88,6 +104,16 @@ const StaffManagementModal = ({ order, allStaff, onClose, onSubmit, isSubmitting
       setHasChanges(false);
     }
   }, [order, allStaff]);
+
+  const filterStaff = (list, search) => {
+    if (!search.trim()) return list;
+    const q = search.toLowerCase();
+    return list.filter(s =>
+      (s.full_name || s.name || '').toLowerCase().includes(q) ||
+      (s.mobile || '').includes(q) ||
+      (s.username || '').toLowerCase().includes(q)
+    );
+  };
 
   const moveToRight = (staff) => {
     setLeftStaff(prev => prev.filter(s => s.username !== staff.username));
@@ -114,32 +140,36 @@ const StaffManagementModal = ({ order, allStaff, onClose, onSubmit, isSubmitting
   };
 
   const handleSubmit = () => {
-    const staffUsernames = rightStaff.map(s => s.username);
     onSubmit({
       order_id: order.order_id,
-      staff_usernames: staffUsernames
+      staff_usernames: rightStaff.map(s => s.username)
     });
   };
 
   const isInitial = () => {
-    const currentRight = rightStaff.map(s => s.username).sort();
-    const initialRight = initialRightStaff.sort();
+    const currentRight = [...rightStaff.map(s => s.username)].sort();
+    const initialRight = [...initialRightStaff].sort();
     return JSON.stringify(currentRight) === JSON.stringify(initialRight);
   };
 
-  const StaffCard = ({ staff, onAction, actionIcon: ActionIcon, actionLabel, direction }) => (
+  const filteredLeft = filterStaff(leftStaff, leftSearch);
+  const filteredRight = filterStaff(rightStaff, rightSearch);
+
+  const StaffCard = ({ staff, onAction, actionIcon: ActionIcon, actionLabel }) => (
     <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all group">
       <div className="flex items-center gap-3 min-w-0">
         {staff.image ? (
-          <img src={staff.image} alt={staff.name} className="w-8 h-8 rounded-full object-cover shrink-0" />
+          <img src={staff.image} alt={staff.full_name || staff.name} className="w-8 h-8 rounded-full object-cover shrink-0" />
         ) : (
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-            {staff.name?.charAt(0) || '?'}
+            {(staff.full_name || staff.name || '?').charAt(0)}
           </div>
         )}
         <div className="min-w-0">
-          <p className="font-medium text-sm text-gray-800 dark:text-gray-200">{staff.name}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{staff.username}</p>
+          <p className="font-medium text-sm text-gray-800 dark:text-gray-200">{staff.full_name || staff.name}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 truncate flex items-center gap-1">
+            <Phone size={10} /> {staff.mobile || '—'}
+          </p>
         </div>
       </div>
       <button
@@ -149,6 +179,24 @@ const StaffManagementModal = ({ order, allStaff, onClose, onSubmit, isSubmitting
       >
         <ActionIcon size={16} className="text-gray-500 dark:text-gray-400" />
       </button>
+    </div>
+  );
+
+  const SearchInput = ({ value, onChange, placeholder }) => (
+    <div className="relative mb-2">
+      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={13} />
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full pl-8 pr-7 py-1.5 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:text-gray-100"
+      />
+      {value && (
+        <button onClick={() => onChange('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+          <X size={11} />
+        </button>
+      )}
     </div>
   );
 
@@ -185,92 +233,70 @@ const StaffManagementModal = ({ order, allStaff, onClose, onSubmit, isSubmitting
         <div className="flex flex-col gap-4 lg:flex-row md:flex-row items-stretch">
           {/* Left Column - Available Staff */}
           <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-sm p-3 bg-gray-50 dark:bg-gray-900/30">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
                 <UserPlus size={14} className="text-indigo-500" />
                 Available ({leftStaff.length})
               </h4>
               {leftStaff.length > 0 && (
-                <button
-                  onClick={moveAllToRight}
-                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold flex items-center gap-1"
-                >
+                <button onClick={moveAllToRight} className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 font-semibold flex items-center gap-1">
                   <ChevronRight size={14} /> All
                 </button>
               )}
             </div>
-            <div className="max-h-96 overflow-y-auto space-y-2 pr-2">
-              {leftStaff.length > 0 ? (
-                leftStaff.map(staff => (
-                  <StaffCard
-                    key={staff.username}
-                    staff={staff}
-                    onAction={moveToRight}
-                    actionIcon={ChevronRight}
-                    actionLabel="Assign"
-                  />
+            <SearchInput value={leftSearch} onChange={setLeftSearch} placeholder="Search available..." />
+            <div className="max-h-80 overflow-y-auto space-y-2 pr-1">
+              {staffLoading ? (
+                Array.from({ length: 3 }).map((_, i) => <StaffCardSkeleton key={i} />)
+              ) : filteredLeft.length > 0 ? (
+                filteredLeft.map(staff => (
+                  <StaffCard key={staff.username} staff={staff} onAction={moveToRight} actionIcon={ChevronRight} actionLabel="Assign" />
                 ))
               ) : (
                 <div className="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
                   <UserPlus className="mx-auto mb-2 text-gray-300 dark:text-gray-600" size={32} />
-                  No available staff
+                  {leftSearch ? 'No matching staff' : 'No available staff'}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Center Column - Navigation Arrows (narrow) */}
+          {/* Center Column */}
           <div className="w-16 mx-auto flex flex-col items-center justify-center gap-4 py-4 flex-shrink-0">
-            <button
-              onClick={moveAllToRight}
-              disabled={leftStaff.length === 0}
-              className="p-2 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all disabled:opacity-30 disabled:cursor-not-allowed border border-indigo-200 dark:border-indigo-700"
-            >
+            <button onClick={moveAllToRight} disabled={leftStaff.length === 0} className="p-2 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-all disabled:opacity-30 disabled:cursor-not-allowed border border-indigo-200 dark:border-indigo-700">
               <ChevronRight size={20} />
             </button>
-            <button
-              onClick={moveAllToLeft}
-              disabled={rightStaff.length === 0}
-              className="p-2 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all disabled:opacity-30 disabled:cursor-not-allowed border border-indigo-200 dark:border-indigo-700"
-            >
+            <button onClick={moveAllToLeft} disabled={rightStaff.length === 0} className="p-2 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-all disabled:opacity-30 disabled:cursor-not-allowed border border-indigo-200 dark:border-indigo-700">
               <ChevronLeft size={20} />
             </button>
-            <div className="text-xs text-gray-400 dark:text-gray-500 font-medium text-center">
-              {rightStaff.length} / {allStaff.length}
-            </div>
+            <div className="text-xs text-gray-400 font-medium text-center">{rightStaff.length} / {allStaff.length}</div>
           </div>
 
           {/* Right Column - Assigned Staff */}
           <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-sm p-3 bg-gray-50 dark:bg-gray-900/30">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
                 <UserCheck size={14} className="text-green-500" />
                 Assigned ({rightStaff.length})
               </h4>
               {rightStaff.length > 0 && (
-                <button
-                  onClick={moveAllToLeft}
-                  className="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-semibold flex items-center gap-1"
-                >
+                <button onClick={moveAllToLeft} className="text-xs text-red-600 dark:text-red-400 hover:text-red-700 font-semibold flex items-center gap-1">
                   <ChevronLeft size={14} /> All
                 </button>
               )}
             </div>
-            <div className="max-h-96 overflow-y-auto space-y-2 pr-2">
-              {rightStaff.length > 0 ? (
-                rightStaff.map(staff => (
-                  <StaffCard
-                    key={staff.username}
-                    staff={staff}
-                    onAction={moveToLeft}
-                    actionIcon={ChevronLeft}
-                    actionLabel="Unassign"
-                  />
+            <SearchInput value={rightSearch} onChange={setRightSearch} placeholder="Search assigned..." />
+            <div className="max-h-80 overflow-y-auto space-y-2 pr-1">
+              {staffLoading ? (
+                Array.from({ length: 2 }).map((_, i) => <StaffCardSkeleton key={i} />)
+              ) : filteredRight.length > 0 ? (
+                filteredRight.map(staff => (
+                  <StaffCard key={staff.username} staff={staff} onAction={moveToLeft} actionIcon={ChevronLeft} actionLabel="Unassign" />
                 ))
               ) : (
                 <div className="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
                   <UserMinus className="mx-auto mb-2 text-gray-300 dark:text-gray-600" size={32} />
-                  No staff assigned
+                  {rightSearch ? 'No matching staff' : 'No staff assigned'}
                 </div>
               )}
             </div>
@@ -290,19 +316,8 @@ const StaffManagementModal = ({ order, allStaff, onClose, onSubmit, isSubmitting
   );
 };
 
-// Helper component for UserCheck icon
 const UserCheck = ({ size, className }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
     <circle cx="8.5" cy="7" r="4" />
     <polyline points="17 11 19 13 23 9" />
@@ -431,110 +446,233 @@ const ViewOrderModal = ({ order, onClose, onManageStaff, onUpdateOrder, onUpdate
   );
 };
 
-const OrderUpdateModal = ({ order, onClose, onSubmit, isSubmitting }) => {
+const OrderUpdateModal = ({ order, services, servicesLoading, onClose, onSubmit, isSubmitting }) => {
   const { discountTypeOptions } = ConstantOptions();
   const [form, setForm] = useState({
-    order_name: order?.order_name || '',
+    order_name: order?.order_name || order?.name || '',
     service_id: order?.service_id || '',
-    base_price: order?.base_price ?? 1,
-    tax_rate: order?.tax_rate ?? 1,
-    tax_value: order?.tax_value ?? 1,
-    total_fees: order?.total_fees ?? 1,
+    base_price: order?.base_price ?? '',
+    tax_rate: order?.tax_rate ?? '',
+    tax_value: order?.tax_value ?? '',
+    total_fees: order?.total_fees ?? '',
     discount_type: order?.discount_type || 'not applicable',
-    discount_percentage: order?.discount_percentage ?? 1,
-    discount_value: order?.discount_value ?? 1,
-    fees: order?.fees ?? 1,
+    discount_percentage: order?.discount_percentage ?? '',
+    discount_value: order?.discount_value ?? '',
+    fees: order?.fees ?? '',
     partial_payment_allowed: order?.partial_payment_allowed ?? true,
   });
 
-  const inputCls = 'w-full px-3 py-2.5 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm';
+  const inputCls = 'w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none';
+  const readOnlyCls = 'w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-100 dark:bg-gray-600/50 text-gray-500 dark:text-gray-400 cursor-not-allowed outline-none';
 
-  const setText = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
-  const setNumber = (key) => (e) => {
+  const handleNumberKeyPress = (e) => { if (!/[0-9.]/.test(e.key)) e.preventDefault(); };
+  const handleNumberChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value === '' ? '' : Number(value) }));
+  };
+
+  // Auto-calculation (same logic as ServiceFormModal)
+  useEffect(() => {
+    const basePrice = Number(form.base_price) || 0;
+    const taxRate = Number(form.tax_rate) || 0;
+    const discountPercentage = Number(form.discount_percentage) || 0;
+    const discountType = form.discount_type;
+
+    const taxValue = parseFloat((basePrice * taxRate / 100).toFixed(2));
+    const totalFees = parseFloat((basePrice + taxValue).toFixed(2));
+
+    let discountValue;
+    if (discountType === 'percentage') {
+      discountValue = parseFloat((totalFees * discountPercentage / 100).toFixed(2));
+    } else if (discountType === 'flat') {
+      discountValue = Number(form.discount_value) || 0;
+    } else {
+      discountValue = 0;
+    }
+
+    const fees = parseFloat((totalFees - discountValue).toFixed(2));
+
+    setForm(prev => ({
+      ...prev,
+      tax_value: taxValue !== 0 ? taxValue : '',
+      total_fees: totalFees !== 0 ? totalFees : '',
+      ...(discountType === 'percentage' ? { discount_value: discountValue !== 0 ? discountValue : '' } : {}),
+      ...(discountType === 'not applicable' ? { discount_value: '' } : {}),
+      fees: fees !== 0 ? fees : '',
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.base_price, form.tax_rate, form.discount_type, form.discount_percentage]);
+
+  const handleFlatDiscountChange = (e) => {
     const value = e.target.value;
-    setForm((prev) => ({ ...prev, [key]: value === '' ? '' : Number(value) }));
+    const discountValue = value === '' ? 0 : Number(value);
+    const totalFees = Number(form.total_fees) || 0;
+    const fees = parseFloat((totalFees - discountValue).toFixed(2));
+    setForm(prev => ({
+      ...prev,
+      discount_value: value === '' ? '' : discountValue,
+      fees: fees !== 0 ? fees : '',
+    }));
+  };
+
+  const handleServiceSelect = (selected) => {
+    if (!selected) {
+      setForm(prev => ({ ...prev, service_id: '' }));
+      return;
+    }
+    const svc = services.find(s => s.service_id === selected.value);
+    if (svc) {
+      setForm(prev => ({
+        ...prev,
+        service_id: svc.service_id,
+        base_price: svc.base_price ?? '',
+        tax_rate: svc.tax_rate ?? '',
+        discount_type: svc.discount_type || 'not applicable',
+        discount_percentage: svc.discount_percentage ?? '',
+        discount_value: svc.discount_type === 'flat' ? (svc.discount_value ?? '') : prev.discount_value,
+      }));
+    } else {
+      setForm(prev => ({ ...prev, service_id: selected.value }));
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({
-      ...form,
-      base_price: Number(form.base_price),
-      tax_rate: Number(form.tax_rate),
-      tax_value: Number(form.tax_value),
-      total_fees: Number(form.total_fees),
-      discount_percentage: Number(form.discount_percentage),
-      discount_value: Number(form.discount_value),
-      fees: Number(form.fees),
-      partial_payment_allowed: Boolean(form.partial_payment_allowed),
+    const payload = { ...form };
+    ['base_price', 'tax_rate', 'tax_value', 'total_fees', 'discount_percentage', 'discount_value', 'fees'].forEach(k => {
+      payload[k] = Number(payload[k]);
     });
+    payload.partial_payment_allowed = Boolean(payload.partial_payment_allowed);
+    onSubmit(payload);
   };
+
+  const isPercentageDiscount = form.discount_type === 'percentage';
+  const isFlatDiscount = form.discount_type === 'flat';
+  const isDiscountApplicable = form.discount_type !== 'not applicable';
+
+  const serviceOptions = services.map(s => ({ value: s.service_id, label: s.name }));
 
   return (
     <Modal
       isOpen={true}
       onClose={onClose}
-      title={`Update Order · ${order?.order_name || ''}`}
+      title={`Update Order · ${order?.order_name || order?.name || ''}`}
       icon={Edit}
       size="3xl"
-      contentClassName="p-5"
+      contentClassName="p-0"
       closeText="Cancel"
       footer={
-        <button
-          type="submit"
-          form="order-update-form"
-          disabled={isSubmitting}
-          className="px-5 py-2.5 rounded-lg bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-50"
-        >
+        <button type="submit" form="order-update-form" disabled={isSubmitting}
+          className="px-5 py-2.5 rounded-lg bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-50">
           <Edit size={14} />
           {isSubmitting ? 'Updating...' : 'Update Order'}
         </button>
       }
     >
-      <form id="order-update-form" onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Order Name</label>
-            <input required value={form.order_name} onChange={setText('order_name')} className={inputCls} />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Service ID</label>
-            <input required value={form.service_id} onChange={setText('service_id')} className={inputCls} />
-          </div>
-          {[
-            ['base_price', 'Base Price'],
-            ['tax_rate', 'Tax Rate'],
-            ['tax_value', 'Tax Value'],
-            ['total_fees', 'Total Fees'],
-            ['discount_percentage', 'Discount Percentage'],
-            ['discount_value', 'Discount Value'],
-            ['fees', 'Final Fees'],
-          ].map(([key, label]) => (
-            <div key={key}>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">{label}</label>
-              <input required type="number" min="0" step="0.01" value={form[key]} onChange={setNumber(key)} className={inputCls} />
+      <form id="order-update-form" onSubmit={handleSubmit} className="p-6 space-y-8">
+
+        {/* Basic Info */}
+        <section>
+          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 border-b pb-2 dark:border-gray-700">Order Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Order Name *</label>
+              <input required type="text" value={form.order_name} onChange={(e) => setForm(prev => ({ ...prev, order_name: e.target.value }))} className={inputCls} placeholder="Order name" />
             </div>
-          ))}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Discount Type</label>
-            <SelectField
-              options={discountTypeOptions}
-              value={discountTypeOptions.find((option) => option.value === form.discount_type) || discountTypeOptions[0]}
-              onChange={(selected) => setForm((prev) => ({ ...prev, discount_type: selected?.value || 'not applicable' }))}
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="flex items-center gap-3 rounded-sm border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200">
-              <input
-                type="checkbox"
-                checked={form.partial_payment_allowed}
-                onChange={(e) => setForm((prev) => ({ ...prev, partial_payment_allowed: e.target.checked }))}
-                className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Service *</label>
+              <SelectField
+                options={serviceOptions}
+                value={serviceOptions.find(o => o.value === form.service_id) || null}
+                onChange={handleServiceSelect}
+                placeholder={servicesLoading ? 'Loading services...' : 'Select service...'}
+                isLoading={servicesLoading}
               />
-              Partial payment allowed
-            </label>
+            </div>
           </div>
-        </div>
+        </section>
+
+        <hr className="border-gray-200 dark:border-gray-700" />
+
+        {/* Pricing */}
+        <section>
+          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-1 border-b pb-2 dark:border-gray-700">Pricing &amp; Fees</h3>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
+            Tax Value, Total Fees, and Final Fees are calculated automatically. Fields with (auto) are read-only.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Row 1 */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Base Price</label>
+              <input type="text" name="base_price" value={form.base_price} onKeyPress={handleNumberKeyPress} onChange={handleNumberChange} className={inputCls} placeholder="0" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Tax Rate (%)</label>
+              <input type="text" name="tax_rate" value={form.tax_rate} onKeyPress={handleNumberKeyPress} onChange={handleNumberChange} className={inputCls} placeholder="0" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 flex items-center gap-1">Tax Value <span className="text-xs text-gray-400 font-normal">(auto)</span></label>
+              <input type="text" value={form.tax_value} readOnly className={readOnlyCls} placeholder="—" />
+            </div>
+
+            {/* Row 2 */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 flex items-center gap-1">Total Fees <span className="text-xs text-gray-400 font-normal">(auto)</span></label>
+              <input type="text" value={form.total_fees} readOnly className={readOnlyCls} placeholder="—" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Discount Type</label>
+              <SelectField
+                options={discountTypeOptions}
+                value={discountTypeOptions.find(o => o.value === form.discount_type) || discountTypeOptions[0]}
+                onChange={(selected) => setForm(prev => ({ ...prev, discount_type: selected?.value || 'not applicable' }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                Discount %
+                {!isPercentageDiscount && <span className="text-xs text-gray-400 font-normal ml-1">(n/a)</span>}
+              </label>
+              <input type="text" name="discount_percentage" value={form.discount_percentage} onKeyPress={handleNumberKeyPress} onChange={handleNumberChange} disabled={!isPercentageDiscount} className={isPercentageDiscount ? inputCls : readOnlyCls} placeholder={isPercentageDiscount ? '0' : '—'} />
+            </div>
+
+            {/* Row 3 */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 flex items-center gap-1">
+                Discount Value
+                {isPercentageDiscount && <span className="text-xs text-gray-400 font-normal">(auto)</span>}
+                {!isDiscountApplicable && <span className="text-xs text-gray-400 font-normal">(n/a)</span>}
+              </label>
+              <input type="text" name="discount_value" value={form.discount_value} readOnly={!isFlatDiscount} onKeyPress={isFlatDiscount ? handleNumberKeyPress : undefined} onChange={isFlatDiscount ? handleFlatDiscountChange : undefined} className={isFlatDiscount ? inputCls : readOnlyCls} placeholder={isFlatDiscount ? '0' : '—'} />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 flex items-center gap-1">Final Fees <span className="text-xs text-gray-400 font-normal">(auto)</span></label>
+              <input type="text" value={form.fees} readOnly className={`${readOnlyCls} font-semibold text-gray-700 dark:text-gray-200`} placeholder="—" />
+            </div>
+          </div>
+
+          {(Number(form.base_price) > 0) && (
+            <div className="mt-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-sm text-xs text-indigo-700 dark:text-indigo-300 flex flex-wrap gap-x-4 gap-y-1">
+              <span>Base <strong>{form.base_price}</strong></span>
+              <span>+ Tax <strong>{form.tax_value || 0}</strong></span>
+              <span>= Total <strong>{form.total_fees || 0}</strong></span>
+              {isDiscountApplicable && <span>− Discount <strong>{form.discount_value || 0}</strong></span>}
+              <span className="font-bold">= Final <strong>{form.fees || 0}</strong></span>
+            </div>
+          )}
+        </section>
+
+        <hr className="border-gray-200 dark:border-gray-700" />
+
+        {/* Options */}
+        <section>
+          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 border-b pb-2 dark:border-gray-700">Options</h3>
+          <label className="flex items-center gap-3 rounded-sm border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200">
+            <input type="checkbox" checked={form.partial_payment_allowed} onChange={(e) => setForm(prev => ({ ...prev, partial_payment_allowed: e.target.checked }))} className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500" />
+            Partial payment allowed
+          </label>
+        </section>
       </form>
     </Modal>
   );
@@ -616,6 +754,10 @@ export default function Orders() {
   // Staff
   const [allStaff, setAllStaff] = useState([]);
 
+  // Services (for update order modal)
+  const [allServices, setAllServices] = useState([]);
+  const [servicesLoading, setServicesLoading] = useState(false);
+
   // Modals
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
@@ -630,6 +772,7 @@ export default function Orders() {
 
   /* ─── Data Fetching ─── */
   const staffFetchedRef = useRef(false);
+  const servicesFetchedRef = useRef(false);
 
   const ensureStaffFetched = async () => {
     if (!staffFetchedRef.current) {
@@ -648,6 +791,53 @@ export default function Orders() {
       }
     }
   };
+
+  const ensureServicesFetched = async () => {
+    if (!servicesFetchedRef.current) {
+      setServicesLoading(true);
+      try {
+        const res = await apiCall('/api/admin/services/list?limit=100', 'GET');
+        const data = await res.json();
+        if (data.success) {
+          setAllServices(data.data.services || []);
+          servicesFetchedRef.current = true;
+        }
+      } catch (err) {
+        console.error('Failed to fetch services', err);
+      } finally {
+        setServicesLoading(false);
+      }
+    }
+  };
+
+  const fetchOrderDetails = useCallback(async (orderId) => {
+    try {
+      const res = await apiCall(`/api/admin/orders/details/${orderId}`, 'GET');
+      const data = await res.json();
+      if (data.success) {
+        const o = data.data;
+        return {
+          ...o,
+          name: o.order_name,
+          assigned_staff: o.assigned_staff || [],
+          payments: o.payments || [],
+          documents: o.documents || [],
+          base_price: Number(o.base_price),
+          tax_rate: Number(o.tax_rate),
+          tax_value: Number(o.tax_value),
+          total_fees: Number(o.total_fees),
+          discount_percentage: Number(o.discount_percentage),
+          discount_value: Number(o.discount_value),
+          fees: Number(o.fees),
+          total_paid: Number(o.total_paid),
+          due_amount: Number(o.due_amount),
+        };
+      }
+    } catch (err) {
+      console.error('Failed to fetch order details', err);
+    }
+    return null;
+  }, []);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -706,28 +896,37 @@ export default function Orders() {
   const handleRefresh = () => { setRefreshing(true); fetchOrders(); };
 
   /* ─── Modal Openers ─── */
-  const openDetailModal = (order) => {
+  const openDetailModal = async (order) => {
     setSelectedOrder(order);
     setDetailModalOpen(true);
+    const latest = await fetchOrderDetails(order.order_id);
+    if (latest) setSelectedOrder(latest);
   };
 
-  const openStaffModal = (order) => {
+  const openStaffModal = async (order) => {
     setSelectedOrder(order);
     setDetailModalOpen(false);
     setStaffModalOpen(true);
     ensureStaffFetched();
+    const latest = await fetchOrderDetails(order.order_id);
+    if (latest) setSelectedOrder(latest);
   };
 
-  const openUpdateOrderModal = (order) => {
+  const openUpdateOrderModal = async (order) => {
     setSelectedOrder(order);
     setDetailModalOpen(false);
     setUpdateOrderModalOpen(true);
+    ensureServicesFetched();
+    const latest = await fetchOrderDetails(order.order_id);
+    if (latest) setSelectedOrder(latest);
   };
 
-  const openStatusModal = (order) => {
+  const openStatusModal = async (order) => {
     setSelectedOrder(order);
     setDetailModalOpen(false);
     setStatusModalOpen(true);
+    const latest = await fetchOrderDetails(order.order_id);
+    if (latest) setSelectedOrder(latest);
   };
 
   const openDocumentsPage = (order) => {
@@ -776,14 +975,17 @@ export default function Orders() {
     if (!selectedOrder) return;
     setSaving(true);
     try {
-      const res = await apiCall('/api/admin/orders/assign/update', 'POST', payload);
+      const res = await apiCall('/api/admin/orders/assign/update', 'PUT', payload);
       const data = await res.json();
       if (data.success) {
+        toast.success('Staff assignments updated successfully');
         setStaffModalOpen(false);
         setSelectedOrder(null);
         fetchOrders();
+      } else {
+        toast.error(data.message || 'Failed to update staff assignments');
       }
-    } catch (e) { console.error(e); }
+    } catch (e) { toast.error('An error occurred. Please try again.'); }
     finally { setSaving(false); }
   };
 
@@ -794,11 +996,14 @@ export default function Orders() {
       const res = await apiCall(`/api/admin/orders/update/${selectedOrder.order_id}`, 'PUT', payload);
       const data = await res.json();
       if (data.success) {
+        toast.success('Order updated successfully');
         setUpdateOrderModalOpen(false);
         setSelectedOrder(null);
         fetchOrders();
+      } else {
+        toast.error(data.message || 'Failed to update order');
       }
-    } catch (e) { console.error(e); }
+    } catch (e) { toast.error('An error occurred. Please try again.'); }
     finally { setSaving(false); }
   };
 
@@ -809,11 +1014,14 @@ export default function Orders() {
       const res = await apiCall(`/api/admin/orders/status/${selectedOrder.order_id}`, 'PUT', payload);
       const data = await res.json();
       if (data.success) {
+        toast.success('Order status updated successfully');
         setStatusModalOpen(false);
         setSelectedOrder(null);
         fetchOrders();
+      } else {
+        toast.error(data.message || 'Failed to update status');
       }
-    } catch (e) { console.error(e); }
+    } catch (e) { toast.error('An error occurred. Please try again.'); }
     finally { setSaving(false); }
   };
 
@@ -874,6 +1082,14 @@ export default function Orders() {
 
   /* ─── Table Columns ─── */
   const columns = [
+    {
+      key: 'serial_no', label: '#',
+      render: (_row, index) => (
+        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+          {(currentPage - 1) * itemsPerPage + index + 1}
+        </span>
+      ),
+    },
     { key: 'order_id', label: 'Order ID' },
     { key: 'order_name', label: 'Order Name' },
     { key: 'service_name', label: 'Service' },
@@ -1065,6 +1281,7 @@ export default function Orders() {
           <StaffManagementModal
             order={selectedOrder}
             allStaff={allStaff}
+            staffLoading={staffLoading}
             onClose={() => { setStaffModalOpen(false); setSelectedOrder(null); }}
             onSubmit={handleUpdateStaff}
             isSubmitting={saving}
@@ -1077,6 +1294,8 @@ export default function Orders() {
         {updateOrderModalOpen && selectedOrder && (
           <OrderUpdateModal
             order={selectedOrder}
+            services={allServices}
+            servicesLoading={servicesLoading}
             onClose={() => setUpdateOrderModalOpen(false)}
             onSubmit={handleUpdateOrder}
             isSubmitting={saving}

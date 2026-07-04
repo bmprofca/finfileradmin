@@ -734,6 +734,7 @@ export default function Blogs() {
       const response = await apiCall('/api/admin/blogs/delete', 'DELETE', { blog_id: blogToDelete.blog_id });
       const json = await response.json();
       if (json.success) {
+        toast.success('Blog deleted successfully');
         setIsDeleteModalOpen(false);
         setBlogToDelete(null);
         fetchBlogs({ force: true });
@@ -757,6 +758,7 @@ export default function Blogs() {
       const response = await apiCall(endpoint, method, payload);
       const json = await response.json();
       if (json.success) {
+        toast.success(isEdit ? 'Blog updated successfully' : 'Blog created successfully');
         setIsFormModalOpen(false);
         fetchBlogs({ force: true });
       } else {

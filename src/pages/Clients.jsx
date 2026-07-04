@@ -330,6 +330,7 @@ export default function Clients() {
       const response = await apiCall(`/api/admin/clients/delete/${clientToDelete.username}`, 'DELETE');
       const json = await response.json();
       if (json.success) {
+        toast.success('Client deleted successfully');
         setIsDeleteModalOpen(false);
         setClientToDelete(null);
         fetchClients({ force: true });
@@ -356,6 +357,7 @@ export default function Clients() {
       const json = await response.json();
 
       if (json.success) {
+        toast.success(isEdit ? 'Client updated successfully' : 'Client created successfully');
         setIsFormModalOpen(false);
         fetchClients({ force: true });
       } else {

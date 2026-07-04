@@ -389,6 +389,7 @@ export default function PermissionPackages({ tabs, activeTab, onTabChange }) {
       const json = await res.json();
 
       if (json.success) {
+        toast.success(isEdit ? 'Package updated successfully' : 'Package created successfully');
         setIsFormModalOpen(false);
         fetchPackages();
       } else {
@@ -412,6 +413,7 @@ export default function PermissionPackages({ tabs, activeTab, onTabChange }) {
       );
       const json = await res.json();
       if (json.success) {
+        toast.success('Package deleted successfully');
         setIsDeleteModalOpen(false);
         setDeletingPkg(null);
         fetchPackages();

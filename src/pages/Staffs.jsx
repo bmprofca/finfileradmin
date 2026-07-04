@@ -701,6 +701,7 @@ export default function Staffs() {
       const response = await apiCall(`/api/admin/staff/logout/${staffToLogout.username}`, 'POST');
       const json = await response.json();
       if (json.success) {
+        toast.success('Staff sessions logged out successfully');
         setIsLogoutModalOpen(false);
         setStaffToLogout(null);
       } else {
@@ -726,6 +727,7 @@ export default function Staffs() {
       const json = await response.json();
 
       if (json.success) {
+        toast.success(isEdit ? 'Staff updated successfully' : 'Staff created successfully');
         setIsFormModalOpen(false);
         fetchStaffs();
       } else {

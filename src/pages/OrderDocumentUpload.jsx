@@ -117,10 +117,13 @@ export default function OrderDocumentUpload() {
       const response = await apiCall(`/api/admin/orders/upload-document/${resolvedOrderId}`, 'POST', payload);
       const data = await response.json();
       if (data.success) {
+        toast.success('Documents uploaded successfully');
         navigate('/orders');
+      } else {
+        toast.error(data.message || 'Failed to upload documents');
       }
     } catch (error) {
-      console.error('Failed to upload order documents:', error);
+      toast.error('An error occurred while uploading documents');
     } finally {
       setSubmitting(false);
     }

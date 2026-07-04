@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Briefcase, Plus, FileText, CheckCircle, XCircle,
-  Search, X, Eye, DollarSign, Trash2, Edit
+  Search, X, Eye, DollarSign, Edit
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ManagementHub from '../components/common/ManagementHub';
@@ -66,7 +66,7 @@ const filterSelectStyles = {
 
 // ─── View Service Modal ───────────────────────────────────────────────────────
 
-const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
+const ViewServiceModal = ({ service, onClose, onEdit }) => (
   <Modal
     isOpen={true}
     onClose={onClose}
@@ -75,14 +75,9 @@ const ViewServiceModal = ({ service, onClose, onEdit, onDelete }) => (
     size="2xl"
     contentClassName="p-5 space-y-4"
     footer={
-      <>
-        <button onClick={() => onDelete(service)} className="px-5 py-2.5 rounded-lg border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center gap-2">
-          <Trash2 size={16} /> Delete
-        </button>
-        <button onClick={() => onEdit(service)} className="px-5 py-2.5 rounded-lg bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2">
-          <Edit size={16} /> Edit Service
-        </button>
-      </>
+      <button onClick={() => onEdit(service)} className="px-5 py-2.5 rounded-lg bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex items-center gap-2">
+        <Edit size={16} /> Edit Service
+      </button>
     }
   >
     <div className="flex items-center gap-4 pb-4 border-b dark:border-gray-700">
@@ -217,9 +212,6 @@ export default function Services() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingService, setEditingService] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [serviceToDelete, setServiceToDelete] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -293,39 +285,18 @@ export default function Services() {
   const handleRefresh = () => fetchServices({ silent: true, force: true });
   const handleLimitChange = (limit) => { setItemsPerPage(limit); setCurrentPage(1); };
 
-  const handleDeleteRequest = (service) => {
-    setServiceToDelete(service);
-    setIsDeleteModalOpen(true);
-    setIsViewModalOpen(false);
-  };
-
-  const confirmDelete = async () => {
-    if (!serviceToDelete) return;
-    setIsDeleting(true);
-    try {
-      const response = await apiCall('/api/admin/services/delete', 'POST', { service_id: serviceToDelete.service_id });
-      const json = await response.json();
-      if (json.success) {
-        setIsDeleteModalOpen(false);
-        setServiceToDelete(null);
-        fetchServices({ silent: true, force: true });
-      } else {
-        toast.error(json.message || 'Failed to delete service.');
-      }
-    } catch {
-      toast.error('Error connecting to server.');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
   const handleFormSubmit = async (formData) => {
     setIsSubmitting(true);
     try {
-      const endpoint = editingService ? '/api/admin/services/update' : '/api/admin/services/create';
-      const response = await apiCall(endpoint, 'POST', formData);
+      const isEdit = !!editingService;
+      const endpoint = isEdit
+        ? `/api/admin/services/edit/${editingService.service_id}`
+        : '/api/admin/services/create';
+      const method = isEdit ? 'PUT' : 'POST';
+      const response = await apiCall(endpoint, method, formData);
       const json = await response.json();
       if (json.success) {
+        toast.success(isEdit ? 'Service updated successfully' : 'Service created successfully');
         setIsFormModalOpen(false);
         fetchServices({ silent: true, force: true });
       } else {
@@ -495,7 +466,6 @@ export default function Services() {
               getActions={(row) => [
                 { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
                 { label: 'Edit Service', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
-                { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDeleteRequest(row), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' },
               ]}
               accent="emerald"
             />
@@ -521,35 +491,7 @@ export default function Services() {
             service={selectedService}
             onClose={() => { setIsViewModalOpen(false); setSelectedService(null); }}
             onEdit={handleEdit}
-            onDelete={handleDeleteRequest}
           />
-        )}
-      </AnimatePresence>
-
-      {/* Delete Modal */}
-      <AnimatePresence>
-        {isDeleteModalOpen && serviceToDelete && (
-          <Modal
-            isOpen={true}
-            onClose={() => !isDeleting && setIsDeleteModalOpen(false)}
-            title="Delete Service"
-            icon={Trash2}
-            size="md"
-            closeText="Cancel"
-            footer={
-              <button
-                disabled={isDeleting}
-                onClick={confirmDelete}
-                className="px-5 py-2.5 rounded-lg bg-red-600 dark:bg-red-500 text-white text-sm font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50"
-              >
-                {isDeleting ? 'Deleting...' : 'Yes, Delete Service'}
-              </button>
-            }
-          >
-            <div className="text-gray-600 dark:text-gray-400">
-              Are you sure you want to delete <span className="font-semibold text-gray-800 dark:text-gray-100">{serviceToDelete.name}</span>? This action cannot be undone.
-            </div>
-          </Modal>
         )}
       </AnimatePresence>
 

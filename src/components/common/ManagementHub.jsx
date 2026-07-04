@@ -49,53 +49,52 @@ export default function ManagementHub({
 }) {
   const accentClass = accentStyles[accent] || accentStyles.slate;
 
+  const hasHeader = eyebrow || title || description || summary || actions || onRefresh || (tabs && tabs.length > 0);
+
   return (
     <div className={joinClasses('min-h-screen', className)}>
       <div className={joinClasses('mx-auto', widthClassName)}>
-        {(eyebrow || title || description || summary || actions || onRefresh || (tabs && tabs.length > 0)) && (
+        {hasHeader && (
           <motion.div
-            initial={{ opacity: 0, y: -14 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="mb-4 rounded-sm border border-slate-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 p-2.5 shadow-sm shadow-slate-200/40 dark:shadow-none backdrop-blur md:p-3"
+            transition={{ duration: 0.3 }}
+            className="mb-2"
           >
-            <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-3xl">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
                 {eyebrow && (
                   <div className={joinClasses(
-                    'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em]',
+                    'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] shrink-0',
                     accentClass
                   )}>
                     {eyebrow}
                   </div>
                 )}
-                {title && <h1 className="mt-1 text-lg font-bold flex-wrap whitespace-nowrap text-slate-900 dark:text-gray-100 md:text-xl">{title}</h1>}
-                {description && <p className="mt-0.5 text-xs text-slate-500 dark:text-gray-400">{description}</p>}
+                {title && <h1 className="text-base font-bold text-slate-900 dark:text-gray-100 truncate">{title}</h1>}
+                {description && <p className="hidden lg:block text-xs text-slate-400 dark:text-gray-500 truncate">— {description}</p>}
               </div>
 
               {(summary || actions || onRefresh) && (
-                <div className="flex flex-wrap items-center justify-between w-full gap-1.5">
+                <div className="flex items-center gap-1.5 shrink-0">
                   {summary}
-                  <div className="flex absolute top-[10px] right-[10px] w-full items-center justify-end gap-1.5">
-                    {onRefresh && (
-                      <RefreshButton
-                        type="button"
-                        loading={refreshing}
-                        onClick={onRefresh}
-                        title={refreshTitle || refreshLabel}
-                      >
-                        <span className='hidden md:block'>{refreshLabel}</span>
-                      </RefreshButton>
-                    )}
-                    {actions}
-                  </div>
-
+                  {onRefresh && (
+                    <RefreshButton
+                      type="button"
+                      loading={refreshing}
+                      onClick={onRefresh}
+                      title={refreshTitle || refreshLabel}
+                    >
+                      <span className='hidden md:block'>{refreshLabel}</span>
+                    </RefreshButton>
+                  )}
+                  {actions}
                 </div>
               )}
             </div>
 
             {tabs?.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2">
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = tab.id === activeTab;
@@ -109,7 +108,7 @@ export default function ManagementHub({
                       disabled={disabled}
                       title={tab.title || tab.description || tab.label}
                       className={joinClasses(
-                        'inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold transition-all duration-200',
+                        'inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-all duration-200',
                         isActive
                           ? activeButtonStyles[accent] || activeButtonStyles.slate
                           : disabled
