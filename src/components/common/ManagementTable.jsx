@@ -39,6 +39,7 @@ export default function ManagementTable({
 }) {
   const containerRef = useRef(null);
   const [containerWidth, setContainerWidth] = useState(1024);
+  const [contextMenu, setContextMenu] = useState(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -78,6 +79,14 @@ export default function ManagementTable({
     rose: 'border-rose-100 dark:border-rose-900/50 shadow-rose-100/50 dark:shadow-none',
   };
   const cardClass = cardAccentMap[accent] || cardAccentMap.slate;
+
+  const handleContextMenu = (e, row, index) => {
+    const rowActions = typeof getActions === 'function' ? getActions(row, index) : actions;
+    if (!rowActions || (Array.isArray(rowActions) && !rowActions.length)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ actions: rowActions, x: e.clientX, y: e.clientY, key: `ctx-${resolveRowKey(row, rowKey, index)}` });
+  };
 
   if (!rows.length) {
     return emptyState || null;
@@ -128,6 +137,7 @@ export default function ManagementTable({
                 <tr
                   key={key}
                   onClick={onRowClick ? () => onRowClick(row, index) : undefined}
+                  onContextMenu={(actions || getActions) ? (e) => handleContextMenu(e, row, index) : undefined}
                   className={joinClasses(
                     'align-middle text-left transition-all duration-200',
                     onRowClick && 'cursor-pointer hover:bg-slate-50 dark:hover:bg-gray-700/50',
@@ -174,6 +184,16 @@ export default function ManagementTable({
           </tbody>
         </table>
       </div>
+
+      {contextMenu && (
+        <ActionMenu
+          menuId={contextMenu.key}
+          activeId={contextMenu.key}
+          onToggle={() => setContextMenu(null)}
+          actions={contextMenu.actions}
+          anchorCoords={{ x: contextMenu.x, y: contextMenu.y }}
+        />
+      )}
     </motion.div>
   );
 }

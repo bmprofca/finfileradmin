@@ -19,6 +19,7 @@ import StaffProfile from "./pages/StaffProfile";
 import ClientProfile from "./pages/ClientProfile";
 import MyOrders from "./pages/MyOrders";
 import Orders from "./pages/Orders";
+import OrderProfile from "./pages/OrderProfile";
 import NotFound from "./pages/NotFound";
 import ServerUnreachable from "./pages/ServerUnreachable";
 import Clients from "./pages/Clients";
@@ -74,6 +75,7 @@ function App() {
                     {/* Other Routes */}
                     <Route path="my-orders" element={<RoleRoute allowedRoles={['staff']}><PermissionRoute><MyOrders /></PermissionRoute></RoleRoute>} />
                     <Route path="orders" element={<PermissionRoute modules="order"><Orders /></PermissionRoute>} />
+                    <Route path="orders/:orderId" element={<PermissionRoute modules="order"><OrderProfile /></PermissionRoute>} />
                     <Route path="orders/:orderId/upload-documents" element={<PermissionRoute modules="order"><OrderDocumentUpload /></PermissionRoute>} />
                     <Route path="documents/:orderId" element={<Documents />} />
                     <Route path="services" element={<PermissionRoute modules="service"><Services /></PermissionRoute>} />

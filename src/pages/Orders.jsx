@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
-  Search, X, Briefcase, Hash, User, Users, UserPlus, UserMinus,
-  Eye, Calendar, IndianRupee, FileText, Tag, Edit, RefreshCw,
+  Search, X, Briefcase, User, Users, UserPlus, UserMinus,
+  Eye, FileText, Edit, RefreshCw,
   ChevronLeft, ChevronRight, Upload, Download, Phone
 } from 'lucide-react';
 import ManagementHub from '../components/common/ManagementHub';
@@ -324,128 +324,6 @@ const UserCheck = ({ size, className }) => (
   </svg>
 );
 
-/* ─── Info Item ─── */
-const InfoItem = ({ icon: Icon, label, value }) => (
-  <div className="flex items-start gap-2 rounded-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-3 py-2">
-    <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600">
-      <Icon size={14} className="text-indigo-500 dark:text-indigo-400" />
-    </div>
-    <div className="min-w-0 flex-1">
-      <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 leading-none mb-1">{label}</div>
-      <div className="text-sm font-medium text-gray-800 dark:text-gray-100 leading-snug break-words">{value || 'N/A'}</div>
-    </div>
-  </div>
-);
-
-/* ─── View Order Modal ─── */
-const ViewOrderModal = ({ order, onClose, onManageStaff, onUpdateOrder, onUpdateStatus }) => {
-  const hasAssignedStaff = order.assigned_staff && order.assigned_staff.length > 0;
-
-  return (
-    <Modal
-      isOpen={true}
-      onClose={onClose}
-      title="Order Details"
-      icon={Briefcase}
-      size="2xl"
-      contentClassName="p-5 space-y-4"
-      footer={
-        <>
-          <button
-            onClick={() => onUpdateStatus(order)}
-            className="px-4 py-2.5 rounded-lg border border-emerald-200 dark:border-emerald-900/30 bg-emerald-50 dark:bg-emerald-900/20 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all flex items-center gap-2"
-          >
-            <RefreshCw size={14} /> Status
-          </button>
-          <button
-            onClick={() => onUpdateOrder(order)}
-            className="px-4 py-2.5 rounded-lg border border-indigo-200 dark:border-indigo-900/30 bg-indigo-50 dark:bg-indigo-900/20 text-sm font-semibold text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-all flex items-center gap-2"
-          >
-            <Edit size={14} /> Update
-          </button>
-          <button
-            onClick={() => onManageStaff(order)}
-            className={`px-4 py-2.5 rounded-lg border transition-all flex items-center gap-2 ${hasAssignedStaff
-              ? 'border-blue-200 dark:border-blue-900/30 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40'
-              : 'border-yellow-200 dark:border-yellow-900/30 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/40'
-              }`}
-          >
-            {hasAssignedStaff ? (
-              <>
-                <Users size={14} /> Manage Staff
-              </>
-            ) : (
-              <>
-                <UserPlus size={14} /> Assign Staff
-              </>
-            )}
-          </button>
-        </>
-      }
-    >
-      <div className="flex items-center gap-4 pb-4 border-b dark:border-gray-700">
-        <div className="w-16 h-16 rounded-sm bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-indigo-500/30">
-          <Briefcase size={28} />
-        </div>
-        <div>
-          <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{order.order_name}</h3>
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-0.5">{order.service_name}</p>
-          <div className="mt-2 flex gap-2 items-center">
-            <StatusBadge status={order.status} />
-            <span className="text-xs text-gray-500 dark:text-gray-400 font-mono text-[10px]">ID: {order.order_id}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Info Grid */}
-      <div>
-        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-          <FileText className="text-indigo-500 dark:text-indigo-400" size={15} /> General & Financial Details
-        </h4>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          <InfoItem icon={Hash} label="Order ID" value={order.order_id} />
-          <InfoItem icon={FileText} label="Order Name" value={order.order_name} />
-          <InfoItem icon={Tag} label="Service" value={order.service_name} />
-          <InfoItem icon={User} label="Client" value={order.client_name || order.client_username} />
-          <InfoItem icon={IndianRupee} label="Fees" value={formatCurrency(order.fees)} />
-          <InfoItem icon={IndianRupee} label="Paid" value={formatCurrency(order.total_paid)} />
-          <InfoItem icon={IndianRupee} label="Due" value={<PaymentText order={order} />} />
-          <InfoItem icon={Briefcase} label="Status" value={<StatusBadge status={order.status} />} />
-          <InfoItem icon={Calendar} label="Created" value={new Date(order.create_date).toLocaleString()} />
-        </div>
-      </div>
-
-      {/* Staff Grid */}
-      <div>
-        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-          <Users className="text-indigo-500 dark:text-indigo-400" size={15} /> Assigned Staff
-        </h4>
-        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-sm border border-gray-200 dark:border-gray-700 p-3">
-          {order.assigned_staff && order.assigned_staff.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {order.assigned_staff.map(s => (
-                <span
-                  key={s.username}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white text-indigo-700 border border-gray-200 shadow-sm dark:bg-gray-800 dark:text-indigo-300 dark:border-gray-700"
-                >
-                  <User size={12} className="text-indigo-500" /> {s.name}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <button
-              onClick={() => onManageStaff(order)}
-              className="text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold flex items-center gap-2"
-            >
-              <UserPlus size={16} /> Click to assign staff
-            </button>
-          )}
-        </div>
-      </div>
-    </Modal>
-  );
-};
-
 const OrderUpdateModal = ({ order, services, servicesLoading, onClose, onSubmit, isSubmitting }) => {
   const { discountTypeOptions } = ConstantOptions();
   const [form, setForm] = useState({
@@ -760,7 +638,6 @@ export default function Orders() {
 
   // Modals
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [staffModalOpen, setStaffModalOpen] = useState(false);
   const [updateOrderModalOpen, setUpdateOrderModalOpen] = useState(false);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
@@ -896,16 +773,8 @@ export default function Orders() {
   const handleRefresh = () => { setRefreshing(true); fetchOrders(); };
 
   /* ─── Modal Openers ─── */
-  const openDetailModal = async (order) => {
-    setSelectedOrder(order);
-    setDetailModalOpen(true);
-    const latest = await fetchOrderDetails(order.order_id);
-    if (latest) setSelectedOrder(latest);
-  };
-
   const openStaffModal = async (order) => {
     setSelectedOrder(order);
-    setDetailModalOpen(false);
     setStaffModalOpen(true);
     ensureStaffFetched();
     const latest = await fetchOrderDetails(order.order_id);
@@ -914,7 +783,6 @@ export default function Orders() {
 
   const openUpdateOrderModal = async (order) => {
     setSelectedOrder(order);
-    setDetailModalOpen(false);
     setUpdateOrderModalOpen(true);
     ensureServicesFetched();
     const latest = await fetchOrderDetails(order.order_id);
@@ -923,7 +791,6 @@ export default function Orders() {
 
   const openStatusModal = async (order) => {
     setSelectedOrder(order);
-    setDetailModalOpen(false);
     setStatusModalOpen(true);
     const latest = await fetchOrderDetails(order.order_id);
     if (latest) setSelectedOrder(latest);
@@ -1025,7 +892,7 @@ export default function Orders() {
       {
         label: 'View Details',
         icon: <Eye size={12} />,
-        onClick: () => openDetailModal(order),
+        onClick: () => navigate(`/orders/${order.order_id}`),
         className: 'text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:text-emerald-200 dark:hover:bg-emerald-950/40',
       },
       {
@@ -1076,69 +943,76 @@ export default function Orders() {
   const columns = [
     {
       key: 'serial_no', label: '#',
+      className: 'w-[48px] !max-w-[48px]', headerClassName: 'w-[48px]',
       render: (_row, index) => (
         <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
           {(currentPage - 1) * itemsPerPage + index + 1}
         </span>
       ),
     },
-    { key: 'order_id', label: 'Order ID' },
-    { key: 'order_name', label: 'Order Name' },
-    { key: 'service_name', label: 'Service' },
     {
-      key: 'client', label: 'Client',
-      render: (row) => row.client_name || row.client_username,
+      key: 'status', label: 'Status',
+      className: 'w-[120px] !max-w-[120px]', headerClassName: 'w-[120px]',
+      render: (row) => <StatusBadge status={row.status} />,
     },
     {
       key: 'assigned_staff', label: 'Staff',
+      className: 'w-[90px] !max-w-[90px]', headerClassName: 'w-[90px]',
       render: (row) =>
         row.assigned_staff && row.assigned_staff.length > 0
           ? (
             <button
               onClick={(e) => { e.stopPropagation(); openStaffModal(row); }}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition-colors dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700 dark:hover:bg-indigo-900/50 cursor-pointer"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition-colors dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700 dark:hover:bg-indigo-900/50 cursor-pointer"
             >
-              <Users size={12} /> {row.assigned_staff.length} Assigned
+              <Users size={11} /> {row.assigned_staff.length}
             </button>
           )
           : (
             <button
               onClick={(e) => { e.stopPropagation(); openStaffModal(row); }}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition-colors dark:bg-green-900/30 dark:text-green-300 dark:border-green-700 dark:hover:bg-green-900/50 cursor-pointer"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition-colors dark:bg-green-900/30 dark:text-green-300 dark:border-green-700 dark:hover:bg-green-900/50 cursor-pointer"
             >
-              <UserPlus size={12} /> Unassigned
+              <UserPlus size={11} /> 0
             </button>
           ),
     },
     {
-      key: 'fees', label: 'Fees',
-      render: (row) => <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">{formatCurrency(row.fees)}</span>,
-    },
-    {
-      key: 'payment', label: 'Payment',
-      render: (row) => <PaymentText order={row} />,
-    },
-    {
-      key: 'documents', label: 'Docs',
-      render: (row) => (
-        <button
-          onClick={(e) => { e.stopPropagation(); openDocumentsPage(row); }}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700 dark:hover:bg-blue-900/50"
-        >
-          <FileText size={12} /> {row.documents?.length || 0}
-        </button>
-      ),
-    },
-    {
-      key: 'status', label: 'Status',
-      render: (row) => <StatusBadge status={row.status} />,
-    },
-    {
       key: 'create_date', label: 'Date',
+      className: 'w-[90px] !max-w-[90px]', headerClassName: 'w-[90px]',
       render: (row) => (
         <span className="text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">
           {new Date(row.create_date).toLocaleDateString()}
         </span>
+      ),
+    },
+    { key: 'order_id', label: 'Order ID', className: 'w-[120px] !max-w-[120px]', headerClassName: 'w-[120px]' },
+    { key: 'service_name', label: 'Service', className: 'w-[130px] !max-w-[130px]', headerClassName: 'w-[130px]' },
+    {
+      key: 'client', label: 'Client',
+      className: 'w-[130px] !max-w-[130px]', headerClassName: 'w-[130px]',
+      render: (row) => <span className="truncate">{row.client_name || row.client_username}</span>,
+    },
+    {
+      key: 'fees', label: 'Fees',
+      className: 'w-[90px] !max-w-[90px]', headerClassName: 'w-[90px]',
+      render: (row) => <span className="text-xs font-semibold text-gray-800 dark:text-gray-100">{formatCurrency(row.fees)}</span>,
+    },
+    {
+      key: 'payment', label: 'Payment',
+      className: 'w-[90px] !max-w-[90px]', headerClassName: 'w-[90px]',
+      render: (row) => <PaymentText order={row} />,
+    },
+    {
+      key: 'documents', label: 'Docs',
+      className: 'w-[70px] !max-w-[70px]', headerClassName: 'w-[70px]',
+      render: (row) => (
+        <button
+          onClick={(e) => { e.stopPropagation(); openDocumentsPage(row); }}
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700 dark:hover:bg-blue-900/50"
+        >
+          <FileText size={11} /> {row.documents?.length || 0}
+        </button>
       ),
     },
   ];
@@ -1234,7 +1108,7 @@ export default function Orders() {
                   rowKey="order_id"
                   accent="indigo"
                   getActions={getActions}
-                  onRowClick={(row) => openDetailModal(row)}
+                  onRowClick={(row) => navigate(`/orders/${row.order_id}`)}
                   rowClassName={(row) => getRowHighlightClass(row)}
                 />
               </motion.div>
@@ -1253,19 +1127,6 @@ export default function Orders() {
           )}
         </div>
       </div>
-
-      {/* ── VIEW DETAILS MODAL ── */}
-      <AnimatePresence>
-        {detailModalOpen && selectedOrder && (
-          <ViewOrderModal
-            order={selectedOrder}
-            onClose={() => { setDetailModalOpen(false); setSelectedOrder(null); }}
-            onManageStaff={openStaffModal}
-            onUpdateOrder={openUpdateOrderModal}
-            onUpdateStatus={openStatusModal}
-          />
-        )}
-      </AnimatePresence>
 
       {/* ── STAFF MANAGEMENT MODAL ── */}
       <AnimatePresence>

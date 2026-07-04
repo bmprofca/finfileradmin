@@ -1,57 +1,60 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { FaEllipsisV } from 'react-icons/fa';
 
-/**
- * Standardized Action Menu component — renders via a Portal (fixed positioning).
- * AnimatePresence is intentionally omitted: it injects a ref through the portal
- * boundary which triggers a React "ref is not a prop" warning.
- *
- * @param {Array}    actions  - [{ label, icon, onClick, className, disabled, title }]
- * @param {String}   activeId - Current active menu ID (external control)
- * @param {Function} onToggle - (e, menuId) => void
- * @param {any}      menuId   - Unique id for this menu instance
- * @param {ReactNode}trigger  - Optional custom trigger element
- */
-const ActionMenu = ({ actions = [], activeId, onToggle, menuId, trigger }) => {
+const MENU_WIDTH = 192;
+const EDGE_PADDING = 8;
+
+const ActionMenu = ({ actions = [], activeId, onToggle, menuId, trigger, anchorCoords }) => {
   const [isOpen, setIsOpen] = useState(false);
-  // coords: viewport-relative (for position:fixed)
-  // triggerTop = top of trigger button, triggerBottom = bottom of trigger button
-  const [coords, setCoords] = useState({ triggerTop: 0, triggerBottom: 0, triggerRight: 0 });
+  const [menuPos, setMenuPos] = useState({ top: -9999, left: -9999 });
   const triggerRef = useRef(null);
   const menuRef = useRef(null);
 
   const isMenuOpen = activeId !== undefined ? activeId === menuId : isOpen;
 
-  const captureCoords = useCallback(() => {
-    if (triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      setCoords({
-        triggerTop: rect.top,
-        triggerBottom: rect.bottom,
-        triggerRight: rect.right,
-      });
-    }
-  }, []);
-
   const closeMenu = useCallback(() => {
-    if (onToggle) {
-      onToggle(null, null);
-    } else {
-      setIsOpen(false);
-    }
+    if (onToggle) { onToggle(null, null); } else { setIsOpen(false); }
   }, [onToggle]);
+
+  const calcPosition = useCallback(() => {
+    const measuredH = menuRef.current?.offsetHeight || 200;
+    let anchorTop, anchorBottom, left;
+
+    if (anchorCoords) {
+      anchorTop = anchorCoords.y;
+      anchorBottom = anchorCoords.y;
+      left = anchorCoords.x;
+    } else if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      anchorTop = rect.top;
+      anchorBottom = rect.bottom;
+      left = rect.right - MENU_WIDTH;
+    } else {
+      return;
+    }
+
+    let top = anchorBottom + 4;
+    if (left < EDGE_PADDING) left = EDGE_PADDING;
+    if (left + MENU_WIDTH > window.innerWidth - EDGE_PADDING) left = window.innerWidth - MENU_WIDTH - EDGE_PADDING;
+    if (top + measuredH > window.innerHeight - EDGE_PADDING) top = anchorTop - measuredH - 4;
+    if (top < EDGE_PADDING) top = EDGE_PADDING;
+
+    setMenuPos({ top, left });
+  }, [anchorCoords]);
 
   const toggleMenu = (e) => {
     e.stopPropagation();
-    captureCoords();
-    if (onToggle) {
-      onToggle(e, menuId);
-    } else {
-      setIsOpen((prev) => !prev);
-    }
+    if (onToggle) { onToggle(e, menuId); } else { setIsOpen((prev) => !prev); }
   };
+
+  useLayoutEffect(() => {
+    if (!isMenuOpen) return;
+    calcPosition();
+    const frame = requestAnimationFrame(calcPosition);
+    return () => cancelAnimationFrame(frame);
+  }, [isMenuOpen, calcPosition]);
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -59,56 +62,38 @@ const ActionMenu = ({ actions = [], activeId, onToggle, menuId, trigger }) => {
     const handleClickOutside = (e) => {
       if (
         menuRef.current && !menuRef.current.contains(e.target) &&
-        triggerRef.current && !triggerRef.current.contains(e.target)
-      ) {
-        closeMenu();
-      }
+        (!triggerRef.current || !triggerRef.current.contains(e.target))
+      ) { closeMenu(); }
     };
-
-    const handleScroll = () => captureCoords();
+    const handleScroll = () => {
+      if (anchorCoords) { closeMenu(); return; }
+      calcPosition();
+    };
     const handleEscape = (e) => { if (e.key === 'Escape') closeMenu(); };
 
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleEscape);
     window.addEventListener('scroll', handleScroll, true);
-
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
       window.removeEventListener('scroll', handleScroll, true);
     };
-  }, [isMenuOpen, captureCoords, closeMenu]);
-  // ── Position (all viewport-relative for position:fixed) ──────────────────────
-  const menuWidth = 192;
-  const menuHeight = actions.length * 44 + 16;
+  }, [isMenuOpen, calcPosition, closeMenu, anchorCoords]);
 
-  // Default: open below-right of trigger, aligned to right edge of trigger
-  let top = coords.triggerBottom + 6;
-  let left = coords.triggerRight - menuWidth;
-
-  // Clamp horizontally
-  if (left < 8) left = 8;
-  if (left + menuWidth > window.innerWidth - 8) left = window.innerWidth - menuWidth - 8;
-
-  // Flip above if not enough room below
-  if (top + menuHeight > window.innerHeight - 8) {
-    top = coords.triggerTop - menuHeight - 6;
-  }
-
-  // Only portal-render when open (avoids constant re-animation / freezing)
   const menuPortal = isMenuOpen ? createPortal(
     <motion.div
       ref={menuRef}
       key={`action-menu-${String(menuId ?? 'default')}`}
-      initial={{ opacity: 0, scale: 0.95, y: -6 }}
+      initial={{ opacity: 0, scale: 0.96, y: -4 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.13, ease: 'easeOut' }}
+      transition={{ duration: 0.12, ease: 'easeOut' }}
       style={{
         position: 'fixed',
-        top: `${top}px`,
-        left: `${left}px`,
+        top: `${menuPos.top}px`,
+        left: `${menuPos.left}px`,
         zIndex: 9999,
-        width: `${menuWidth}px`,
+        width: `${MENU_WIDTH}px`,
       }}
       className="overflow-hidden rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-1.5 shadow-xl shadow-slate-200/70 dark:shadow-gray-950/60 backdrop-blur-xl ring-1 ring-slate-900/5 dark:ring-white/10"
     >
@@ -139,6 +124,10 @@ const ActionMenu = ({ actions = [], activeId, onToggle, menuId, trigger }) => {
     document.body
   ) : null;
 
+  if (anchorCoords) {
+    return menuPortal;
+  }
+
   return (
     <div className="relative inline-block text-left">
       <div ref={triggerRef} onClick={toggleMenu} className="cursor-pointer">
@@ -153,7 +142,6 @@ const ActionMenu = ({ actions = [], activeId, onToggle, menuId, trigger }) => {
           </button>
         )}
       </div>
-
       {menuPortal}
     </div>
   );
