@@ -75,7 +75,7 @@ function App() {
                     <Route path="my-orders" element={<RoleRoute allowedRoles={['staff']}><PermissionRoute><MyOrders /></PermissionRoute></RoleRoute>} />
                     <Route path="orders" element={<PermissionRoute modules="order"><Orders /></PermissionRoute>} />
                     <Route path="orders/:orderId/upload-documents" element={<PermissionRoute modules="order"><OrderDocumentUpload /></PermissionRoute>} />
-                    <Route path="documents" element={<Documents />} />
+                    <Route path="documents/:orderId" element={<Documents />} />
                     <Route path="services" element={<PermissionRoute modules="service"><Services /></PermissionRoute>} />
                     <Route path="firms" element={<PermissionRoute modules="firm"><Firms /></PermissionRoute>} />
                     <Route path="payments" element={<PermissionRoute modules="payment"><Payments /></PermissionRoute>} />

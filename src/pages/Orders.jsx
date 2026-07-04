@@ -930,15 +930,7 @@ export default function Orders() {
   };
 
   const openDocumentsPage = (order) => {
-    navigate('/documents', {
-      state: {
-        documents: order.documents || [],
-        title: `Documents - ${order.order_name || order.order_id}`,
-        subtitle: `${order.service_name || 'Order'} · ${order.client_name || order.client_username || ''}`,
-        type: 'order',
-        id: order.order_id,
-      },
-    });
+    navigate(`/documents/${order.order_id}`);
   };
 
   const handleDownloadStatement = async (order) => {

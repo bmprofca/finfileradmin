@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Download, ExternalLink, FileText, Image, FileSpreadsheet, File } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ManagementHub from '../components/common/ManagementHub';
@@ -32,11 +32,7 @@ const getDocumentIcon = (document) => {
 
 export default function Documents() {
   const navigate = useNavigate();
-  const { state } = useLocation();
-  const type = state?.type || '';
-  const id = state?.id || '';
-  const initialTitle = state?.title || 'Documents';
-  const initialSubtitle = state?.subtitle || '';
+  const { orderId } = useParams();
 
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,26 +40,39 @@ export default function Documents() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [totalItems, setTotalItems] = useState(0);
+  const [pageTitle, setPageTitle] = useState('Documents');
+  const [pageSubtitle, setPageSubtitle] = useState('');
 
   const lastFetchRef = useRef(null);
   const activeFetchRef = useRef(null);
+  const detailsFetchedRef = useRef(false);
 
   const handleLimitChange = (limit) => { setItemsPerPage(limit); setCurrentPage(1); };
 
+  useEffect(() => {
+    if (!orderId || detailsFetchedRef.current) return;
+    detailsFetchedRef.current = true;
+    (async () => {
+      try {
+        const res = await apiCall(`/api/admin/orders/details/${orderId}`, 'GET');
+        const data = await res.json();
+        if (data.success) {
+          const o = data.data;
+          setPageTitle(`Documents - ${o.order_name || orderId}`);
+          setPageSubtitle(`${o.service_name || 'Order'} · ${o.client_name || o.client_username || ''}`);
+        }
+      } catch { /* keep defaults */ }
+    })();
+  }, [orderId]);
+
   const fetchDocuments = useCallback(async ({ force = false } = {}) => {
-    if (!type || !id) {
+    if (!orderId) {
       setLoading(false);
       return;
     }
 
     const params = new URLSearchParams();
-    if (type === 'firm') {
-      params.append('firm_id', id);
-    } else if (type === 'order') {
-      params.append('order_id', id);
-    } else {
-      params.append(`${type}_id`, id);
-    }
+    params.append('order_id', orderId);
     params.append('page_no', currentPage);
     params.append('limit', itemsPerPage);
 
@@ -96,7 +105,7 @@ export default function Documents() {
         activeFetchRef.current = null;
       }
     }
-  }, [type, id, currentPage, itemsPerPage]);
+  }, [orderId, currentPage, itemsPerPage]);
 
   useEffect(() => {
     fetchDocuments();
@@ -108,6 +117,15 @@ export default function Documents() {
   };
 
   const columns = [
+    {
+      key: 'serial_no',
+      label: '#',
+      render: (_row, index) => (
+        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+          {(currentPage - 1) * itemsPerPage + index + 1}
+        </span>
+      ),
+    },
     {
       key: 'name',
       label: 'Document',
@@ -125,38 +143,11 @@ export default function Documents() {
       ),
     },
     {
-      key: 'document_id',
-      label: 'Document ID',
-      render: (row) => (
-        <span className="text-sm text-gray-600 dark:text-gray-300">
-          {row.document_id || '-'}
-        </span>
-      ),
-    },
-    {
-      key: 'related_id',
-      label: 'Related ID',
-      render: (row) => (
-        <span className="text-sm text-gray-600 dark:text-gray-300">
-          {row.firm_id || row.order_id || row.id || '-'}
-        </span>
-      ),
-    },
-    {
       key: 'username',
       label: 'Uploaded By',
       render: (row) => (
         <span className="text-sm text-gray-600 dark:text-gray-300">
-          {row.username || '-'}
-        </span>
-      ),
-    },
-    {
-      key: 'file_name',
-      label: 'File Name',
-      render: (row) => (
-        <span className="text-sm text-gray-600 dark:text-gray-300 break-all">
-          {row.file_name || '-'}
+          {row.username || row.create_by || '-'}
         </span>
       ),
     },
@@ -169,47 +160,59 @@ export default function Documents() {
         </span>
       ),
     },
+    {
+      key: 'actions_inline',
+      label: 'Actions',
+      render: (row) => (
+        <div className="flex items-center gap-1">
+          {row.file_url && (
+            <>
+              <button
+                onClick={(e) => { e.stopPropagation(); window.open(row.file_url, '_blank'); }}
+                title="View"
+                className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/30 transition-colors"
+              >
+                <ExternalLink size={16} />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleDownload(row); }}
+                title="Download"
+                className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30 transition-colors"
+              >
+                <Download size={16} />
+              </button>
+            </>
+          )}
+        </div>
+      ),
+    },
   ];
 
-  const getActions = (document) => {
-    const actions = [];
-    if (document.file_url) {
-      actions.push({
-        label: 'View',
-        icon: <ExternalLink size={12} />,
-        onClick: () => window.open(document.file_url, '_blank'),
-        className: 'text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:text-emerald-200 dark:hover:bg-emerald-950/40',
-      });
-      actions.push({
-        label: 'Download',
-        icon: <Download size={12} />,
-        onClick: () => {
-          let downloadUrl = document.file_url;
-          if (downloadUrl && downloadUrl.includes('backblazeb2.com')) {
-            const disposition = `attachment; filename="${document.file_name || 'document'}"`;
-            const separator = downloadUrl.includes('?') ? '&' : '?';
-            downloadUrl = `${downloadUrl}${separator}b2ContentDisposition=${encodeURIComponent(disposition)}`;
-          }
-
-          const a = window.document.createElement('a');
-          a.href = downloadUrl;
-          a.download = document.file_name || 'document';
-          // Using _blank prevents the current page from being replaced if the browser decides to navigate
-          a.target = '_blank';
-          window.document.body.appendChild(a);
-          a.click();
-          window.document.body.removeChild(a);
-        },
-        className: 'text-blue-700 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-300 dark:hover:text-blue-200 dark:hover:bg-blue-950/40',
-      });
+  const handleDownload = async (doc) => {
+    const fileName = doc.file_name || doc.document_name || doc.name || 'document';
+    const toastId = toast.loading('Downloading...');
+    try {
+      const res = await apiCall(`/api/admin/documents/download/${doc.document_id}?source=order`, 'GET');
+      if (!res.ok) throw new Error('Download failed');
+      const blob = await res.blob();
+      const objectUrl = window.URL.createObjectURL(blob);
+      const a = window.document.createElement('a');
+      a.href = objectUrl;
+      a.download = fileName;
+      window.document.body.appendChild(a);
+      a.click();
+      window.document.body.removeChild(a);
+      setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1000);
+      toast.dismiss(toastId);
+    } catch {
+      toast.error('Failed to download file', { id: toastId });
     }
-    return actions;
   };
 
   return (
     <ManagementHub
-      title={initialTitle}
-      description={initialSubtitle}
+      title={pageTitle}
+      description={pageSubtitle}
       accent="emerald"
       onRefresh={handleRefresh}
       refreshing={refreshing}
@@ -238,7 +241,7 @@ export default function Documents() {
               rows={documents}
               rowKey={(row) => row.document_id || row.file_url}
               accent="emerald"
-              getActions={getActions}
+              showActionsColumn={false}
             />
           </div>
         )}

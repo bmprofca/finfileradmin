@@ -52,7 +52,7 @@ export default function ManagementHub({
   const hasHeader = eyebrow || title || description || summary || actions || onRefresh || (tabs && tabs.length > 0);
 
   return (
-    <div className={joinClasses('min-h-screen', className)}>
+    <div className={joinClasses('', className)}>
       <div className={joinClasses('mx-auto', widthClassName)}>
         {hasHeader && (
           <motion.div

@@ -65,7 +65,7 @@ const MainLayout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-950 dark:to-gray-900 transition-colors duration-300">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-950 dark:to-gray-900 transition-colors duration-300 overflow-hidden">
       <Navbar
         toggleSidebar={toggleSidebar}
         isMobile={isMobile}
@@ -73,7 +73,7 @@ const MainLayout = ({ children }) => {
         isDesktopSidebarExpanded={!desktopSidebarCollapsed}
       />
 
-      <div className="flex relative">
+      <div className="flex flex-1 relative overflow-hidden">
         <div ref={sidebarRef} className="z-30">
           <Sidebar
             isMobile={isMobile}
@@ -96,8 +96,7 @@ const MainLayout = ({ children }) => {
           className={`
             flex-1 transition-all duration-300 ease-out
             ${getContentMargin()}
-            min-h-[calc(100vh-64px)]
-            overflow-x-hidden
+            overflow-y-auto overflow-x-hidden
           `}
           style={{
             padding: isMobile ? '0px' : '1rem',
@@ -109,7 +108,7 @@ const MainLayout = ({ children }) => {
             {children || <Outlet />}
           </div>
         </main>
-      </div> 
+      </div>
     </div>
   );
 };
