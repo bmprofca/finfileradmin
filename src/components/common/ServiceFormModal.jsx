@@ -5,6 +5,7 @@ import SelectField from './SelectField';
 import { ConstantOptions } from '../../contexts/ConstantOptionsContext';
 import apiCall, { uploadFile } from '../../utils/apiCall';
 import toast from 'react-hot-toast';
+import calculateServicePricing from '../../utils/servicePricing';
 
 const DEFAULT_FIELDS = {
   mobile: false,
@@ -140,68 +141,39 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
 
   // ── Auto-calculation effect ──────────────────────────────────────────────
   useEffect(() => {
-    const basePrice = Number(formData.base_price) || 0;
-    const taxRate = Number(formData.tax_rate) || 0;
-    const discountPercentage = Number(formData.discount_percentage) || 0;
-    const discountType = formData.discount_type;
-
-    // Tax Value = Base Price × Tax Rate / 100
-    const taxValue = parseFloat((basePrice * taxRate / 100).toFixed(2));
-
-    // Total Fees = Base Price + Tax Value
-    const totalFees = parseFloat((basePrice + taxValue).toFixed(2));
-
-    // Discount Value:
-    //   • percentage → auto-calculated from totalFees × discountPercentage / 100
-    //   • flat       → user enters manually (don't overwrite)
-    //   • not applicable → 0
-    let discountValue;
-    if (discountType === 'percentage') {
-      discountValue = parseFloat((totalFees * discountPercentage / 100).toFixed(2));
-    } else if (discountType === 'flat') {
-      discountValue = Number(formData.discount_value) || 0;
-    } else {
-      discountValue = 0;
-    }
-
-    // Final Fees = Total Fees − Discount Value
-    const fees = parseFloat((totalFees - discountValue).toFixed(2));
+    const pricing = calculateServicePricing({
+      base_price: formData.base_price,
+      tax_rate: formData.tax_rate,
+      discount_type: formData.discount_type,
+      discount_percentage: formData.discount_percentage,
+      discount_value: formData.discount_value,
+    });
 
     setFormData(prev => ({
       ...prev,
-      tax_value: taxValue !== 0 ? taxValue : "",
-      total_fees: totalFees !== 0 ? totalFees : "",
-      // Only overwrite discount_value when it's auto-driven (percentage type)
-      ...(discountType === 'percentage'
-        ? { discount_value: discountValue !== 0 ? discountValue : "" }
+      tax_value: pricing.tax_value !== 0 ? pricing.tax_value : "",
+      total_fees: pricing.total_fees !== 0 ? pricing.total_fees : "",
+      ...(prev.discount_type === 'percentage'
+        ? { discount_value: pricing.discount_value !== 0 ? pricing.discount_value : "" }
         : {}),
-      // Clear discount_value when switching to "not applicable"
-      ...(discountType === 'not applicable'
+      ...(prev.discount_type === 'not applicable'
         ? { discount_value: "" }
         : {}),
-      fees: fees !== 0 ? fees : "",
+      fees: pricing.fees !== 0 ? pricing.fees : "",
     }));
   }, [
     formData.base_price,
     formData.tax_rate,
     formData.discount_type,
     formData.discount_percentage,
-    // Note: formData.discount_value is intentionally NOT a dependency here
-    // to avoid an infinite loop when the user types in the flat discount field.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    formData.discount_value,
   ]);
 
-  // Recalculate Final Fees when user manually changes flat discount_value
   const handleFlatDiscountChange = (e) => {
     const value = e.target.value;
-    const discountValue = value === "" ? 0 : Number(value);
-    const totalFees = Number(formData.total_fees) || 0;
-    const fees = parseFloat((totalFees - discountValue).toFixed(2));
-
     setFormData(prev => ({
       ...prev,
-      discount_value: value === "" ? "" : discountValue,
-      fees: fees !== 0 ? fees : "",
+      discount_value: value === "" ? "" : Number(value),
     }));
   };
 
@@ -434,14 +406,14 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
                 readOnly
                 className={readOnlyCls}
                 placeholder="—"
-                title="Auto-calculated: Base Price × Tax Rate / 100"
+                title="Auto-calculated: (Base Price − Discount) × Tax Rate / 100"
               />
             </div>
 
             {/* Row 2: Total Fees (auto) · Discount Type · Discount % */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 flex items-center gap-1">
-                Total Fees
+                Subtotal (after discount)
                 <span className="text-xs text-gray-400 font-normal">(auto)</span>
               </label>
               <input
@@ -451,7 +423,7 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
                 readOnly
                 className={readOnlyCls}
                 placeholder="—"
-                title="Auto-calculated: Base Price + Tax Value"
+                title="Auto-calculated: Base Price − Discount Value"
               />
             </div>
             <div>
@@ -499,7 +471,7 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
                 placeholder={isFlatDiscount ? "0" : "—"}
                 title={
                   isPercentageDiscount
-                    ? "Auto-calculated: Total Fees × Discount % / 100"
+                    ? "Auto-calculated: Base Price × Discount % / 100"
                     : !isDiscountApplicable
                       ? "Select a discount type to enable"
                       : ""
@@ -518,7 +490,7 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
                 readOnly
                 className={`${readOnlyCls} font-semibold text-gray-700 dark:text-gray-200`}
                 placeholder="—"
-                title="Auto-calculated: Total Fees − Discount Value"
+                title="Auto-calculated: Subtotal + Tax Value"
               />
             </div>
 
@@ -528,9 +500,9 @@ export default function ServiceFormModal({ service, onClose, onSubmit, isSubmitt
           {(Number(formData.base_price) > 0) && (
             <div className="mt-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg text-xs text-emerald-700 dark:text-emerald-300 flex flex-wrap gap-x-4 gap-y-1">
               <span>Base <strong>{formData.base_price}</strong></span>
-              <span>+ Tax <strong>{formData.tax_value || 0}</strong></span>
-              <span>= Total <strong>{formData.total_fees || 0}</strong></span>
               {isDiscountApplicable && <span>− Discount <strong>{formData.discount_value || 0}</strong></span>}
+              <span>= Subtotal <strong>{formData.total_fees || 0}</strong></span>
+              <span>+ Tax <strong>{formData.tax_value || 0}</strong></span>
               <span className="font-bold">= Final <strong>{formData.fees || 0}</strong></span>
             </div>
           )}
