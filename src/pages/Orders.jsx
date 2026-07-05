@@ -143,8 +143,8 @@ const PaymentText = ({ order }) => {
   return (
     <span
       className={`whitespace-nowrap text-xs font-semibold ${isPaid
-          ? "text-emerald-700 dark:text-emerald-300"
-          : "text-amber-700 dark:text-amber-300"
+        ? "text-emerald-700 dark:text-emerald-300"
+        : "text-amber-700 dark:text-amber-300"
         }`}
     >
       {isPaid ? "Paid" : `Due ${formatCurrency(order.due_amount)}`}
@@ -1599,8 +1599,8 @@ export default function Orders() {
                 key={tab.key}
                 onClick={() => switchTab(tab.key)}
                 className={`relative flex items-center gap-1.5 px-3.5 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-200 ${isActive
-                    ? "text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  ? "text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
               >
                 <Icon size={14} className={isActive ? "text-indigo-500 dark:text-indigo-400" : ""} />
@@ -1644,7 +1644,7 @@ export default function Orders() {
                   setSearchTerm(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full pl-9 pr-8 py-2 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-950 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm h-[42px]"
+                className="w-full pl-9 pr-8 py-2 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-sm h-[42px]"
               />
               {searchTerm && (
                 <button

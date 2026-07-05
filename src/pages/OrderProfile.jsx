@@ -1734,7 +1734,7 @@ export default function OrderProfile() {
   return (
     <div>
       {/* ─── Sticky Header + Tabs ─── */}
-      <div className="sticky top-0 z-10 -mt-2 md:-mt-6 bg-gray-50/95 dark:bg-gray-950/95 backdrop-blur-sm">
+      <div className="sticky top-0 z-10 -mt-2 md:-mt-6 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm">
         {/* Header */}
         {order && (
           <div className="px-2 pt-3 pb-2">
@@ -2533,11 +2533,10 @@ export default function OrderProfile() {
               onDragOver={handleUploadDragOver}
               onDragLeave={handleUploadDragLeave}
               onDrop={handleUploadDrop}
-              className={`flex min-h-[150px] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-6 text-center transition-colors ${
-                isDragging
+              className={`flex min-h-[150px] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-6 text-center transition-colors ${isDragging
                   ? "border-indigo-500 bg-indigo-100 dark:border-indigo-500 dark:bg-indigo-900/40"
                   : "border-indigo-200 bg-indigo-50/60 hover:bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/30"
-              } ${isUploadingFiles ? "opacity-50 cursor-not-allowed pointer-events-none" : ""}`}
+                } ${isUploadingFiles ? "opacity-50 cursor-not-allowed pointer-events-none" : ""}`}
             >
               {isUploadingFiles ? (
                 <Loader2

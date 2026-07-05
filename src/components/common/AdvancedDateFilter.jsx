@@ -439,12 +439,12 @@ export default function AdvancedDateFilter({
   return (
     <div className="relative inline-block w-full">
       {/* Trigger */}
-      <div className={shouldShowStepper ? "flex w-full rounded-lg border border-slate-200 dark:border-gray-700 min-w-[200px] items-stretch" : ""}>
+      <div className={shouldShowStepper ? "flex w-full rounded-lg border border-slate-200 dark:border-gray-700 min-w-[200px] items-stretch overflow-hidden" : ""}>
         {shouldShowStepper && (
           <button
             type="button"
             onClick={() => applySingleDate(shiftDate(getStepperDate(), -1))}
-            className="flex w-9 flex-shrink-0 items-center justify-center rounded-l-xl bg-blue-50 text-blue-600 transition hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-800/40"
+            className="flex w-9 flex-shrink-0 items-center justify-center bg-blue-50 text-blue-600 transition hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-800/40"
             title="Previous day"
           >
             <FaChevronLeft size={11} />
@@ -454,7 +454,7 @@ export default function AdvancedDateFilter({
           ref={triggerRef}
           type="button"
           onClick={() => setIsOpen(prev => !prev)}
-          className={`${buttonClassName} flex min-w-[200px] flex-1 items-center justify-center gap-2`.trim()}
+          className={`${buttonClassName} flex min-w-[200px] flex-1 items-center justify-center gap-2 ${shouldShowStepper ? '!border-y-0 !border-x !border-slate-200 dark:!border-gray-700 !rounded-none' : ''}`.trim()}
           aria-haspopup="dialog"
           aria-expanded={isOpen}
         >
@@ -470,9 +470,9 @@ export default function AdvancedDateFilter({
               if (canStepForward) applySingleDate(shiftDate(stepperDate, 1));
             }}
             disabled={!canStepForward}
-            className={`flex w-9 flex-shrink-0 items-center justify-center rounded-r-xl bg-blue-50 text-blue-600 transition hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-800/40 ${canStepForward
-              ? "border-blue-100 bg-blue-50 text-blue-600 dark:border-blue-800/30 dark:bg-blue-900/30 dark:text-blue-400"
-              : "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-600"
+            className={`flex w-9 flex-shrink-0 items-center justify-center transition ${canStepForward
+              ? "bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-800/40"
+              : "cursor-not-allowed bg-slate-50 text-slate-300 dark:bg-gray-800 dark:text-gray-600"
               }`}
             title={canStepForward ? "Next day" : "Future dates are not available"}
           >

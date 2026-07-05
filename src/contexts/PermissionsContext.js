@@ -13,6 +13,12 @@ export const usePermissions = () => {
   return ctx;
 };
 
+// Global cache to survive remounts
+let permissionsCache = {
+  hasFetched: false,
+  data: []
+};
+
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 /**
@@ -33,27 +39,26 @@ export const PermissionsProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);       // true while fetching
   const [authorized, setAuthorized] = useState(true); // false if got 401
 
-  // Tracks the username permissions were last fetched for, so we only refetch
-  // when the logged-in user actually changes (login/logout/switch account),
-  // and avoid duplicate fetches on unrelated rerenders / StrictMode double-invoke.
-  const fetchedForRef = useRef(undefined);
-
   useEffect(() => {
     // Wait until AuthContext has resolved the current session from storage.
     if (authLoading) return;
 
     // No logged-in user (logged out, or session cleared) — reset and stop.
     if (!user) {
-      fetchedForRef.current = undefined;
+      permissionsCache.hasFetched = false;
+      permissionsCache.data = [];
       setPermissions([]);
       setAuthorized(true);
       setLoading(false);
       return;
     }
 
-    // Already fetched permissions for this exact user — skip refetching.
-    if (fetchedForRef.current === user.username) return;
-    fetchedForRef.current = user.username;
+    // Already fetched permissions for this session — skip refetching.
+    if (permissionsCache.hasFetched) {
+      setPermissions(permissionsCache.data);
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
 
@@ -83,6 +88,8 @@ export const PermissionsProvider = ({ children }) => {
 
         const data = await res.json();
         if (data.success) {
+          permissionsCache.hasFetched = true;
+          permissionsCache.data = data.data || [];
           setPermissions(data.data || []);
         }
         // Non-401 errors: still let the app load, just with empty permissions
@@ -97,7 +104,6 @@ export const PermissionsProvider = ({ children }) => {
       // StrictMode cleanup clears the timer before it fires → 0 API calls from
       // the first run. The second invocation's timer fires normally → 1 API call.
       clearTimeout(timer);
-      fetchedForRef.current = undefined;
     };
   }, [user, authLoading, navigate]);
 

@@ -18,6 +18,7 @@ const EMPTY_CONSTANTS = {
 
 let constantsMemoryCache = null;
 let constantsRequest = null;
+let hasFetchedConstantsThisSession = false;
 
 const readCachedConstants = () => {
   if (constantsMemoryCache) return constantsMemoryCache;
@@ -101,6 +102,12 @@ export const ServiceOptionsProvider = ({ children }) => {
     // Don't fetch constants if no user is logged in
     if (!user?.token) {
       setLoadingConstants(false);
+      hasFetchedConstantsThisSession = false;
+      return;
+    }
+
+    if (hasFetchedConstantsThisSession) {
+      setLoadingConstants(false);
       return;
     }
 
@@ -110,6 +117,7 @@ export const ServiceOptionsProvider = ({ children }) => {
       fetchConstantsOnce()
         .then((data) => {
           setConstants(data);
+          hasFetchedConstantsThisSession = true;
         })
         .catch((error) => {
           console.error("Failed to load constants:", error);
