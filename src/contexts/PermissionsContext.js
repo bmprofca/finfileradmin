@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import { GlobalSkeleton } from '../components/SkeletonComponent';
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
@@ -54,13 +55,13 @@ export const PermissionsProvider = ({ children }) => {
     if (fetchedForRef.current === user.username) return;
     fetchedForRef.current = user.username;
 
-    let cancelled = false;
     setLoading(true);
 
-    const loadPermissions = async () => {
+    // Delay the fetch by 500ms so React StrictMode's cleanup can cancel the
+    // first invocation's timer before it fires — ensuring only 1 API call.
+    const timer = setTimeout(async () => {
       try {
         const res = await fetch(
-          // Use the same base as apiCall but call directly to intercept 401 ourselves
           `${process.env.REACT_APP_BASE_API_URL || ''}/api/admin/permissions/user`,
           {
             method: 'GET',
@@ -72,10 +73,7 @@ export const PermissionsProvider = ({ children }) => {
           }
         );
 
-        if (cancelled) return;
-
         // 401 → session is invalid → clear everything and go to login
-        // Block child rendering so no subsequent APIs (constants, etc.) fire
         if (res.status === 401) {
           localStorage.removeItem('user_data');
           setAuthorized(false);
@@ -91,14 +89,15 @@ export const PermissionsProvider = ({ children }) => {
       } catch {
         // Network error: let the app load, ServerUnreachable page will handle it
       } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       }
-    };
-
-    loadPermissions();
+    }, 500);
 
     return () => {
-      cancelled = true;
+      // StrictMode cleanup clears the timer before it fires → 0 API calls from
+      // the first run. The second invocation's timer fires normally → 1 API call.
+      clearTimeout(timer);
+      fetchedForRef.current = undefined;
     };
   }, [user, authLoading, navigate]);
 
@@ -135,8 +134,8 @@ export const PermissionsProvider = ({ children }) => {
   // and firing their own API calls before the redirect completes.
   if (!authorized) return null;
 
-  // ── Show nothing while loading (no flash of unauthorized content) ─────────
-  if (authLoading || loading) return null;
+  // ── Show skeleton while loading (prevents white blank page flash) ──────────
+  if (authLoading || loading) return <GlobalSkeleton />;
 
   return (
     <PermissionsContext.Provider
