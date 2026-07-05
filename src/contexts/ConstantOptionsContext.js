@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import apiCall from "../utils/apiCall";
+import { useAuth } from "./AuthContext";
 
 const ConstantOptionsContext = createContext();
 
@@ -85,6 +86,7 @@ export const ConstantOptions = () => {
 };
 
 export const ServiceOptionsProvider = ({ children }) => {
+  const { user } = useAuth();
   const cachedConstants = readCachedConstants();
 
   const [constants, setConstants] = useState(
@@ -96,17 +98,29 @@ export const ServiceOptionsProvider = ({ children }) => {
   );
 
   useEffect(() => {
-    fetchConstantsOnce()
-      .then((data) => {
-        setConstants(data);
-      })
-      .catch((error) => {
-        console.error("Failed to load constants:", error);
-      })
-      .finally(() => {
-        setLoadingConstants(false);
-      });
-  }, []);
+    // Don't fetch constants if no user is logged in
+    if (!user?.token) {
+      setLoadingConstants(false);
+      return;
+    }
+
+    // Delay 500ms so StrictMode's cleanup clears the first timer before it fires
+    // — ensuring only 1 API call is made.
+    const timer = setTimeout(() => {
+      fetchConstantsOnce()
+        .then((data) => {
+          setConstants(data);
+        })
+        .catch((error) => {
+          console.error("Failed to load constants:", error);
+        })
+        .finally(() => {
+          setLoadingConstants(false);
+        });
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [user?.token]);
 
   const value = useMemo(
     () => ({
