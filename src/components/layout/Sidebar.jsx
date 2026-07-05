@@ -110,8 +110,8 @@ const Sidebar = ({
     {
       icon:ChartBar,
       label:"Reports",
-      path:"/reports",
-      modules:[""]
+      path:"/report",
+      modules:["report"]
     }
     
   ];

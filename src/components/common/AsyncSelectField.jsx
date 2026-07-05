@@ -46,9 +46,14 @@ const AsyncSelectField = ({
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [hasMore, setHasMore] = useState(true);
-  
+
+  // Lazy-load guard: don't fetch until the menu is opened for the first time
+  const hasFetchedRef = useRef(false);
   const searchTimeout = useRef(null);
   const fetchController = useRef(null);
+  // Keeps the last selected full option object so the label always shows correctly
+  // even when the options list is replaced (search, pagination reset, etc.)
+  const lastSelectedRef = useRef(null);
 
   const loadOptions = useCallback(async (pageNum, searchQuery, isNewSearch = false) => {
     if (fetchController.current) {
@@ -60,14 +65,14 @@ const AsyncSelectField = ({
     try {
       const separator = fetchUrl.includes("?") ? "&" : "?";
       const url = `${fetchUrl}${separator}page_no=${pageNum}&limit=20&search=${encodeURIComponent(searchQuery)}`;
-      
+
       const res = await apiCall(url, "GET");
       const data = await res.json();
-      
+
       if (data.success) {
         const rawItems = dataKey ? data.data[dataKey] : data.data;
         const items = Array.isArray(rawItems) ? rawItems : [];
-        
+
         const newOptions = items.map(item => ({
           ...item,
           value: item[valueKey],
@@ -75,12 +80,7 @@ const AsyncSelectField = ({
         }));
 
         setOptions(prev => isNewSearch ? newOptions : [...prev, ...newOptions]);
-        
-        if (items.length < 20) {
-          setHasMore(false);
-        } else {
-          setHasMore(true);
-        }
+        setHasMore(items.length >= 20);
       }
     } catch (error) {
       if (error.name !== "AbortError") {
@@ -91,8 +91,12 @@ const AsyncSelectField = ({
     }
   }, [fetchUrl, dataKey, labelKey, valueKey]);
 
-  useEffect(() => {
-    loadOptions(1, "", true);
+  // Fetch only when the user first opens the dropdown (lazy)
+  const handleMenuOpen = useCallback(() => {
+    if (!hasFetchedRef.current) {
+      hasFetchedRef.current = true;
+      loadOptions(1, "", true);
+    }
   }, [loadOptions]);
 
   const handleMenuScrollToBottom = () => {
@@ -115,8 +119,19 @@ const AsyncSelectField = ({
   };
 
   const selectedOption = useMemo(() => {
-    if (!value) return null;
-    return options.find(opt => opt.value === value) || { value, label: value };
+    if (value === null || value === undefined || value === "") {
+      lastSelectedRef.current = null;
+      return null;
+    }
+    // First try to find in current options list
+    const found = options.find(opt => String(opt.value) === String(value));
+    if (found) return found;
+    // Fall back to the cached last-selected option if it still matches
+    if (lastSelectedRef.current && String(lastSelectedRef.current.value) === String(value)) {
+      return lastSelectedRef.current;
+    }
+    // Last resort: show a placeholder with the raw value (shouldn't normally happen)
+    return { value, label: String(value) };
   }, [value, options]);
 
   return (
@@ -126,9 +141,14 @@ const AsyncSelectField = ({
       styles={mergedStyles}
       options={options}
       value={selectedOption}
-      onChange={(selected) => onChange(selected ? selected.value : null, selected)}
+      onChange={(selected) => {
+        // Cache the full option object so we can always display the label
+        lastSelectedRef.current = selected || null;
+        onChange(selected ? selected.value : null, selected);
+      }}
       onInputChange={handleInputChange}
       onMenuScrollToBottom={handleMenuScrollToBottom}
+      onMenuOpen={handleMenuOpen}
       isLoading={loading}
       placeholder={placeholder}
       isClearable

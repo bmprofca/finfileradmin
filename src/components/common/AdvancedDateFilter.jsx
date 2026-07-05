@@ -383,7 +383,13 @@ export default function AdvancedDateFilter({
   }
 
   function applySingleDate(date) {
-    const selectedDate = startOfDay(date || new Date());
+    if (!date) {
+      // Clear the single date filter without defaulting to today
+      setSelectedSingle(null);
+      onChange?.({ date: "", month: "", year: "", from_date: "", to_date: "" });
+      return;
+    }
+    const selectedDate = startOfDay(date);
     setSelectedSingle(selectedDate);
     setViewDate(selectedDate);
     onChange?.({ date: toIsoDate(selectedDate), month: "", year: "", from_date: "", to_date: "" });
@@ -448,7 +454,7 @@ export default function AdvancedDateFilter({
           ref={triggerRef}
           type="button"
           onClick={() => setIsOpen(prev => !prev)}
-          className={`${buttonClassName} flex min-w-[120px] flex-1 items-center justify-center gap-2`.trim()}
+          className={`${buttonClassName} flex min-w-[200px] flex-1 items-center justify-center gap-2`.trim()}
           aria-haspopup="dialog"
           aria-expanded={isOpen}
         >
