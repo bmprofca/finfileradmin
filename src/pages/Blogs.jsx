@@ -33,7 +33,6 @@ import SelectField from '../components/common/SelectField';
 const statusOptions = [
   { value: "draft", label: "Draft" },
   { value: "published", label: "Published" },
-  { value: "archived", label: "Archived" },
 ];
 const EMPTY_DOC = { type: 'doc', content: [{ type: 'paragraph' }] };
 

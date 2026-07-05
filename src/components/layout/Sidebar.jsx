@@ -10,11 +10,12 @@ import {
   IndianRupee,
   Newspaper,
   ShieldCheck,
-  PackageCheck,
+  ChartBar,
   Settings,
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { usePermissions } from "../../contexts/PermissionsContext";
+import { FaIndianRupeeSign } from "react-icons/fa6";
 
 const Sidebar = ({
   isMobile,
@@ -106,6 +107,13 @@ const Sidebar = ({
       path: "/settings",
       modules: ["setting"],
     },
+    {
+      icon:ChartBar,
+      label:"Reports",
+      path:"/reports",
+      modules:[""]
+    }
+    
   ];
 
   const menuItems = allMenuItems.filter((item) => {

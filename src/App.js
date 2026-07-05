@@ -31,6 +31,8 @@ import Documents from "./pages/Documents";
 import OrderDocumentUpload from "./pages/OrderDocumentUpload";
 import Blogs from "./pages/Blogs";
 import AccessManagement from "./pages/AccessManagement";
+import Report from "./pages/Report";
+import SalesReport from "./pages/SalesReport";
 
 function App() {
   return (
@@ -87,6 +89,8 @@ function App() {
                     <Route path="permissions" element={<PermissionRoute modules={['permissions','permission_package']}><AccessManagement /></PermissionRoute>} />
                     <Route path="permission-packages" element={<PermissionRoute modules={['permission_package','permissions']}><AccessManagement /></PermissionRoute>} />
                     <Route path="settings" element={<PermissionRoute modules={['setting']}><Settings /></PermissionRoute>} />
+                    <Route path="report" element={<PermissionRoute modules={[]}><Report /></PermissionRoute>} />
+                    <Route path="sales-report" element={<PermissionRoute modules={[]}><SalesReport /></PermissionRoute>} />
                   </Route>
                 </Route>
 
