@@ -120,7 +120,7 @@ function KpiCard({ icon, label, value, help, tone = "violet", delay = 0 }) {
 
 function StatTile({ label, value, sub, help }) {
   return (
-    <div className="rounded-lg border border-slate-100 bg-slate-50/60 px-3.5 py-3 dark:border-gray-700 dark:bg-gray-900/30" title={help}>
+    <div className="rounded-lg border border-slate-100 bg-white px-3.5 py-3 dark:border-gray-700 dark:bg-gray-800" title={help}>
       <p className="text-[11px] uppercase tracking-wide text-gray-400 dark:text-gray-500">{label}</p>
       <p className="mt-1 text-base font-semibold text-gray-800 dark:text-gray-100">{value}</p>
       {sub && <p className="text-[11px] text-gray-400 dark:text-gray-500">{sub}</p>}
