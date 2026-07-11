@@ -43,10 +43,6 @@ export const apiCall = async (endpoint, method = 'GET', body = null) => {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  if (username) {
-    headers['username'] = username;
-  }
-
   const options = {
     method,
     headers,
