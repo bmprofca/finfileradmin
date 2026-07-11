@@ -578,6 +578,119 @@ const StaffManagementModal = ({
   );
 };
 
+/* ─── CA Assignment Modal ─── */
+const CaModal = ({
+  order,
+  allCAs,
+  caLoading,
+  onClose,
+  onSubmit,
+  isSubmitting,
+}) => {
+  const [selected, setSelected] = useState(
+    order?.ca?.username ? { value: order.ca.username, label: `${order.ca.name || order.ca.username} · ${order.ca.mobile || ""}` } : null
+  );
+
+  const caOptions = allCAs.map((c) => ({
+    value: c.username,
+    label: `${c.name || c.full_name || c.username} · ${c.mobile || ""}`,
+  }));
+
+  const handleSubmit = () =>
+    onSubmit({ order_id: order.order_id, ca_username: selected?.value || "" });
+
+  return (
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title={`${order?.ca ? "Manage CA" : "Assign CA"} · ${order?.order_name || ""}`}
+      icon={Briefcase}
+      size="md"
+      contentClassName="p-5"
+      closeText="Cancel"
+      footer={
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="px-5 py-2.5 rounded-lg bg-violet-600 dark:bg-violet-500 text-white text-sm font-semibold hover:bg-violet-700 dark:hover:bg-violet-600 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Briefcase size={14} /> {isSubmitting ? "Saving..." : order?.ca ? "Update CA" : "Assign CA"}
+        </button>
+      }
+    >
+      <div className="space-y-4">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Select a CA to assign to this order. Clear the selection to remove the current CA.
+        </p>
+        <SelectField
+          options={caOptions}
+          value={selected}
+          onChange={setSelected}
+          placeholder={caLoading ? "Loading CAs..." : "Select a CA..."}
+          isLoading={caLoading}
+          isClearable
+        />
+      </div>
+    </Modal>
+  );
+};
+
+/* ─── CA Fees Modal ─── */
+const CaFeesModal = ({ order, onClose, onSubmit, isSubmitting }) => {
+  const [fees, setFees] = useState(order?.ca_fees ?? "");
+
+  const inputCls =
+    "w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none";
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit({ order_id: order.order_id, ca_fees: Number(fees) || 0 });
+  };
+
+  return (
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title={`Update CA Fees · ${order?.order_name || ""}`}
+      icon={IndianRupee}
+      size="sm"
+      contentClassName="p-5"
+      closeText="Cancel"
+      footer={
+        <button
+          type="submit"
+          form="ca-fees-form-profile"
+          disabled={isSubmitting}
+          className="px-5 py-2.5 rounded-lg bg-teal-600 dark:bg-teal-500 text-white text-sm font-semibold hover:bg-teal-700 dark:hover:bg-teal-600 transition-all flex items-center gap-2 disabled:opacity-50"
+        >
+          <IndianRupee size={14} /> {isSubmitting ? "Saving..." : "Update Fees"}
+        </button>
+      }
+    >
+      <form id="ca-fees-form-profile" onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
+            CA Fees (₹)
+          </label>
+          <input
+            type="number"
+            min={0}
+            value={fees}
+            onChange={(e) => setFees(e.target.value)}
+            className={inputCls}
+            placeholder="0"
+          />
+        </div>
+        {order?.ca && (
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 text-sm text-violet-700 dark:text-violet-300">
+            <Briefcase size={14} /> CA: <span className="font-semibold">{order.ca.name || order.ca.username}</span>
+          </div>
+        )}
+      </form>
+    </Modal>
+  );
+};
+
 /* ─── Order Update Modal ─── */
 const OrderUpdateModal = ({
   order,
@@ -1103,9 +1216,16 @@ export default function OrderProfile() {
 
   // Modals
   const [staffModalOpen, setStaffModalOpen] = useState(false);
+  const [caModalOpen, setCaModalOpen] = useState(false);
+  const [caFeesModalOpen, setCaFeesModalOpen] = useState(false);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // CAs list
+  const [allCAs, setAllCAs] = useState([]);
+  const [caLoading, setCaLoading] = useState(false);
+  const casFetchedRef = useRef(false);
 
   // Upload documents tab
   const [uploadFiles, setUploadFiles] = useState([]);
@@ -1127,6 +1247,7 @@ export default function OrderProfile() {
           assigned_staff: o.assigned_staff || [],
           payments: o.payments || [],
           documents: o.documents || [],
+          ca_fees: Number(o.ca_fees || 0),
           base_price: Number(o.base_price),
           tax_rate: Number(o.tax_rate),
           tax_value: Number(o.tax_value),
@@ -1279,6 +1400,33 @@ export default function OrderProfile() {
     setStaffModalOpen(true);
   };
 
+  const ensureCasFetched = async () => {
+    if (!casFetchedRef.current) {
+      setCaLoading(true);
+      try {
+        const res = await apiCall("/api/admin/cas/list", "GET");
+        const data = await res.json();
+        if (data.success) {
+          setAllCAs(data.data.cas || data.data.staffs || []);
+          casFetchedRef.current = true;
+        }
+      } catch {
+        /* ignore */
+      } finally {
+        setCaLoading(false);
+      }
+    }
+  };
+
+  const openCaModal = () => {
+    ensureCasFetched();
+    setCaModalOpen(true);
+  };
+
+  const openCaFeesModal = () => {
+    setCaFeesModalOpen(true);
+  };
+
   const openStatusModal = () => {
     setStatusModalOpen(true);
   };
@@ -1344,6 +1492,40 @@ export default function OrderProfile() {
         setStatusModalOpen(false);
         fetchOrder();
       } else toast.error(data.message || "Failed to update status");
+    } catch {
+      toast.error("An error occurred.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleAssignCa = async (payload) => {
+    setSaving(true);
+    try {
+      const res = await apiCall("/api/admin/orders/assign/ca", "PUT", payload);
+      const data = await res.json();
+      if (data.success) {
+        toast.success(payload.ca_username ? "CA assigned successfully" : "CA removed successfully");
+        setCaModalOpen(false);
+        fetchOrder();
+      } else toast.error(data.message || "Failed to assign CA");
+    } catch {
+      toast.error("An error occurred.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleUpdateCaFees = async (payload) => {
+    setSaving(true);
+    try {
+      const res = await apiCall("/api/admin/orders/ca-fees", "PUT", payload);
+      const data = await res.json();
+      if (data.success) {
+        toast.success("CA fees updated successfully");
+        setCaFeesModalOpen(false);
+        fetchOrder();
+      } else toast.error(data.message || "Failed to update CA fees");
     } catch {
       toast.error("An error occurred.");
     } finally {
@@ -1734,7 +1916,7 @@ export default function OrderProfile() {
   return (
     <div>
       {/* ─── Sticky Header + Tabs ─── */}
-      <div className="sticky top-0 z-10 -mt-2 md:-mt-6 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm">
+      <div className="relative top-0 z-10 -mt-2 md:-mt-6 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm">
         {/* Header */}
         {order && (
           <div className="px-2 pt-3 pb-2">
@@ -1891,6 +2073,13 @@ export default function OrderProfile() {
                       label="Total Fees"
                       value={formatCurrency(order.total_fees)}
                     />
+                    {order.ca && order.ca_fees !== undefined && (
+                      <InfoItem
+                        icon={IndianRupee}
+                        label="CA Fees"
+                        value={formatCurrency(order.ca_fees)}
+                      />
+                    )}
                     <InfoItem
                       icon={Tag}
                       label="Discount Type"
@@ -2237,18 +2426,71 @@ export default function OrderProfile() {
                 transition={{ duration: 0.2 }}
                 className="space-y-4"
               >
+                {/* CA Card */}
+                {order.ca && (
+                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 mb-4">
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2 mb-6">
+                      <Briefcase className="text-indigo-500" size={20} /> Assigned CA
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      <div className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+                        {order.ca.image ? (
+                          <img
+                            src={order.ca.image}
+                            alt={order.ca.name || order.ca.username}
+                            className="w-10 h-10 rounded-full object-cover shrink-0"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                            {(order.ca.name || order.ca.username || "?").charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-sm text-gray-800 dark:text-gray-200 truncate">
+                            {order.ca.name || order.ca.username}
+                          </p>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 space-y-1">
+                            {order.ca.mobile && (
+                              <p className="flex items-center gap-1"><Phone size={11} /> {order.ca.mobile}</p>
+                            )}
+                            {order.ca.email && (
+                              <p className="flex items-center gap-1"><Mail size={11} /> {order.ca.email}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-6">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
                       <Users className="text-indigo-500" size={20} /> Assigned
                       Staff ({order.assigned_staff?.length || 0})
                     </h3>
-                    <button
-                      onClick={openStaffModal}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors"
-                    >
-                      <Users size={14} /> Manage Staff
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={openCaModal}
+                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${order.ca ? "bg-violet-600 dark:bg-violet-500 text-white hover:bg-violet-700 dark:hover:bg-violet-600" : "bg-orange-500 dark:bg-orange-500 text-white hover:bg-orange-600 dark:hover:bg-orange-600"}`}
+                      >
+                        <Briefcase size={14} /> {order.ca ? "Manage CA" : "Assign CA"}
+                      </button>
+                      {order.ca && (
+                        <button
+                          onClick={openCaFeesModal}
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-600 dark:bg-teal-500 text-white text-sm font-semibold hover:bg-teal-700 dark:hover:bg-teal-600 transition-colors"
+                        >
+                          <IndianRupee size={14} /> CA Fees
+                        </button>
+                      )}
+                      <button
+                        onClick={openStaffModal}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors"
+                      >
+                        <Users size={14} /> Manage Staff
+                      </button>
+                    </div>
                   </div>
                   {order.assigned_staff && order.assigned_staff.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -2658,6 +2900,32 @@ export default function OrderProfile() {
             order={order}
             onClose={() => setStatusModalOpen(false)}
             onSubmit={handleUpdateStatus}
+            isSubmitting={saving}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── CA ASSIGNMENT MODAL ── */}
+      <AnimatePresence>
+        {caModalOpen && order && (
+          <CaModal
+            order={order}
+            allCAs={allCAs}
+            caLoading={caLoading}
+            onClose={() => setCaModalOpen(false)}
+            onSubmit={handleAssignCa}
+            isSubmitting={saving}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── CA FEES MODAL ── */}
+      <AnimatePresence>
+        {caFeesModalOpen && order && (
+          <CaFeesModal
+            order={order}
+            onClose={() => setCaFeesModalOpen(false)}
+            onSubmit={handleUpdateCaFees}
             isSubmitting={saving}
           />
         )}

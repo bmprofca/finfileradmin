@@ -23,6 +23,8 @@ import OrderProfile from "./pages/OrderProfile";
 import NotFound from "./pages/NotFound";
 import ServerUnreachable from "./pages/ServerUnreachable";
 import Clients from "./pages/Clients";
+import CAs from "./pages/CAs";
+import CADetails from "./pages/CADetails";
 import Firms from "./pages/Firms";
 import Settings from "./pages/Settings";
 import Payments from "./pages/Payments";
@@ -72,6 +74,10 @@ function App() {
                     {/* Staff Routes */}
                     <Route path="staffs" element={<PermissionRoute modules="staff"><Staffs /></PermissionRoute>} />
                     <Route path="staffs/:username" element={<PermissionRoute modules="staff"><StaffProfile /></PermissionRoute>} />
+                    
+                    {/* CA Routes */}
+                    <Route path="cas" element={<PermissionRoute modules="ca"><CAs /></PermissionRoute>} />
+                    <Route path="cas/:username" element={<PermissionRoute modules="ca"><CADetails /></PermissionRoute>} />
                     
                     {/* Other Routes */}
                     <Route path="my-orders" element={<RoleRoute allowedRoles={['staff']}><PermissionRoute><MyOrders /></PermissionRoute></RoleRoute>} />

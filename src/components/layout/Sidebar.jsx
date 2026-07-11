@@ -12,10 +12,10 @@ import {
   ShieldCheck,
   ChartBar,
   Settings,
+  Calculator
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { usePermissions } from "../../contexts/PermissionsContext";
-import { FaIndianRupeeSign } from "react-icons/fa6";
 
 const Sidebar = ({
   isMobile,
@@ -57,6 +57,12 @@ const Sidebar = ({
       label: "Staffs",
       path: "/staffs",
       modules: ["staff"],
+    },
+    {
+      icon: Calculator,
+      label: "CA",
+      path: "/cas",
+      modules: ["ca"],
     },
     {
       icon: ClipboardList,
@@ -108,12 +114,12 @@ const Sidebar = ({
       modules: ["setting"],
     },
     {
-      icon:ChartBar,
-      label:"Reports",
-      path:"/report",
-      modules:["report"]
+      icon: ChartBar,
+      label: "Reports",
+      path: "/report",
+      modules: ["report"]
     }
-    
+
   ];
 
   const menuItems = allMenuItems.filter((item) => {
