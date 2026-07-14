@@ -673,10 +673,14 @@ const CaFeesModal = ({ order, onClose, onSubmit, isSubmitting }) => {
             CA Fees (₹)
           </label>
           <input
-            type="number"
-            min={0}
+            type="text"
+            inputMode="decimal"
+            pattern="^\d*\.?\d*$"
             value={fees}
-            onChange={(e) => setFees(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === '' || /^\d*\.?\d*$/.test(val)) setFees(val);
+            }}
             className={inputCls}
             placeholder="0"
           />

@@ -56,7 +56,7 @@ export default function ManagementHub({
           initial={{ opacity: 0, y: -14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="mb-4 rounded-lg border border-border dark:border-gray-800 bg-white dark:bg-gray-800 text-black dark:text-white p-2.5 shadow-sm shadow-slate-200/40 backdrop-blur md:p-3"
+          className="mb-2 rounded-lg border border-border dark:border-gray-800 bg-white dark:bg-gray-800 text-black dark:text-white p-2.5 shadow-sm shadow-slate-200/40 backdrop-blur md:p-3"
         >
           <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">

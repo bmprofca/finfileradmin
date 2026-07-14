@@ -13,14 +13,16 @@ import {
   Edit,
   CheckCircle,
   XCircle,
-  ShieldAlert
+  ShieldAlert,
+  DollarSign
 } from "lucide-react";
 import toast from "react-hot-toast";
-import ManagementHub from "../components/common/ManagementHub";
 import Button from "../components/common/Button";
+import RefreshButton from "../components/common/RefreshButton";
 import { PageContentSkeleton } from "../components/SkeletonComponent";
 import Modal from "../components/common/Modal";
 import apiCall, { uploadFile } from "../utils/apiCall";
+import CAServiceFees from "./CAServiceFees";
 
 const CAStatusBadge = ({ status }) => {
   const isActive = status === 1 || status === true || status === "Active";
@@ -225,6 +227,7 @@ export default function CADetails() {
   const { username } = useParams();
   const navigate = useNavigate();
   const [ca, setCa] = useState(null);
+  const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -284,125 +287,160 @@ export default function CADetails() {
 
   if (loading) {
     return (
-      <ManagementHub title="CA Profile" description="Loading details..." accent="violet">
-        <PageContentSkeleton rows={4} columns={2} />
-      </ManagementHub>
+      <div className="min-h-screen">
+        <div className="mx-auto max-w-[1600px] p-4">
+          <PageContentSkeleton rows={4} columns={2} />
+        </div>
+      </div>
     );
   }
 
   if (!ca) return null;
 
   return (
-    <ManagementHub
-      title="CA Profile"
-      description={`Viewing details for @${username}`}
-      accent="violet"
-      onRefresh={handleRefresh}
-      refreshing={refreshing}
-      actions={
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => navigate("/cas")}
-            className="flex items-center gap-2 text-sm py-1.5"
-          >
-            <ChevronLeft size={16} /> <span className="hidden sm:inline">Back</span>
-          </Button>
-          <Button
-            onClick={() => setIsEditModalOpen(true)}
-            variant="primary"
-            className="flex items-center gap-2 text-sm py-1.5 bg-violet-600 hover:bg-violet-700"
-          >
-            <Edit size={16} /> <span className="hidden sm:inline">Edit CA</span>
-          </Button>
-        </div>
-      }
-    >
-      <div className="space-y-3 mx-auto mt-4">
-        {/* Profile Header */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-            <div className="relative">
-              {ca.image ? (
-                <img
-                  src={ca.image}
-                  alt={ca.full_name}
-                  className="w-24 h-24 rounded-lg object-cover shadow-md border-4 border-white dark:border-gray-800"
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center shadow-md border-4 border-white dark:border-gray-800 text-white">
-                  <User size={40} />
+    <div className="min-h-screen">
+      <div className="mx-auto max-w-[1600px]">
+        {/* Unified Profile Header */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 md:p-5 shadow-sm border border-gray-100 dark:border-gray-700 mb-2 mt-2">
+          <div className="flex flex-col lg:flex-row items-start justify-between gap-4">
+            {/* Avatar & Details */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="relative shrink-0">
+                {ca.image ? (
+                  <img
+                    src={ca.image}
+                    alt={ca.full_name}
+                    className="w-20 h-20 rounded-lg object-cover shadow-sm border-4 border-white dark:border-gray-800"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center shadow-sm border-4 border-white dark:border-gray-800 text-white">
+                    <User size={32} />
+                  </div>
+                )}
+                <div className="absolute -bottom-2 -right-2">
+                  <CAStatusBadge status={ca.status} />
                 </div>
-              )}
-              <div className="absolute -bottom-2 -right-2">
-                <CAStatusBadge status={ca.status} />
+              </div>
+              <div className="flex-1">
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-0.5">
+                  {ca.full_name}
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400 font-mono text-xs mb-2">
+                  @{ca.username}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold">
+                    <Briefcase size={12} /> {ca.profession || "Chartered Accountant"}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-semibold">
+                    Orders: {ca.pending_orders || 0} Pending / {ca.completed_orders || 0} Completed
+                  </span>
+                </div>
               </div>
             </div>
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                {ca.full_name}
-              </h1>
-              <p className="text-gray-500 dark:text-gray-400 font-mono text-sm mb-3">
-                @{ca.username}
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium">
-                  <Briefcase size={14} /> {ca.profession || "Chartered Accountant"}
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-sm font-medium">
-                  Orders: {ca.pending_orders || 0} Pending / {ca.completed_orders || 0} Completed
-                </span>
-              </div>
-            </div>
-            
-            <div className="flex flex-col gap-2 w-full sm:w-auto">
-              <button
+
+            {/* Actions */}
+            <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+              <RefreshButton
+                onClick={handleRefresh}
+                loading={refreshing}
+                title="Refresh CA details"
+                className="h-9 text-xs"
+              >
+                <span className="hidden sm:inline">Refresh</span>
+              </RefreshButton>
+              <Button
+                variant="outline"
+                onClick={() => navigate("/cas")}
+                className="flex items-center gap-1.5 text-xs py-1.5 px-3 h-9"
+              >
+                <ChevronLeft size={14} /> <span className="hidden sm:inline">Back</span>
+              </Button>
+              <Button
+                onClick={() => setIsEditModalOpen(true)}
+                variant="primary"
+                className="flex items-center gap-1.5 text-xs py-1.5 px-3 h-9 bg-violet-600 hover:bg-violet-700"
+              >
+                <Edit size={14} /> <span className="hidden sm:inline">Edit CA</span>
+              </Button>
+              <Button
                 onClick={handleLogoutSessions}
                 disabled={isLoggingOut}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors text-sm font-medium border border-amber-200 dark:border-amber-800/50"
+                variant="outline"
+                className="flex items-center justify-center gap-1.5 px-3 py-1.5 h-9 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 text-xs font-semibold border-red-200 dark:border-red-800/50"
               >
-                <LogOut size={16} />
-                {isLoggingOut ? "Logging out..." : "Logout All Sessions"}
-              </button>
+                <LogOut size={14} />
+                <span className="hidden sm:inline">{isLoggingOut ? "Logging out..." : "Logout Sessions"}</span>
+              </Button>
             </div>
           </div>
         </div>
 
-        {/* Info Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <InfoItem icon={Mail} label="Email Address" value={ca.email} />
-          <InfoItem icon={Phone} label="Mobile Number" value={ca.mobile} />
-          <InfoItem icon={Calendar} label="Date of Birth" value={ca.date_of_birth} />
-          
-          <div className="lg:col-span-3">
-            <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-              <div className="flex items-center gap-2 mb-4">
-                <MapPin size={18} className="text-violet-600 dark:text-violet-400" />
-                <h3 className="font-semibold text-gray-900 dark:text-white">Address Information</h3>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
-                <div>
-                  <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Address Line 1</div>
-                  <div className="text-sm text-gray-900 dark:text-gray-100">{ca.address_line_1 || "—"}</div>
+        <div className="space-y-3 mx-auto">
+
+        {/* Tabs */}
+        <div className="flex border-b border-gray-200 dark:border-gray-700 mt-6 mb-4">
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === "overview"
+                ? "border-violet-600 text-violet-600 dark:border-violet-400 dark:text-violet-400"
+                : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+            }`}
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => setActiveTab("service_fees")}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === "service_fees"
+                ? "border-violet-600 text-violet-600 dark:border-violet-400 dark:text-violet-400"
+                : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+            }`}
+          >
+            Service Fees
+          </button>
+        </div>
+
+        {activeTab === "overview" ? (
+          /* Info Grid */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <InfoItem icon={Mail} label="Email Address" value={ca.email} />
+            <InfoItem icon={Phone} label="Mobile Number" value={ca.mobile} />
+            <InfoItem icon={Calendar} label="Date of Birth" value={ca.date_of_birth} />
+
+            <div className="lg:col-span-3">
+              <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                <div className="flex items-center gap-2 mb-4">
+                  <MapPin size={18} className="text-violet-600 dark:text-violet-400" />
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Address Information</h3>
                 </div>
-                <div>
-                  <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Address Line 2</div>
-                  <div className="text-sm text-gray-900 dark:text-gray-100">{ca.address_line_2 || "—"}</div>
-                </div>
-                <div>
-                  <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">District</div>
-                  <div className="text-sm text-gray-900 dark:text-gray-100">{ca.district || "—"}</div>
-                </div>
-                <div>
-                  <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">State & Pincode</div>
-                  <div className="text-sm text-gray-900 dark:text-gray-100">
-                    {ca.state || "—"} {ca.pincode ? `- ${ca.pincode}` : ""}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Address Line 1</div>
+                    <div className="text-sm text-gray-900 dark:text-gray-100">{ca.address_line_1 || "—"}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Address Line 2</div>
+                    <div className="text-sm text-gray-900 dark:text-gray-100">{ca.address_line_2 || "—"}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">District</div>
+                    <div className="text-sm text-gray-900 dark:text-gray-100">{ca.district || "—"}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">State & Pincode</div>
+                    <div className="text-sm text-gray-900 dark:text-gray-100">
+                      {ca.state || "—"} {ca.pincode ? `- ${ca.pincode}` : ""}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <CAServiceFees />
+        )}
       </div>
 
       <AnimatePresence>
@@ -443,6 +481,7 @@ export default function CADetails() {
           </Modal>
         )}
       </AnimatePresence>
-    </ManagementHub>
+      </div>
+    </div>
   );
 }

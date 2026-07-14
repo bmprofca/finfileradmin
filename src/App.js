@@ -34,6 +34,7 @@ import OrderDocumentUpload from "./pages/OrderDocumentUpload";
 import Blogs from "./pages/Blogs";
 import AccessManagement from "./pages/AccessManagement";
 import ReportsHub from "./pages/ReportsHub";
+import CAServiceFees from "./pages/CAServiceFees";
 
 function App() {
   return (
@@ -78,6 +79,7 @@ function App() {
                     {/* CA Routes */}
                     <Route path="cas" element={<PermissionRoute modules="ca"><CAs /></PermissionRoute>} />
                     <Route path="cas/:username" element={<PermissionRoute modules="ca"><CADetails /></PermissionRoute>} />
+                    <Route path="cas/:username/service-fees" element={<PermissionRoute modules="ca"><CAServiceFees /></PermissionRoute>} />
                     
                     {/* Other Routes */}
                     <Route path="my-orders" element={<RoleRoute allowedRoles={['staff']}><PermissionRoute><MyOrders /></PermissionRoute></RoleRoute>} />

@@ -22,7 +22,7 @@ import {
   CalendarDays,
   AlertCircle,
   CheckCircle,
-  Calculator,
+  Activity,
 } from "lucide-react";
 import ManagementHub from "../components/common/ManagementHub";
 import ManagementTable from "../components/common/ManagementTable";
@@ -35,6 +35,13 @@ import { PageContentSkeleton } from "../components/SkeletonComponent";
 import { ConstantOptions } from "../contexts/ConstantOptionsContext";
 import apiCall from "../utils/apiCall";
 import toast from "react-hot-toast";
+
+import CAManagementModal from "../components/orders/CAManagementModal";
+import StaffManagementModal from "../components/orders/StaffManagementModal";
+import OrderUpdateModal from "../components/orders/OrderUpdateModal";
+import OrderStatusModal from "../components/orders/OrderStatusModal";
+import CaStatusModal from "../components/orders/CaStatusModal";
+
 
 /* ─── Tab Configuration ─── */
 const getTodayISO = () => new Date().toISOString().split("T")[0];
@@ -75,6 +82,13 @@ const TAB_CONFIG = [
     getParams: () => ({ payment_overdue: true }),
     emptyLabel: "No payment overdue orders",
   },
+];
+
+/* ─── CA Status Options (for bulk update) ─── */
+const CA_STATUS_OPTIONS = [
+  { value: "pending", label: "Pending" },
+  { value: "approved", label: "Approved" },
+  { value: "rejected", label: "Rejected" },
 ];
 
 /* ─── Status Badge ─── */
@@ -118,6 +132,30 @@ const StatusBadge = ({ status }) => {
   );
 };
 
+/* ─── CA Status Badge (compact, used inside the CA table cell) ─── */
+const CA_STATUS_COLORS = {
+  pending: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800",
+  in_progress: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800",
+  completed: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800",
+  rejected: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-300 dark:border-red-800",
+};
+
+const CaStatusBadge = ({ status }) => {
+  if (!status) return null;
+  const key = status.toString().toLowerCase();
+  const cls =
+    CA_STATUS_COLORS[key] ||
+    "bg-slate-100 text-slate-600 border-slate-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700";
+  const display = key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+  return (
+    <span
+      className={`inline-block px-1.5 py-[1px] rounded-full text-[10px] font-semibold border ${cls}`}
+    >
+      {display}
+    </span>
+  );
+};
+
 const formatCurrency = (value) => `₹${Number(value || 0).toLocaleString()}`;
 
 const getPaymentState = (order) => {
@@ -154,1083 +192,6 @@ const PaymentText = ({ order }) => {
   );
 };
 
-/* ─── Staff Skeleton ─── */
-const StaffCardSkeleton = () => (
-  <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 animate-pulse">
-    <div className="flex items-center gap-3">
-      <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700" />
-      <div>
-        <div className="h-3.5 w-24 bg-gray-200 dark:bg-gray-700 rounded mb-1.5" />
-        <div className="h-3 w-20 bg-gray-100 dark:bg-gray-700/50 rounded" />
-      </div>
-    </div>
-    <div className="w-7 h-7 bg-gray-100 dark:bg-gray-700 rounded-lg" />
-  </div>
-);
-
-/* ─── CA Management Modal ─── */
-const CAManagementModal = ({
-  order,
-  onClose,
-  onSubmit,
-  isSubmitting,
-}) => {
-  const [cas, setCas] = useState([]);
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  
-  // order.ca might be an object or a string or null/undefined
-  const initialCa = order?.ca ? (typeof order.ca === 'object' ? order.ca.username : order.ca) : null;
-  const [selectedCa, setSelectedCa] = useState(initialCa || "");
-
-  const fetchCas = async (pageNum, searchQuery, append = false) => {
-    setLoading(true);
-    try {
-      const response = await apiCall(`/api/admin/cas/list?page_no=${pageNum}&limit=20&search=${searchQuery}`, "GET");
-      const data = await response.json();
-      if (data.success) {
-        const fetchedCas = data.data.cas || [];
-        setCas(prev => append ? [...prev, ...fetchedCas] : fetchedCas);
-        setHasMore(data.pagination?.total_pages > pageNum);
-      }
-    } catch (e) {
-      toast.error("Failed to fetch CAs");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCas(1, search, false);
-  }, [search]);
-
-  const handleScroll = (e) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.target;
-    if (scrollHeight - scrollTop <= clientHeight + 50 && hasMore && !loading) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      fetchCas(nextPage, search, true);
-    }
-  };
-
-  const handleSubmit = () => {
-    onSubmit({
-      order_id: order.order_id,
-      ca: selectedCa === "" ? null : selectedCa
-    });
-  };
-
-  const handleToggle = (username) => {
-    if (selectedCa === username) {
-      setSelectedCa("");
-    } else {
-      setSelectedCa(username);
-    }
-  };
-
-  const hasChanges = (selectedCa || "") !== (initialCa || "");
-
-  const SearchInput = ({ value, onChange, placeholder }) => (
-    <div className="relative mb-3">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => { onChange(e.target.value); setPage(1); }}
-        placeholder={placeholder}
-        className="w-full pl-10 pr-9 py-2.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 dark:text-gray-100 transition-all"
-      />
-      {value && (
-        <button onClick={() => { onChange(""); setPage(1); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1">
-          <X size={14} />
-        </button>
-      )}
-    </div>
-  );
-
-  return (
-    <Modal
-      isOpen={true}
-      onClose={onClose}
-      title={`Assign CA · ${order?.order_name || ""}`}
-      icon={Briefcase}
-      size="2xl"
-      contentClassName="p-5"
-      closeText="Cancel"
-      footer={
-        <div className="flex items-center justify-between w-full">
-          <button
-            onClick={() => setSelectedCa("")}
-            className="text-sm text-red-500 hover:text-red-600 font-medium px-2 py-1"
-          >
-            Clear Selection
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={isSubmitting || !hasChanges}
-            className="px-5 py-2.5 rounded-lg bg-violet-600 dark:bg-violet-500 text-white text-sm font-semibold hover:bg-violet-700 dark:hover:bg-violet-600 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Briefcase size={14} />
-            {isSubmitting ? "Assigning..." : "Assign CA"}
-          </button>
-        </div>
-      }
-    >
-      <div className="space-y-4">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Search and select a Chartered Accountant to assign to this order.
-        </p>
-
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder="Search CAs by name, username, mobile..."
-        />
-
-        <div className="border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900/30 overflow-hidden">
-          <div 
-            className="max-h-96 overflow-y-auto p-3 space-y-2 custom-scrollbar"
-            onScroll={handleScroll}
-          >
-            {cas.length > 0 ? (
-              cas.map((ca) => {
-                const isSelected = selectedCa === ca.username;
-                return (
-                  <div
-                    key={ca.username}
-                    onClick={() => handleToggle(ca.username)}
-                    className={`flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer ${
-                      isSelected 
-                        ? 'bg-violet-50 border-violet-300 dark:bg-violet-900/30 dark:border-violet-600 shadow-sm' 
-                        : 'bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700 hover:border-violet-200 dark:hover:border-violet-800 hover:shadow-sm'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      {ca.image ? (
-                        <img
-                          src={ca.image}
-                          alt={ca.full_name}
-                          className="w-10 h-10 rounded-full object-cover shrink-0 border border-gray-100 dark:border-gray-700"
-                        />
-                      ) : (
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${isSelected ? 'bg-violet-500 text-white' : 'bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 text-gray-600 dark:text-gray-300'}`}>
-                          {ca.full_name?.charAt(0)?.toUpperCase()}
-                        </div>
-                      )}
-                      <div className="min-w-0">
-                        <p className={`font-medium text-sm truncate ${isSelected ? 'text-violet-900 dark:text-violet-100' : 'text-gray-800 dark:text-gray-200'}`}>
-                          {ca.full_name}
-                        </p>
-                        <p className={`text-xs truncate flex items-center gap-1 mt-0.5 ${isSelected ? 'text-violet-600 dark:text-violet-300' : 'text-gray-500 dark:text-gray-400'}`}>
-                          <Phone size={10} /> {ca.mobile || "—"} <span className="mx-1 opacity-50">•</span> @{ca.username}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="shrink-0 flex items-center">
-                      <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${isSelected ? 'border-violet-500 bg-violet-500 text-white' : 'border-gray-300 dark:border-gray-600'}`}>
-                        {isSelected && <CheckCircle size={12} strokeWidth={3} />}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            ) : !loading && (
-              <div className="text-center py-12 text-sm text-gray-500 dark:text-gray-400">
-                <User className="mx-auto mb-3 text-gray-300 dark:text-gray-600" size={40} />
-                {search ? "No CAs matched your search" : "No CAs available"}
-              </div>
-            )}
-            
-            {loading && (
-              <div className="space-y-2">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <StaffCardSkeleton key={i} />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </Modal>
-  );
-};
-
-/* ─── Staff Management Modal ─── */
-const StaffManagementModal = ({
-  order,
-  allStaff,
-  staffLoading,
-  onClose,
-  onSubmit,
-  isSubmitting,
-}) => {
-  const [leftStaff, setLeftStaff] = useState([]);
-  const [rightStaff, setRightStaff] = useState([]);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [initialRightStaff, setInitialRightStaff] = useState([]);
-  const [leftSearch, setLeftSearch] = useState("");
-  const [rightSearch, setRightSearch] = useState("");
-
-  useEffect(() => {
-    if (order && allStaff.length > 0) {
-      const assignedUsernames =
-        order.assigned_staff?.map((s) => s.username) || [];
-      const left = allStaff.filter(
-        (s) => !assignedUsernames.includes(s.username),
-      );
-      const right = allStaff.filter((s) =>
-        assignedUsernames.includes(s.username),
-      );
-      setLeftStaff(left);
-      setRightStaff(right);
-      setInitialRightStaff(right.map((s) => s.username));
-      setHasChanges(false);
-    }
-  }, [order, allStaff]);
-
-  const filterStaff = (list, search) => {
-    if (!search.trim()) return list;
-    const q = search.toLowerCase();
-    return list.filter(
-      (s) =>
-        (s.full_name || s.name || "").toLowerCase().includes(q) ||
-        (s.mobile || "").includes(q) ||
-        (s.username || "").toLowerCase().includes(q),
-    );
-  };
-
-  const moveToRight = (staff) => {
-    setLeftStaff((prev) => prev.filter((s) => s.username !== staff.username));
-    setRightStaff((prev) => [...prev, staff]);
-    setHasChanges(true);
-  };
-
-  const moveToLeft = (staff) => {
-    setRightStaff((prev) => prev.filter((s) => s.username !== staff.username));
-    setLeftStaff((prev) => [...prev, staff]);
-    setHasChanges(true);
-  };
-
-  const moveAllToRight = () => {
-    setRightStaff((prev) => [...prev, ...leftStaff]);
-    setLeftStaff([]);
-    setHasChanges(true);
-  };
-
-  const moveAllToLeft = () => {
-    setLeftStaff((prev) => [...prev, ...rightStaff]);
-    setRightStaff([]);
-    setHasChanges(true);
-  };
-
-  const handleSubmit = () => {
-    onSubmit({
-      order_id: order.order_id,
-      staff_usernames: rightStaff.map((s) => s.username),
-    });
-  };
-
-  const isInitial = () => {
-    const currentRight = [...rightStaff.map((s) => s.username)].sort();
-    const initialRight = [...initialRightStaff].sort();
-    return JSON.stringify(currentRight) === JSON.stringify(initialRight);
-  };
-
-  const filteredLeft = filterStaff(leftStaff, leftSearch);
-  const filteredRight = filterStaff(rightStaff, rightSearch);
-
-  const StaffCard = ({
-    staff,
-    onAction,
-    actionIcon: ActionIcon,
-    actionLabel,
-  }) => (
-    <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all group">
-      <div className="flex items-center gap-3 min-w-0">
-        {staff.image ? (
-          <img
-            src={staff.image}
-            alt={staff.full_name || staff.name}
-            className="w-8 h-8 rounded-full object-cover shrink-0"
-          />
-        ) : (
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-            {(staff.full_name || staff.name || "?").charAt(0)}
-          </div>
-        )}
-        <div className="min-w-0">
-          <p className="font-medium text-sm text-gray-800 dark:text-gray-200">
-            {staff.full_name || staff.name}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 truncate flex items-center gap-1">
-            <Phone size={10} /> {staff.mobile || "—"}
-          </p>
-        </div>
-      </div>
-      <button
-        onClick={() => onAction(staff)}
-        className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100"
-        title={actionLabel}
-      >
-        <ActionIcon size={16} className="text-gray-500 dark:text-gray-400" />
-      </button>
-    </div>
-  );
-
-  const SearchInput = ({ value, onChange, placeholder }) => (
-    <div className="relative mb-2">
-      <Search
-        className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400"
-        size={13}
-      />
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full pl-8 pr-7 py-1.5 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:text-gray-100"
-      />
-      {value && (
-        <button
-          onClick={() => onChange("")}
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-        >
-          <X size={11} />
-        </button>
-      )}
-    </div>
-  );
-
-  return (
-    <Modal
-      isOpen={true}
-      onClose={onClose}
-      title={`Manage Staff · ${order?.order_name || ""}`}
-      icon={Users}
-      size="3xl"
-      contentClassName="p-5"
-      closeText="Cancel"
-      footer={
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            {rightStaff.length} staff assigned
-          </span>
-          <button
-            onClick={handleSubmit}
-            disabled={isSubmitting || !hasChanges || isInitial()}
-            className="px-5 py-2.5 rounded-lg bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Users size={14} />
-            {isSubmitting ? "Updating..." : "Update Staff"}
-          </button>
-        </div>
-      }
-    >
-      <div className="space-y-4">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Use the arrow buttons to move staff between available and assigned
-          lists.
-        </p>
-
-        <div className="flex flex-col gap-4 lg:flex-row md:flex-row items-stretch">
-          {/* Left Column - Available Staff */}
-          <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-900/30">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                <UserPlus size={14} className="text-indigo-500" />
-                Available ({leftStaff.length})
-              </h4>
-              {leftStaff.length > 0 && (
-                <button
-                  onClick={moveAllToRight}
-                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 font-semibold flex items-center gap-1"
-                >
-                  <ChevronRight size={14} /> All
-                </button>
-              )}
-            </div>
-            <SearchInput
-              value={leftSearch}
-              onChange={setLeftSearch}
-              placeholder="Search available..."
-            />
-            <div className="max-h-80 overflow-y-auto space-y-2 pr-1">
-              {staffLoading ? (
-                Array.from({ length: 3 }).map((_, i) => (
-                  <StaffCardSkeleton key={i} />
-                ))
-              ) : filteredLeft.length > 0 ? (
-                filteredLeft.map((staff) => (
-                  <StaffCard
-                    key={staff.username}
-                    staff={staff}
-                    onAction={moveToRight}
-                    actionIcon={ChevronRight}
-                    actionLabel="Assign"
-                  />
-                ))
-              ) : (
-                <div className="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
-                  <UserPlus
-                    className="mx-auto mb-2 text-gray-300 dark:text-gray-600"
-                    size={32}
-                  />
-                  {leftSearch ? "No matching staff" : "No available staff"}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Center Column */}
-          <div className="w-16 mx-auto flex flex-col items-center justify-center gap-4 py-4 flex-shrink-0">
-            <button
-              onClick={moveAllToRight}
-              disabled={leftStaff.length === 0}
-              className="p-2 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-all disabled:opacity-30 disabled:cursor-not-allowed border border-indigo-200 dark:border-indigo-700"
-            >
-              <ChevronRight size={20} />
-            </button>
-            <button
-              onClick={moveAllToLeft}
-              disabled={rightStaff.length === 0}
-              className="p-2 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-all disabled:opacity-30 disabled:cursor-not-allowed border border-indigo-200 dark:border-indigo-700"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <div className="text-xs text-gray-400 font-medium text-center">
-              {rightStaff.length} / {allStaff.length}
-            </div>
-          </div>
-
-          {/* Right Column - Assigned Staff */}
-          <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-900/30">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                <UserCheck size={14} className="text-green-500" />
-                Assigned ({rightStaff.length})
-              </h4>
-              {rightStaff.length > 0 && (
-                <button
-                  onClick={moveAllToLeft}
-                  className="text-xs text-red-600 dark:text-red-400 hover:text-red-700 font-semibold flex items-center gap-1"
-                >
-                  <ChevronLeft size={14} /> All
-                </button>
-              )}
-            </div>
-            <SearchInput
-              value={rightSearch}
-              onChange={setRightSearch}
-              placeholder="Search assigned..."
-            />
-            <div className="max-h-80 overflow-y-auto space-y-2 pr-1">
-              {staffLoading ? (
-                Array.from({ length: 2 }).map((_, i) => (
-                  <StaffCardSkeleton key={i} />
-                ))
-              ) : filteredRight.length > 0 ? (
-                filteredRight.map((staff) => (
-                  <StaffCard
-                    key={staff.username}
-                    staff={staff}
-                    onAction={moveToLeft}
-                    actionIcon={ChevronLeft}
-                    actionLabel="Unassign"
-                  />
-                ))
-              ) : (
-                <div className="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
-                  <UserMinus
-                    className="mx-auto mb-2 text-gray-300 dark:text-gray-600"
-                    size={32}
-                  />
-                  {rightSearch ? "No matching staff" : "No staff assigned"}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {hasChanges && !isInitial() && (
-          <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
-            <RefreshCw
-              size={14}
-              className="text-amber-600 dark:text-amber-400 animate-spin-slow"
-            />
-            <p className="text-sm text-amber-700 dark:text-amber-300">
-              You have unsaved changes. Click "Update Staff" to save.
-            </p>
-          </div>
-        )}
-      </div>
-    </Modal>
-  );
-};
-
-const UserCheck = ({ size, className }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-    <circle cx="8.5" cy="7" r="4" />
-    <polyline points="17 11 19 13 23 9" />
-  </svg>
-);
-
-const OrderUpdateModal = ({
-  order,
-  services,
-  servicesLoading,
-  onClose,
-  onSubmit,
-  isSubmitting,
-}) => {
-  const { discountTypeOptions } = ConstantOptions();
-  const [form, setForm] = useState({
-    order_name: order?.order_name || order?.name || "",
-    service_id: order?.service_id || "",
-    base_price: order?.base_price ?? "",
-    tax_rate: order?.tax_rate ?? "",
-    tax_value: order?.tax_value ?? "",
-    total_fees: order?.total_fees ?? "",
-    discount_type: order?.discount_type || "not applicable",
-    discount_percentage: order?.discount_percentage ?? "",
-    discount_value: order?.discount_value ?? "",
-    fees: order?.fees ?? "",
-    partial_payment_allowed: order?.partial_payment_allowed ?? true,
-  });
-
-  const inputCls =
-    "w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none";
-  const readOnlyCls =
-    "w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-100 dark:bg-gray-600/50 text-gray-500 dark:text-gray-400 cursor-not-allowed outline-none";
-
-  const handleNumberKeyPress = (e) => {
-    if (!/[0-9.]/.test(e.key)) e.preventDefault();
-  };
-  const handleNumberChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value === "" ? "" : Number(value) }));
-  };
-
-  // Auto-calculation (same logic as ServiceFormModal)
-  useEffect(() => {
-    const basePrice = Number(form.base_price) || 0;
-    const taxRate = Number(form.tax_rate) || 0;
-    const discountPercentage = Number(form.discount_percentage) || 0;
-    const discountType = form.discount_type;
-
-    const taxValue = parseFloat(((basePrice * taxRate) / 100).toFixed(2));
-    const totalFees = parseFloat((basePrice + taxValue).toFixed(2));
-
-    let discountValue;
-    if (discountType === "percentage") {
-      discountValue = parseFloat(
-        ((totalFees * discountPercentage) / 100).toFixed(2),
-      );
-    } else if (discountType === "flat") {
-      discountValue = Number(form.discount_value) || 0;
-    } else {
-      discountValue = 0;
-    }
-
-    const fees = parseFloat((totalFees - discountValue).toFixed(2));
-
-    setForm((prev) => ({
-      ...prev,
-      tax_value: taxValue !== 0 ? taxValue : "",
-      total_fees: totalFees !== 0 ? totalFees : "",
-      ...(discountType === "percentage"
-        ? { discount_value: discountValue !== 0 ? discountValue : "" }
-        : {}),
-      ...(discountType === "not applicable" ? { discount_value: "" } : {}),
-      fees: fees !== 0 ? fees : "",
-    }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    form.base_price,
-    form.tax_rate,
-    form.discount_type,
-    form.discount_percentage,
-  ]);
-
-  const handleFlatDiscountChange = (e) => {
-    const value = e.target.value;
-    const discountValue = value === "" ? 0 : Number(value);
-    const totalFees = Number(form.total_fees) || 0;
-    const fees = parseFloat((totalFees - discountValue).toFixed(2));
-    setForm((prev) => ({
-      ...prev,
-      discount_value: value === "" ? "" : discountValue,
-      fees: fees !== 0 ? fees : "",
-    }));
-  };
-
-  const handleServiceSelect = (selected) => {
-    if (!selected) {
-      setForm((prev) => ({ ...prev, service_id: "" }));
-      return;
-    }
-    const svc = services.find((s) => s.service_id === selected.value);
-    if (svc) {
-      setForm((prev) => ({
-        ...prev,
-        service_id: svc.service_id,
-        base_price: svc.base_price ?? "",
-        tax_rate: svc.tax_rate ?? "",
-        discount_type: svc.discount_type || "not applicable",
-        discount_percentage: svc.discount_percentage ?? "",
-        discount_value:
-          svc.discount_type === "flat"
-            ? (svc.discount_value ?? "")
-            : prev.discount_value,
-      }));
-    } else {
-      setForm((prev) => ({ ...prev, service_id: selected.value }));
-    }
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const payload = { ...form };
-    [
-      "base_price",
-      "tax_rate",
-      "tax_value",
-      "total_fees",
-      "discount_percentage",
-      "discount_value",
-      "fees",
-    ].forEach((k) => {
-      payload[k] = Number(payload[k]);
-    });
-    payload.partial_payment_allowed = Boolean(payload.partial_payment_allowed);
-    onSubmit(payload);
-  };
-
-  const isPercentageDiscount = form.discount_type === "percentage";
-  const isFlatDiscount = form.discount_type === "flat";
-  const isDiscountApplicable = form.discount_type !== "not applicable";
-
-  const serviceOptions = services.map((s) => ({
-    value: s.service_id,
-    label: s.name,
-  }));
-
-  return (
-    <Modal
-      isOpen={true}
-      onClose={onClose}
-      title={`Update Order · ${order?.order_name || order?.name || ""}`}
-      icon={Edit}
-      size="3xl"
-      contentClassName="p-0"
-      closeText="Cancel"
-      footer={
-        <button
-          type="submit"
-          form="order-update-form"
-          disabled={isSubmitting}
-          className="px-5 py-2.5 rounded-lg bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-50"
-        >
-          <Edit size={14} />
-          {isSubmitting ? "Updating..." : "Update Order"}
-        </button>
-      }
-    >
-      <form
-        id="order-update-form"
-        onSubmit={handleSubmit}
-        className="p-6 space-y-8"
-      >
-        {/* Basic Info */}
-        <section>
-          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 border-b pb-2 dark:border-gray-700">
-            Order Information
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                Order Name *
-              </label>
-              <input
-                required
-                type="text"
-                value={form.order_name}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, order_name: e.target.value }))
-                }
-                className={inputCls}
-                placeholder="Order name"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                Service *
-              </label>
-              <SelectField
-                options={serviceOptions}
-                value={
-                  serviceOptions.find((o) => o.value === form.service_id) ||
-                  null
-                }
-                onChange={handleServiceSelect}
-                placeholder={
-                  servicesLoading ? "Loading services..." : "Select service..."
-                }
-                isLoading={servicesLoading}
-              />
-            </div>
-          </div>
-        </section>
-
-        <hr className="border-gray-200 dark:border-gray-700" />
-
-        {/* Pricing */}
-        <section>
-          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-1 border-b pb-2 dark:border-gray-700">
-            Pricing &amp; Fees
-          </h3>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
-            Tax Value, Total Fees, and Final Fees are calculated automatically.
-            Fields with (auto) are read-only.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Row 1 */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                Base Price
-              </label>
-              <input
-                type="text"
-                name="base_price"
-                value={form.base_price}
-                onKeyPress={handleNumberKeyPress}
-                onChange={handleNumberChange}
-                className={inputCls}
-                placeholder="0"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                Tax Rate (%)
-              </label>
-              <input
-                type="text"
-                name="tax_rate"
-                value={form.tax_rate}
-                onKeyPress={handleNumberKeyPress}
-                onChange={handleNumberChange}
-                className={inputCls}
-                placeholder="0"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 flex items-center gap-1">
-                Tax Value{" "}
-                <span className="text-xs text-gray-400 font-normal">
-                  (auto)
-                </span>
-              </label>
-              <input
-                type="text"
-                value={form.tax_value}
-                readOnly
-                className={readOnlyCls}
-                placeholder="—"
-              />
-            </div>
-
-            {/* Row 2 */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 flex items-center gap-1">
-                Total Fees{" "}
-                <span className="text-xs text-gray-400 font-normal">
-                  (auto)
-                </span>
-              </label>
-              <input
-                type="text"
-                value={form.total_fees}
-                readOnly
-                className={readOnlyCls}
-                placeholder="—"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                Discount Type
-              </label>
-              <SelectField
-                options={discountTypeOptions}
-                value={
-                  discountTypeOptions.find(
-                    (o) => o.value === form.discount_type,
-                  ) || discountTypeOptions[0]
-                }
-                onChange={(selected) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    discount_type: selected?.value || "not applicable",
-                  }))
-                }
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                Discount %
-                {!isPercentageDiscount && (
-                  <span className="text-xs text-gray-400 font-normal ml-1">
-                    (n/a)
-                  </span>
-                )}
-              </label>
-              <input
-                type="text"
-                name="discount_percentage"
-                value={form.discount_percentage}
-                onKeyPress={handleNumberKeyPress}
-                onChange={handleNumberChange}
-                disabled={!isPercentageDiscount}
-                className={isPercentageDiscount ? inputCls : readOnlyCls}
-                placeholder={isPercentageDiscount ? "0" : "—"}
-              />
-            </div>
-
-            {/* Row 3 */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 flex items-center gap-1">
-                Discount Value
-                {isPercentageDiscount && (
-                  <span className="text-xs text-gray-400 font-normal">
-                    (auto)
-                  </span>
-                )}
-                {!isDiscountApplicable && (
-                  <span className="text-xs text-gray-400 font-normal">
-                    (n/a)
-                  </span>
-                )}
-              </label>
-              <input
-                type="text"
-                name="discount_value"
-                value={form.discount_value}
-                readOnly={!isFlatDiscount}
-                onKeyPress={isFlatDiscount ? handleNumberKeyPress : undefined}
-                onChange={isFlatDiscount ? handleFlatDiscountChange : undefined}
-                className={isFlatDiscount ? inputCls : readOnlyCls}
-                placeholder={isFlatDiscount ? "0" : "—"}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 flex items-center gap-1">
-                Final Fees{" "}
-                <span className="text-xs text-gray-400 font-normal">
-                  (auto)
-                </span>
-              </label>
-              <input
-                type="text"
-                value={form.fees}
-                readOnly
-                className={`${readOnlyCls} font-semibold text-gray-700 dark:text-gray-200`}
-                placeholder="—"
-              />
-            </div>
-          </div>
-
-          {Number(form.base_price) > 0 && (
-            <div className="mt-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg text-xs text-indigo-700 dark:text-indigo-300 flex flex-wrap gap-x-4 gap-y-1">
-              <span>
-                Base <strong>{form.base_price}</strong>
-              </span>
-              <span>
-                + Tax <strong>{form.tax_value || 0}</strong>
-              </span>
-              <span>
-                = Total <strong>{form.total_fees || 0}</strong>
-              </span>
-              {isDiscountApplicable && (
-                <span>
-                  − Discount <strong>{form.discount_value || 0}</strong>
-                </span>
-              )}
-              <span className="font-bold">
-                = Final <strong>{form.fees || 0}</strong>
-              </span>
-            </div>
-          )}
-        </section>
-
-        <hr className="border-gray-200 dark:border-gray-700" />
-
-        {/* Options */}
-        <section>
-          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 border-b pb-2 dark:border-gray-700">
-            Options
-          </h3>
-          <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200">
-            <input
-              type="checkbox"
-              checked={form.partial_payment_allowed}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  partial_payment_allowed: e.target.checked,
-                }))
-              }
-              className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
-            />
-            Partial payment allowed
-          </label>
-        </section>
-      </form>
-    </Modal>
-  );
-};
-
-const OrderStatusModal = ({ order, onClose, onSubmit, isSubmitting }) => {
-  const { orderStatusOptions } = ConstantOptions();
-  const [form, setForm] = useState({
-    status: (order?.status || "created").toString().toLowerCase(),
-    remark: order?.remark || "",
-  });
-
-  const inputCls =
-    "w-full px-3 py-2.5 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-sm";
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(form);
-  };
-
-  return (
-    <Modal
-      isOpen={true}
-      onClose={onClose}
-      title={`Update Status · ${order?.order_name || ""}`}
-      icon={RefreshCw}
-      size="md"
-      contentClassName="p-5"
-      closeText="Cancel"
-      footer={
-        <button
-          type="submit"
-          form="order-status-form"
-          disabled={isSubmitting}
-          className="px-5 py-2.5 rounded-lg bg-emerald-600 dark:bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-all flex items-center gap-2 disabled:opacity-50"
-        >
-          <RefreshCw size={14} />
-          {isSubmitting ? "Updating..." : "Update Status"}
-        </button>
-      }
-    >
-      <form
-        id="order-status-form"
-        onSubmit={handleSubmit}
-        className="space-y-4"
-      >
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
-            Status
-          </label>
-          <SelectField
-            options={orderStatusOptions}
-            value={
-              orderStatusOptions.find(
-                (option) => option.value === form.status,
-              ) || orderStatusOptions[0]
-            }
-            onChange={(selected) =>
-              setForm((prev) => ({
-                ...prev,
-                status: selected?.value || "created",
-              }))
-            }
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
-            Remark
-          </label>
-          <textarea
-            value={form.remark}
-            onChange={(e) =>
-              setForm((prev) => ({ ...prev, remark: e.target.value }))
-            }
-            rows={4}
-            placeholder="Add a status note..."
-            className={inputCls}
-          />
-        </div>
-      </form>
-    </Modal>
-  );
-};
-
-const CAFeesModal = ({ order, onClose, onSubmit, isSubmitting }) => {
-  const [fees, setFees] = useState(order?.ca_fees || 0);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit({
-      order_id: order.order_id,
-      ca_fees: Number(fees),
-    });
-  };
-
-  return (
-    <Modal
-      isOpen={true}
-      onClose={onClose}
-      title={`Update CA Fees · ${order?.order_name || ""}`}
-      icon={Calculator}
-      size="md"
-      contentClassName="p-5"
-      closeText="Cancel"
-      footer={
-        <button
-          type="submit"
-          form="ca-fees-form"
-          disabled={isSubmitting}
-          className="px-5 py-2.5 rounded-lg bg-teal-600 dark:bg-teal-500 text-white text-sm font-semibold hover:bg-teal-700 dark:hover:bg-teal-600 transition-all flex items-center gap-2 disabled:opacity-50"
-        >
-          <Calculator size={14} />
-          {isSubmitting ? "Updating..." : "Update Fees"}
-        </button>
-      }
-    >
-      <form id="ca-fees-form" onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-            CA Fees (₹)
-          </label>
-          <input
-            type="number"
-            value={fees}
-            onChange={(e) => setFees(e.target.value)}
-            className="w-full px-3 py-2.5 bg-gray-50 text-gray-900 placeholder:text-gray-400 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all text-sm"
-            placeholder="Enter CA fees"
-            min="0"
-            required
-          />
-        </div>
-      </form>
-    </Modal>
-  );
-};
 
 /* ═══════════════════════════════════════════════
    MAIN COMPONENT
@@ -1270,9 +231,13 @@ export default function Orders() {
   const [caModalOpen, setCaModalOpen] = useState(false);
   const [updateOrderModalOpen, setUpdateOrderModalOpen] = useState(false);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
-  const [caFeesModalOpen, setCaFeesModalOpen] = useState(false);
+  const [caStatusModalOpen, setCaStatusModalOpen] = useState(false);
   const [staffLoading, setStaffLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Bulk CA status selection
+  const [selectedOrderIds, setSelectedOrderIds] = useState([]);
+  const [bulkUpdating, setBulkUpdating] = useState(false);
 
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const handleLimitChange = (limit) => {
@@ -1465,6 +430,11 @@ export default function Orders() {
     activeTab,
   ]);
 
+  // Clear bulk selection whenever the visible order set changes
+  useEffect(() => {
+    setSelectedOrderIds([]);
+  }, [currentPage, activeTab, itemsPerPage]);
+
   const handleRefresh = () => {
     setRefreshing(true);
     fetchOrders();
@@ -1482,8 +452,6 @@ export default function Orders() {
   const openCaModal = async (order) => {
     setSelectedOrder(order);
     setCaModalOpen(true);
-    const latest = await fetchOrderDetails(order.order_id);
-    if (latest) setSelectedOrder(latest);
   };
 
   const openUpdateOrderModal = async (order) => {
@@ -1501,11 +469,9 @@ export default function Orders() {
     if (latest) setSelectedOrder(latest);
   };
 
-  const openCaFeesModal = async (order) => {
+  const openCaStatusModal = (order) => {
     setSelectedOrder(order);
-    setCaFeesModalOpen(true);
-    const latest = await fetchOrderDetails(order.order_id);
-    if (latest) setSelectedOrder(latest);
+    setCaStatusModalOpen(true);
   };
 
   const openDocumentsPage = (order) => {
@@ -1572,6 +538,7 @@ export default function Orders() {
     }
   };
 
+  // Assign CA + CA fees in a single call
   const handleUpdateCa = async (payload) => {
     if (!selectedOrder) return;
     setSaving(true);
@@ -1647,29 +614,76 @@ export default function Orders() {
     }
   };
 
-  const handleUpdateCaFees = async (payload) => {
-    if (!selectedOrder) return;
-    setSaving(true);
-    try {
-      const res = await apiCall(
-        "/api/admin/orders/ca-fees",
-        "PUT",
-        payload,
+  /* ─── Bulk CA Status Update ─── */
+  const toggleOrderSelection = (orderId) => {
+    setSelectedOrderIds((prev) =>
+      prev.includes(orderId)
+        ? prev.filter((id) => id !== orderId)
+        : [...prev, orderId],
+    );
+  };
+
+  const toggleSelectAllOnPage = () => {
+    const pageOrderIds = orders.map((o) => o.order_id);
+    const allSelected = pageOrderIds.every((id) =>
+      selectedOrderIds.includes(id),
+    );
+    if (allSelected) {
+      setSelectedOrderIds((prev) =>
+        prev.filter((id) => !pageOrderIds.includes(id)),
       );
+    } else {
+      setSelectedOrderIds((prev) =>
+        Array.from(new Set([...prev, ...pageOrderIds])),
+      );
+    }
+  };
+
+  const clearSelection = () => setSelectedOrderIds([]);
+
+  // Shared caller for PUT /api/admin/orders/ca-status, used by both the
+  // bulk selection bar and the single-order "Update CA Status" action.
+  const performCaStatusUpdate = async (orderIds, caStatus) => {
+    try {
+      const res = await apiCall("/api/admin/orders/ca-status", "PUT", {
+        ca_status: caStatus,
+        order_ids: orderIds,
+      });
       const data = await res.json();
       if (data.success) {
-        toast.success("CA fees updated successfully");
-        setCaFeesModalOpen(false);
-        setSelectedOrder(null);
+        toast.success(
+          orderIds.length > 1
+            ? `CA status updated for ${orderIds.length} order(s)`
+            : "CA status updated successfully",
+        );
         fetchOrders();
-      } else {
-        toast.error(data.message || "Failed to update CA fees");
+        return true;
       }
+      toast.error(data.message || "Failed to update CA status");
+      return false;
     } catch (e) {
       toast.error("An error occurred. Please try again.");
-    } finally {
-      setSaving(false);
+      return false;
     }
+  };
+
+  const handleBulkCaStatusUpdate = async (caStatus) => {
+    if (selectedOrderIds.length === 0 || !caStatus) return;
+    setBulkUpdating(true);
+    const ok = await performCaStatusUpdate(selectedOrderIds, caStatus);
+    if (ok) setSelectedOrderIds([]);
+    setBulkUpdating(false);
+  };
+
+  const handleUpdateSingleCaStatus = async (caStatus) => {
+    if (!selectedOrder) return;
+    setSaving(true);
+    const ok = await performCaStatusUpdate([selectedOrder.order_id], caStatus);
+    if (ok) {
+      setCaStatusModalOpen(false);
+      setSelectedOrder(null);
+    }
+    setSaving(false);
   };
 
   /* ─── Action Menu ─── */
@@ -1711,11 +725,11 @@ export default function Orders() {
       ...(order.ca
         ? [
             {
-              label: "Update CA Fees",
-              icon: <Calculator size={12} />,
-              onClick: () => openCaFeesModal(order),
+              label: "Update CA Status",
+              icon: <Activity size={12} />,
+              onClick: () => openCaStatusModal(order),
               className:
-                "text-teal-700 hover:text-teal-800 hover:bg-teal-50 dark:text-teal-300 dark:hover:text-teal-200 dark:hover:bg-teal-950/40",
+                "text-fuchsia-700 hover:text-fuchsia-800 hover:bg-fuchsia-50 dark:text-fuchsia-300 dark:hover:text-fuchsia-200 dark:hover:bg-fuchsia-950/40",
             },
           ]
         : []),
@@ -1758,6 +772,31 @@ export default function Orders() {
   /* ─── Table Columns ─── */
   const columns = [
     {
+      key: "select",
+      label: (
+        <input
+          type="checkbox"
+          checked={
+            orders.length > 0 &&
+            orders.every((o) => selectedOrderIds.includes(o.order_id))
+          }
+          onChange={toggleSelectAllOnPage}
+          className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+        />
+      ),
+      className: "w-[36px] !max-w-[36px]",
+      headerClassName: "w-[36px]",
+      render: (row) => (
+        <input
+          type="checkbox"
+          checked={selectedOrderIds.includes(row.order_id)}
+          onClick={(e) => e.stopPropagation()}
+          onChange={() => toggleOrderSelection(row.order_id)}
+          className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+        />
+      ),
+    },
+    {
       key: "serial_no",
       label: "#",
       className: "w-[40px] !max-w-[40px]",
@@ -1787,8 +826,8 @@ export default function Orders() {
     {
       key: "service_name",
       label: "Service",
-      className: "min-w-[120px]",
-      headerClassName: "min-w-[120px]",
+      className: "w-[20%] min-w-[160px]",
+      headerClassName: "w-[20%] min-w-[160px]",
       render: (row) => (
         <div className="leading-snug">
           <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
@@ -1803,8 +842,8 @@ export default function Orders() {
     {
       key: "firm",
       label: "Firm",
-      className: "min-w-[110px]",
-      headerClassName: "min-w-[110px]",
+      className: "w-[15%] min-w-[140px]",
+      headerClassName: "w-[15%] min-w-[140px]",
       render: (row) =>
         row.firm_name ? (
           <div className="leading-snug">
@@ -1824,8 +863,8 @@ export default function Orders() {
     {
       key: "client",
       label: "Client",
-      className: "min-w-[120px]",
-      headerClassName: "min-w-[120px]",
+      className: "w-[15%] min-w-[140px]",
+      headerClassName: "w-[15%] min-w-[140px]",
       render: (row) => (
         <div className="leading-snug">
           <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
@@ -1870,21 +909,38 @@ export default function Orders() {
     {
       key: "ca",
       label: "CA",
-      className: "w-[80px] !max-w-[80px]",
-      headerClassName: "w-[80px]",
+      className: "w-[15%] min-w-[150px]",
+      headerClassName: "w-[15%] min-w-[150px]",
       render: (row) =>
         row.ca ? (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              openCaModal(row);
-            }}
-            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100 transition-colors dark:bg-violet-900/30 dark:text-violet-300 dark:border-violet-700 dark:hover:bg-violet-900/50 cursor-pointer max-w-[120px]"
-            title={typeof row.ca === 'object' ? row.ca.name || row.ca.full_name || row.ca.username : row.ca}
-          >
-            <Briefcase size={11} className="shrink-0" />
-            <span className="truncate">{typeof row.ca === 'object' ? ((row.ca.name || row.ca.full_name)?.split(' ')[0] || row.ca.username) : row.ca}</span>
-          </button>
+          <div className="leading-snug">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                openCaModal(row);
+              }}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100 transition-colors dark:bg-violet-900/30 dark:text-violet-300 dark:border-violet-700 dark:hover:bg-violet-900/50 cursor-pointer max-w-[130px]"
+              title={row.ca.name || row.ca.username}
+            >
+              <Briefcase size={11} className="shrink-0" />
+              <span className="truncate">{row.ca.name || row.ca.username}</span>
+            </button>
+            <div className="flex items-center gap-1.5 mt-1">
+              <span className="text-[10px] text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                {formatCurrency(row.ca_fees)}
+              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openCaStatusModal(row);
+                }}
+                title="Update CA status"
+                className="cursor-pointer"
+              >
+                <CaStatusBadge status={row.ca_status} />
+              </button>
+            </div>
+          </div>
         ) : (
           <button
             onClick={(e) => {
@@ -1913,6 +969,7 @@ export default function Orders() {
     setStaffFilter("");
     setPartialPaymentFilter("");
     setPaymentStatusFilter("");
+    setSelectedOrderIds([]);
   };
 
   const clearAllFilters = () => {
@@ -1981,6 +1038,40 @@ export default function Orders() {
             );
           })}
         </motion.div>
+
+        {/* ── Bulk CA Status Action Bar ── */}
+        <AnimatePresence>
+          {selectedOrderIds.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -8, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: "auto" }}
+              exit={{ opacity: 0, y: -8, height: 0 }}
+              className="flex flex-wrap items-center gap-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg px-4 py-3"
+            >
+              <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300 whitespace-nowrap">
+                {selectedOrderIds.length} order{selectedOrderIds.length > 1 ? "s" : ""} selected
+              </span>
+              <div className="flex-1 min-w-[180px] max-w-xs">
+                <SelectField
+                  options={CA_STATUS_OPTIONS}
+                  value={null}
+                  onChange={(selected) =>
+                    selected && handleBulkCaStatusUpdate(selected.value)
+                  }
+                  placeholder={bulkUpdating ? "Updating..." : "Set CA status..."}
+                  isDisabled={bulkUpdating}
+                />
+              </div>
+              <button
+                onClick={clearSelection}
+                disabled={bulkUpdating}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg transition-colors whitespace-nowrap disabled:opacity-50"
+              >
+                <X size={14} /> Clear selection
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="space-y-3">
           {/* Filters Bar */}
@@ -2259,13 +1350,16 @@ export default function Orders() {
         )}
       </AnimatePresence>
 
-      {/* ── UPDATE CA FEES MODAL ── */}
+      {/* ── UPDATE CA STATUS MODAL (single order) ── */}
       <AnimatePresence>
-        {caFeesModalOpen && selectedOrder && (
-          <CAFeesModal
+        {caStatusModalOpen && selectedOrder && (
+          <CaStatusModal
             order={selectedOrder}
-            onClose={() => setCaFeesModalOpen(false)}
-            onSubmit={handleUpdateCaFees}
+            onClose={() => {
+              setCaStatusModalOpen(false);
+              setSelectedOrder(null);
+            }}
+            onSubmit={handleUpdateSingleCaStatus}
             isSubmitting={saving}
           />
         )}
