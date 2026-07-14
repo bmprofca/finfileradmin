@@ -384,6 +384,102 @@ const EditFeeModal = ({ fee, onClose, onSuccess }) => {
   );
 };
 
+
+/* ─────────────────────────────────────────────
+   Bulk Edit Fee Modal
+───────────────────────────────────────────── */
+const BulkEditFeeModal = ({ feesToEdit, onClose, onSuccess }) => {
+  const [values, setValues] = useState(
+    () => Object.fromEntries(feesToEdit.map((f) => [f.ca_fee_id, String(f.fees ?? "")]))
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const updateValue = (ca_fee_id, val) => {
+    if (val === "" || /^\d*\.?\d*$/.test(val)) {
+      setValues((v) => ({ ...v, [ca_fee_id]: val }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const payload = feesToEdit
+      .filter((f) => values[f.ca_fee_id] !== "")
+      .map((f) => ({ ca_fee_id: f.ca_fee_id, fees: Number(values[f.ca_fee_id]) }));
+
+    if (payload.length === 0) {
+      toast.error("Enter at least one fee amount");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await apiCall("/api/admin/ca-service-fees/update", "PUT", payload);
+      const json = await response.json();
+      if (json.success) {
+        toast.success(`Updated ${payload.length} service fee${payload.length > 1 ? "s" : ""}`);
+        onSuccess();
+      } else {
+        toast.error(json.message || "Failed to update service fee(s)");
+      }
+    } catch {
+      toast.error("Error connecting to server.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title={`Edit Fees (${feesToEdit.length})`}
+      icon={Edit2}
+      size="lg"
+      contentClassName="p-5"
+      closeText="Cancel"
+      footer={
+        <button
+          type="submit"
+          form="bulk-edit-fee-form"
+          disabled={isSubmitting}
+          className="px-5 py-2.5 rounded-lg bg-violet-600 dark:bg-violet-500 text-white text-sm font-semibold hover:bg-violet-700 transition-all flex items-center gap-2 disabled:opacity-50"
+        >
+          <RefreshCw size={14} />
+          {isSubmitting ? "Saving..." : "Save Changes"}
+        </button>
+      }
+    >
+      <form id="bulk-edit-fee-form" onSubmit={handleSubmit} className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+        {feesToEdit.map((fee) => (
+          <div
+            key={fee.ca_fee_id}
+            className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900/40 rounded-lg border border-gray-200 dark:border-gray-700"
+          >
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
+                {fee.service_name || "—"}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{fee.service_type || "—"}</p>
+            </div>
+            <div className="w-32 shrink-0">
+              <input
+                required
+                type="text"
+                inputMode="decimal"
+                pattern="^\d*\.?\d*$"
+                value={values[fee.ca_fee_id]}
+                onChange={(e) => updateValue(fee.ca_fee_id, e.target.value)}
+                placeholder="0"
+                className={inputCls}
+              />
+            </div>
+          </div>
+        ))}
+      </form>
+    </Modal>
+  );
+};
+
 /* ─────────────────────────────────────────────
    Main Component
 ───────────────────────────────────────────── */
@@ -398,7 +494,7 @@ export default function CAServiceFees() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [selected, setSelected] = useState(new Set());
   const [activeMenuId, setActiveMenuId] = useState(null);
-
+  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
   // Modal state for individual row actions
   const [viewFee, setViewFee] = useState(null);
   const [editFee, setEditFee] = useState(null);
@@ -505,7 +601,7 @@ export default function CAServiceFees() {
             className="flex items-center gap-2 text-sm py-1.5"
             disabled={refreshing}
           >
-          <RefreshCw size={14} />
+            <RefreshCw size={14} />
             <span className="hidden sm:inline">{refreshing ? "Refreshing..." : "Refresh"}</span>
           </Button>
           <Button
@@ -531,12 +627,20 @@ export default function CAServiceFees() {
               <span className="text-sm font-medium text-violet-800 dark:text-violet-300">
                 {selected.size} selected
               </span>
-              <button
-                onClick={openBulkDeleteModal}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm font-semibold hover:bg-red-100 dark:hover:bg-red-900/40 border border-red-200 dark:border-red-800/50 transition-colors"
-              >
-                <Trash2 size={14} /> Delete Selected
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsBulkEditModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-sm font-semibold hover:bg-violet-200 dark:hover:bg-violet-900/50 border border-violet-200 dark:border-violet-800/50 transition-colors"
+                >
+                  <Edit2 size={14} /> Edit Selected
+                </button>
+                <button
+                  onClick={openBulkDeleteModal}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm font-semibold hover:bg-red-100 dark:hover:bg-red-900/40 border border-red-200 dark:border-red-800/50 transition-colors"
+                >
+                  <Trash2 size={14} /> Delete Selected
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -625,10 +729,10 @@ export default function CAServiceFees() {
                     <span className="text-gray-500 dark:text-gray-400 text-xs">
                       {row.modify_date
                         ? new Date(row.modify_date).toLocaleDateString("en-IN", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          })
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })
                         : "—"}
                     </span>
                   ),
@@ -678,7 +782,18 @@ export default function CAServiceFees() {
           />
         )}
       </AnimatePresence>
-
+      <AnimatePresence>
+        {isBulkEditModalOpen && (
+          <BulkEditFeeModal
+            feesToEdit={fees.filter((f) => selected.has(f.ca_fee_id))}
+            onClose={() => setIsBulkEditModalOpen(false)}
+            onSuccess={() => {
+              setIsBulkEditModalOpen(false);
+              fetchFees();
+            }}
+          />
+        )}
+      </AnimatePresence>
       {/* View Details Modal */}
       <AnimatePresence>
         {viewFee && (
