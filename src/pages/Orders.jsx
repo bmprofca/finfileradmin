@@ -54,13 +54,7 @@ const TAB_CONFIG = [
     getParams: () => ({ assigned: false }),
     emptyLabel: "No unassigned orders found",
   },
-  {
-    key: "all",
-    label: "All Orders",
-    icon: List,
-    getParams: () => ({}),
-    emptyLabel: "No orders found",
-  },
+  
   {
     key: "assigned",
     label: "Assigned",
@@ -81,6 +75,13 @@ const TAB_CONFIG = [
     icon: AlertCircle,
     getParams: () => ({ payment_overdue: true }),
     emptyLabel: "No payment overdue orders",
+  },
+  {
+    key: "all",
+    label: "All Orders",
+    icon: List,
+    getParams: () => ({}),
+    emptyLabel: "No orders found",
   },
 ];
 
