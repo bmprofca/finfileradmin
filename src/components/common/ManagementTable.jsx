@@ -154,7 +154,7 @@ export default function ManagementTable({
                         key={column.key}
                         className={joinClasses(
                           densityClasses,
-                          'max-w-[150px] sm:max-w-[200px] lg:max-w-[250px] truncate',
+                          'max-w-[150px] sm:max-w-[200px] lg:max-w-[250px]',
                           column.className,
                           cellClassName
                         )}

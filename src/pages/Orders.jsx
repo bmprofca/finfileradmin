@@ -48,6 +48,13 @@ const getTodayISO = () => new Date().toISOString().split("T")[0];
 
 const TAB_CONFIG = [
   {
+    key: "unassigned",
+    label: "Unassigned",
+    icon: UserPlus,
+    getParams: () => ({ assigned: false }),
+    emptyLabel: "No unassigned orders found",
+  },
+  {
     key: "all",
     label: "All Orders",
     icon: List,
@@ -60,13 +67,6 @@ const TAB_CONFIG = [
     icon: Users,
     getParams: () => ({ assigned: true }),
     emptyLabel: "No assigned orders found",
-  },
-  {
-    key: "unassigned",
-    label: "Unassigned",
-    icon: UserPlus,
-    getParams: () => ({ assigned: false }),
-    emptyLabel: "No unassigned orders found",
   },
   {
     key: "today",
@@ -202,8 +202,8 @@ export default function Orders() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Derive active tab from URL ?tab= param
-  const tabFromUrl = searchParams.get("tab") || "all";
-  const activeTab = TAB_CONFIG.find((t) => t.key === tabFromUrl) ? tabFromUrl : "all";
+  const tabFromUrl = searchParams.get("tab") || "unassigned";
+  const activeTab = TAB_CONFIG.find((t) => t.key === tabFromUrl) ? tabFromUrl : "unassigned";
   const activeTabConfig = TAB_CONFIG.find((t) => t.key === activeTab);
 
   const [orders, setOrders] = useState([]);
@@ -781,26 +781,26 @@ export default function Orders() {
             orders.every((o) => selectedOrderIds.includes(o.order_id))
           }
           onChange={toggleSelectAllOnPage}
-          className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+          className="w-3 h-3 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
         />
       ),
-      className: "w-[36px] !max-w-[36px]",
-      headerClassName: "w-[36px]",
+      className: "w-[40px] !max-w-[40px] !px-2 text-center",
+      headerClassName: "w-[40px] !px-2 text-center",
       render: (row) => (
         <input
           type="checkbox"
           checked={selectedOrderIds.includes(row.order_id)}
           onClick={(e) => e.stopPropagation()}
           onChange={() => toggleOrderSelection(row.order_id)}
-          className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+          className="w-3 h-3 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
         />
       ),
     },
     {
       key: "serial_no",
       label: "#",
-      className: "w-[40px] !max-w-[40px]",
-      headerClassName: "w-[40px]",
+      className: "w-[48px] !max-w-[48px] !px-2 text-center",
+      headerClassName: "w-[48px] !px-2 text-center",
       render: (_row, index) => (
         <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
           {(currentPage - 1) * itemsPerPage + index + 1}
