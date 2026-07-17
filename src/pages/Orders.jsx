@@ -54,7 +54,7 @@ const TAB_CONFIG = [
     getParams: () => ({ assigned: false }),
     emptyLabel: "No unassigned orders found",
   },
-  
+
   {
     key: "assigned",
     label: "Assigned",
@@ -725,14 +725,14 @@ export default function Orders() {
       },
       ...(order.ca
         ? [
-            {
-              label: "Update CA Status",
-              icon: <Activity size={12} />,
-              onClick: () => openCaStatusModal(order),
-              className:
-                "text-fuchsia-700 hover:text-fuchsia-800 hover:bg-fuchsia-50 dark:text-fuchsia-300 dark:hover:text-fuchsia-200 dark:hover:bg-fuchsia-950/40",
-            },
-          ]
+          {
+            label: "Update CA Status",
+            icon: <Activity size={12} />,
+            onClick: () => openCaStatusModal(order),
+            className:
+              "text-fuchsia-700 hover:text-fuchsia-800 hover:bg-fuchsia-50 dark:text-fuchsia-300 dark:hover:text-fuchsia-200 dark:hover:bg-fuchsia-950/40",
+          },
+        ]
         : []),
       {
         label: "Update Status",
@@ -1109,7 +1109,7 @@ export default function Orders() {
             </div>
 
             {/* Order Status */}
-            <div className="flex-1 min-w-[130px] w-full lg:w-auto">
+            <div className="flex-1 whitespace-nowrap min-w-[130px] w-full lg:w-auto">
               <SelectField
                 options={orderStatusOptions}
                 value={
@@ -1127,7 +1127,7 @@ export default function Orders() {
             </div>
 
             {/* Payment Status */}
-            <div className="flex-1 min-w-[130px] w-full lg:w-auto">
+            <div className="flex-1 whitespace-nowrap min-w-[130px] w-full lg:w-auto">
               <SelectField
                 options={paymentStatusOptions}
                 value={
@@ -1145,7 +1145,7 @@ export default function Orders() {
             </div>
 
             {/* Partial Payment */}
-            <div className="flex-1 min-w-[130px] w-full lg:w-auto">
+            <div className="flex-1 whitespace-nowrap min-w-[130px] w-full lg:w-auto">
               <SelectField
                 options={[
                   { value: "true", label: "Allowed" },
