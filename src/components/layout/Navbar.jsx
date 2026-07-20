@@ -51,13 +51,13 @@ const Navbar = ({
               <button
                 type="button"
                 onClick={() => navigate("/dashboard")}
-                className="flex items-center gap-2 rounded-lg transition-opacity duration-200 hover:opacity-90 focus:outline-none"
+                className="flex items-center gap-1 rounded-lg transition-opacity duration-200 hover:opacity-90 focus:outline-none"
               >
-                <div className="w-10 h-8 flex items-center justify-center">
+                <div className="w-6 h-6 flex items-center justify-center">
                   <img
                     src="/logo192.png"
                     alt="FinFiler Logo"
-                    className="w-10 h-8 object-contain"
+                    className="w-6 h-6 object-contain"
                   />
                 </div>
                 <div>
