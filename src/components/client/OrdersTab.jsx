@@ -357,7 +357,7 @@ export default function OrdersTab({ username, refreshTrigger }) {
             <AdvancedDateFilter
               value={dateFilter}
               onChange={(val) => { setDateFilter(val); setCurrentPage(1); }}
-              placeholder="Date or range"
+              placeholder="Select Date"
               tabOptions={['date', 'month', 'range']}
               showDateStepper
               buttonClassName="h-full min-h-[36px] w-full bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm font-medium text-slate-700 dark:text-gray-100 transition-colors"

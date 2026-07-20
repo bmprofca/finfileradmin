@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, X, Eye, User, Wallet as WalletIcon,
@@ -12,6 +12,8 @@ import PaginationComponent from '../components/common/PaginationComponent';
 import Modal from '../components/common/Modal';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
 import AdvancedDateFilter from '../components/common/AdvancedDateFilter';
+import SelectField from '../components/common/SelectField';
+import AsyncSelectField from '../components/common/AsyncSelectField';
 import apiCall from '../utils/apiCall';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -47,28 +49,21 @@ const InfoItem = ({ icon: Icon, label, value, mono = false }) => (
 // ─── Filter Select Component ────────────────────────────────────────────────
 
 const FilterSelect = ({ options, value, onChange, placeholder, icon: Icon }) => {
+  const selectedOption = useMemo(() => options.find((opt) => opt.value === value) || null, [options, value]);
+
   return (
     <div className="relative">
-      <select
-        value={value || ''}
-        onChange={(e) => onChange(e.target.value || null)}
-        className="appearance-none w-full pl-9 pr-8 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100 cursor-pointer"
-      >
-        <option value="">{placeholder}</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+      <SelectField
+        value={selectedOption}
+        onChange={(option) => onChange(option ? option.value : null)}
+        options={options}
+        placeholder={placeholder}
+        isClearable
+        styles={Icon ? { control: (base) => ({ ...base, paddingLeft: '1.75rem' }) } : {}}
+      />
       {Icon && (
-        <Icon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" />
+        <Icon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none z-10" />
       )}
-      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M6 8L1 3h10L6 8z" fill="currentColor" />
-        </svg>
-      </div>
     </div>
   );
 };
@@ -76,6 +71,7 @@ const FilterSelect = ({ options, value, onChange, placeholder, icon: Icon }) => 
 // ─── Adjust Balance Modal ──────────────────────────────────────────────────────
 const AdjustBalanceModal = ({ onClose, onUpdate }) => {
   const [username, setUsername] = useState('');
+  const [selectedUser, setSelectedUser] = useState(null);
   const [action, setAction] = useState('add');
   const [amount, setAmount] = useState('');
   const [remark, setRemark] = useState('');
@@ -110,40 +106,88 @@ const AdjustBalanceModal = ({ onClose, onUpdate }) => {
     }
   };
 
+  const formId = 'adjust-balance-form';
+
   return (
-    <Modal isOpen={true} onClose={onClose} title="Adjust Wallet Balance" icon={WalletIcon}>
-      <form onSubmit={handleSubmit} className="p-5 space-y-4">
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="Adjust Wallet Balance"
+      icon={WalletIcon}
+      closeText="Cancel"
+      size="3xl"
+      footer={
+        <button
+          type="submit"
+          form={formId}
+          disabled={saving}
+          className="px-5 py-2.5 text-sm font-semibold text-white bg-violet-600 rounded-lg hover:bg-violet-700 disabled:opacity-50 transition-colors"
+        >
+          {saving ? 'Saving...' : 'Adjust Balance'}
+        </button>
+      }
+    >
+      <form id={formId} onSubmit={handleSubmit} className="p-5 space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username</label>
-          <input
-            type="text"
-            required
+          <AsyncSelectField
+            fetchUrl="/api/admin/clients/active-users"
+            dataKey="users"
+            labelKey={(user) => `@${user.username} - ${user.full_name}`}
+            valueKey="username"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="e.g. client123"
-            className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all dark:text-white"
+            onChange={(val, opt) => {
+              setUsername(val);
+              setSelectedUser(opt);
+            }}
+            placeholder="Search username..."
           />
+          {selectedUser && (
+            <div className="mt-3 p-3 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg border border-gray-100 dark:border-gray-700">
+              <div className="flex gap-3 items-center mb-2">
+                <div className="w-9 h-9 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center text-violet-600 dark:text-violet-400 font-bold text-sm shrink-0">
+                  {selectedUser.first_name ? selectedUser.first_name.charAt(0).toUpperCase() : selectedUser.username?.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">{selectedUser.full_name || `@${selectedUser.username}`}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{selectedUser.email}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-gray-200/60 dark:border-gray-700/60">
+                <div>
+                  <p className="text-[10px] text-gray-400 uppercase font-semibold tracking-wider">Role</p>
+                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{selectedUser.role || 'Client'}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-gray-400 uppercase font-semibold tracking-wider">Mobile</p>
+                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{selectedUser.mobile || 'N/A'}</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Action</label>
-          <select
-            value={action}
-            onChange={(e) => setAction(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all dark:text-white"
-          >
-            <option value="add">Add Balance</option>
-            <option value="remove">Remove Balance</option>
-          </select>
+          <SelectField
+            value={{ value: action, label: action === 'add' ? 'Add Balance' : 'Remove Balance' }}
+            onChange={(selected) => setAction(selected ? selected.value : 'add')}
+            options={[
+              { value: 'add', label: 'Add Balance' },
+              { value: 'remove', label: 'Remove Balance' }
+            ]}
+          />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount</label>
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             required
-            min="0"
-            step="0.01"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (v === '' || /^\d*\.?\d*$/.test(v)) setAmount(v);
+            }}
             placeholder="0.00"
             className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all dark:text-white"
           />
@@ -157,22 +201,6 @@ const AdjustBalanceModal = ({ onClose, onUpdate }) => {
             rows="3"
             placeholder="E.g., Correction for overpayment"
           ></textarea>
-        </div>
-        <div className="flex justify-end gap-3 mt-6">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 disabled:opacity-50 transition-colors"
-          >
-            {saving ? 'Saving...' : 'Adjust Balance'}
-          </button>
         </div>
       </form>
     </Modal>
@@ -219,7 +247,7 @@ const ViewDetailsModal = ({ transactionId, onClose }) => {
   if (!details) return null;
 
   return (
-    <Modal isOpen={true} onClose={onClose} title="Transaction Details" icon={FileText} size="2xl" contentClassName="p-5 space-y-5">
+    <Modal isOpen={true} onClose={onClose} title="Transaction Details" icon={FileText} size="3xl" contentClassName="p-5 space-y-5">
       {/* Header */}
       <div className="flex items-start gap-4 pb-4 border-b dark:border-gray-700">
         <div className={`h-12 w-12 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0 ${details.type === 'cr' ? 'from-emerald-500 to-teal-600' : 'from-rose-500 to-red-600'}`}>
@@ -479,7 +507,7 @@ export default function Wallet() {
           className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors text-sm font-medium shadow-md shadow-violet-500/20"
         >
           <WalletIcon size={16} />
-          Adjust Balance
+          <span className="hidden md:inline"> Adjust Balance</span>
         </button>
       }
     >
@@ -522,48 +550,34 @@ export default function Wallet() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col gap-3 bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm"
+          className="flex flex-col lg:flex-row gap-3 bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm items-stretch lg:items-center"
         >
-          {/* Row 1: Search and View Switcher */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-            <div className="flex items-center gap-3 flex-1">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
-                <input
-                  type="text"
-                  placeholder="Search by username..."
-                  value={searchTerm}
-                  onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                  className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
-                />
-                {searchTerm && (
-                  <button
-                    onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
-                  >
-                    <X size={14} />
-                  </button>
-                )}
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 hidden sm:block whitespace-nowrap">
-                <span className="font-semibold text-gray-800 dark:text-gray-200">{totalItems}</span> txn{totalItems !== 1 ? 's' : ''}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              {hasActiveFilters && (
+          {/* Search and View Switcher */}
+          <div className="flex items-center gap-3 w-full lg:max-w-[260px] xl:max-w-xs flex-shrink-0">
+            <div className="relative w-full">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
+              <input
+                type="text"
+                placeholder="Search by username..."
+                value={searchTerm}
+                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                className="w-full pl-11 pr-10 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100"
+              />
+              {searchTerm && (
                 <button
-                  onClick={clearAllFilters}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 rounded-lg transition-colors whitespace-nowrap"
+                  onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
                 >
-                  <X size={14} /> Clear All
+                  <X size={14} />
                 </button>
               )}
             </div>
+            
           </div>
 
-          {/* Row 2: Filter Selects */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex-1 min-w-[130px] max-w-[160px]">
+          {/* Filter Selects */}
+          <div className="flex flex-wrap lg:flex-nowrap items-center gap-3 w-full lg:flex-1">
+            <div className="flex-1 min-w-[120px] max-w-[160px] lg:max-w-none">
               <FilterSelect
                 options={typeOptions}
                 value={typeFilter}
@@ -572,7 +586,7 @@ export default function Wallet() {
                 icon={Filter}
               />
             </div>
-            <div className="flex-1 min-w-[130px] max-w-[160px]">
+            <div className="flex-1 min-w-[120px] max-w-[160px] lg:max-w-none">
               <FilterSelect
                 options={purposeOptions}
                 value={purposeFilter}
@@ -581,7 +595,7 @@ export default function Wallet() {
                 icon={Filter}
               />
             </div>
-            <div className="flex-1 min-w-[130px] max-w-[160px]">
+            <div className="flex-1 min-w-[120px] max-w-[160px] lg:max-w-none">
               <FilterSelect
                 options={userTypeOptions}
                 value={userTypeFilter}
@@ -590,16 +604,24 @@ export default function Wallet() {
                 icon={User}
               />
             </div>
-            <div className="flex-1 min-w-[180px] max-w-[260px]">
+            <div className="flex-1 min-w-[180px] max-w-[260px] lg:max-w-none">
               <AdvancedDateFilter
                 value={dateFilter}
                 onChange={(val) => { setDateFilter(val); setCurrentPage(1); }}
-                placeholder="Date or range"
+                placeholder="Select Date"
                 tabOptions={['date', 'month', 'range']}
                 showDateStepper
                 buttonClassName="h-full min-h-[42px] w-full bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm font-semibold text-slate-700 dark:text-gray-100 transition-colors"
               />
             </div>
+            {hasActiveFilters && (
+              <button
+                onClick={clearAllFilters}
+                className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 rounded-lg transition-colors whitespace-nowrap min-h-[42px] flex-shrink-0"
+              >
+                <X size={14} /> Clear All
+              </button>
+            )}
           </div>
         </motion.div>
 

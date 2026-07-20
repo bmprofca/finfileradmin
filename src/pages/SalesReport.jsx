@@ -288,7 +288,7 @@ export default function SalesReport({ tabs, activeTab, onTabChange }) {
               value={dateValue}
               onChange={handleDateChange}
               tabOptions={["range", "month", "date"]}
-              placeholder="Date or range"
+              placeholder="Select Date"
               buttonClassName="h-[42px] w-full bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm text-gray-700 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg outline-none transition-all"
             />
           </div>

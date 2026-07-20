@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, X, Eye, User, CreditCard,
@@ -13,6 +13,7 @@ import PaginationComponent from '../components/common/PaginationComponent';
 import Modal from '../components/common/Modal';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
 import AdvancedDateFilter from '../components/common/AdvancedDateFilter';
+import SelectField from '../components/common/SelectField';
 import apiCall from '../utils/apiCall';
 import { ConstantOptions } from '../contexts/ConstantOptionsContext';
 
@@ -79,28 +80,21 @@ const InfoItem = ({ icon: Icon, label, value, mono = false }) => (
 // ─── Filter Select Component ────────────────────────────────────────────────
 
 const FilterSelect = ({ options, value, onChange, placeholder, icon: Icon }) => {
+  const selectedOption = useMemo(() => options.find((opt) => opt.value === value) || null, [options, value]);
+
   return (
     <div className="relative">
-      <select
-        value={value || ''}
-        onChange={(e) => onChange(e.target.value || null)}
-        className="appearance-none w-full pl-9 pr-8 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm min-h-[42px] dark:text-gray-100 cursor-pointer"
-      >
-        <option value="">{placeholder}</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+      <SelectField
+        value={selectedOption}
+        onChange={(option) => onChange(option ? option.value : null)}
+        options={options}
+        placeholder={placeholder}
+        isClearable
+        styles={Icon ? { control: (base) => ({ ...base, paddingLeft: '1.75rem' }) } : {}}
+      />
       {Icon && (
-        <Icon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" />
+        <Icon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none z-10" />
       )}
-      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M6 8L1 3h10L6 8z" fill="currentColor" />
-        </svg>
-      </div>
     </div>
   );
 };
@@ -139,15 +133,15 @@ const UpdateStatusModal = ({ withdrawal, onClose, onUpdate }) => {
       <form onSubmit={handleSubmit} className="p-5 space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all dark:text-white"
-          >
-            <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+          <SelectField
+            value={{ value: status, label: status.charAt(0).toUpperCase() + status.slice(1) }}
+            onChange={(selected) => setStatus(selected ? selected.value : 'pending')}
+            options={[
+              { value: 'pending', label: 'Pending' },
+              { value: 'completed', label: 'Completed' },
+              { value: 'cancelled', label: 'Cancelled' },
+            ]}
+          />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Remark</label>
@@ -220,7 +214,7 @@ const ViewDetailsModal = ({ withdrawalId, onClose }) => {
   if (!details) return null;
 
   return (
-    <Modal isOpen={true} onClose={onClose} title="Withdrawal Details" icon={Banknote} size="2xl" contentClassName="p-5 space-y-5">
+    <Modal isOpen={true} onClose={onClose} title="Withdrawal Details" icon={Banknote} size="3xl" contentClassName="p-5 space-y-5">
       {/* Header */}
       <div className="flex items-start gap-4 pb-4 border-b dark:border-gray-700">
         <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
@@ -495,15 +489,14 @@ export default function Withdrawals() {
       <div className="space-y-3 mt-2">
         {/* Filters Bar */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="flex flex-col gap-3 bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm"
-        >
-          {/* Row 1: Search and View Switcher */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-            <div className="flex items-center gap-3 flex-1">
-              <div className="relative flex-1 max-w-md">
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="flex flex-col lg:flex-row gap-3 bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm items-stretch lg:items-center"
+          >
+            {/* Search and View Switcher */}
+            <div className="flex items-center gap-3 w-full lg:max-w-[260px] xl:max-w-xs flex-shrink-0">
+              <div className="relative w-full">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
                 <input
                   type="text"
@@ -521,62 +514,58 @@ export default function Withdrawals() {
                   </button>
                 )}
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 hidden sm:block whitespace-nowrap">
-                <span className="font-semibold text-gray-800 dark:text-gray-200">{totalItems}</span> request{totalItems !== 1 ? 's' : ''}
-              </p>
+              
             </div>
-            <div className="flex items-center gap-2">
+
+            {/* Filter Selects */}
+            <div className="flex flex-wrap lg:flex-nowrap items-center gap-3 w-full lg:flex-1">
+              <div className="flex-1 min-w-[120px] max-w-[180px] lg:max-w-none">
+                <FilterSelect
+                  options={statusOptions}
+                  value={statusFilter}
+                  onChange={(val) => { setStatusFilter(val); setCurrentPage(1); }}
+                  placeholder="All Status"
+                  icon={Filter}
+                />
+              </div>
+              <div className="flex-1 min-w-[120px] max-w-[180px] lg:max-w-none">
+                <FilterSelect
+                  options={paymentMethodOptions}
+                  value={paymentMethodFilter}
+                  onChange={(val) => { setPaymentMethodFilter(val); setCurrentPage(1); }}
+                  placeholder="All Methods"
+                  icon={Building2}
+                />
+              </div>
+              <div className="flex-1 min-w-[120px] max-w-[180px] lg:max-w-none">
+                <FilterSelect
+                  options={userTypeOptions}
+                  value={userTypeFilter}
+                  onChange={(val) => { setUserTypeFilter(val); setCurrentPage(1); }}
+                  placeholder="User Type"
+                  icon={User}
+                />
+              </div>
+              <div className="flex-1 min-w-[180px] max-w-[260px] lg:max-w-none">
+                <AdvancedDateFilter
+                  value={dateFilter}
+                  onChange={(val) => { setDateFilter(val); setCurrentPage(1); }}
+                  placeholder="Select Date"
+                  tabOptions={['date', 'month', 'range']}
+                  showDateStepper
+                  buttonClassName="h-full min-h-[42px] w-full bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm font-semibold text-slate-700 dark:text-gray-100 transition-colors"
+                />
+              </div>
               {hasActiveFilters && (
                 <button
                   onClick={clearAllFilters}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 rounded-lg transition-colors whitespace-nowrap"
+                  className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 rounded-lg transition-colors whitespace-nowrap min-h-[42px] flex-shrink-0"
                 >
                   <X size={14} /> Clear All
                 </button>
               )}
             </div>
-          </div>
 
-          {/* Row 2: Filter Selects */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex-1 min-w-[140px] max-w-[180px]">
-              <FilterSelect
-                options={statusOptions}
-                value={statusFilter}
-                onChange={(val) => { setStatusFilter(val); setCurrentPage(1); }}
-                placeholder="All Status"
-                icon={Filter}
-              />
-            </div>
-            <div className="flex-1 min-w-[140px] max-w-[180px]">
-              <FilterSelect
-                options={paymentMethodOptions}
-                value={paymentMethodFilter}
-                onChange={(val) => { setPaymentMethodFilter(val); setCurrentPage(1); }}
-                placeholder="All Methods"
-                icon={Building2}
-              />
-            </div>
-            <div className="flex-1 min-w-[140px] max-w-[180px]">
-              <FilterSelect
-                options={userTypeOptions}
-                value={userTypeFilter}
-                onChange={(val) => { setUserTypeFilter(val); setCurrentPage(1); }}
-                placeholder="User Type"
-                icon={User}
-              />
-            </div>
-            <div className="flex-1 min-w-[180px] max-w-[260px]">
-              <AdvancedDateFilter
-                value={dateFilter}
-                onChange={(val) => { setDateFilter(val); setCurrentPage(1); }}
-                placeholder="Date or range"
-                tabOptions={['date', 'month', 'range']}
-                showDateStepper
-                buttonClassName="h-full min-h-[42px] w-full bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm font-semibold text-slate-700 dark:text-gray-100 transition-colors"
-              />
-            </div>
-          </div>
         </motion.div>
 
         {/* Loading */}

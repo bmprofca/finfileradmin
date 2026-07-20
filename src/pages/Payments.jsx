@@ -527,10 +527,7 @@ export default function Payments() {
                   </button>
                 )}
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 hidden xl:block whitespace-nowrap">
-                <span className="font-semibold text-gray-800 dark:text-gray-200">{totalItems}</span> payment{totalItems !== 1 ? 's' : ''}
-                {searchTerm && <span className="ml-1 text-emerald-600 dark:text-emerald-400">· "{searchTerm}"</span>}
-              </p>
+              
             </div>
             <div className="flex items-center gap-2">
               {hasActiveFilters && (
@@ -573,7 +570,7 @@ export default function Payments() {
               <AdvancedDateFilter
                 value={dateFilter}
                 onChange={(val) => { setDateFilter(val); setCurrentPage(1); }}
-                placeholder="Date or range"
+                placeholder="Select Date"
                 tabOptions={['date', 'month', 'range']}
                 showDateStepper
                 buttonClassName="h-full min-h-[42px] w-full bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm font-semibold text-slate-700 dark:text-gray-100  transition-colors"

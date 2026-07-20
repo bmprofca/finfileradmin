@@ -269,9 +269,7 @@ export default function MyOrders() {
                   </button>
                 )}
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 hidden xl:block whitespace-nowrap">
-                <span className="font-semibold text-gray-800 dark:text-gray-200">{totalOrders}</span> orders
-              </p>
+             
             </div>
 
           </motion.div>

@@ -439,7 +439,7 @@ export default function AdvancedDateFilter({
   return (
     <div className="relative inline-block w-full">
       {/* Trigger */}
-      <div className={shouldShowStepper ? "flex w-full rounded-lg border border-slate-200 dark:border-gray-700 min-w-[200px] items-stretch overflow-hidden" : ""}>
+      <div className={shouldShowStepper ? "flex w-full h-full rounded-lg border border-slate-200 dark:border-gray-700 min-w-0 items-stretch overflow-hidden" : "w-full h-full"}>
         {shouldShowStepper && (
           <button
             type="button"
@@ -454,7 +454,7 @@ export default function AdvancedDateFilter({
           ref={triggerRef}
           type="button"
           onClick={() => setIsOpen(prev => !prev)}
-          className={`${buttonClassName} flex min-w-[200px] flex-1 items-center justify-center gap-2 ${shouldShowStepper ? '!border-y-0 !border-x !border-slate-200 dark:!border-gray-700 !rounded-none' : ''}`.trim()}
+          className={`${buttonClassName} flex flex-1 min-w-0 items-center justify-center gap-2 ${shouldShowStepper ? '!border-y-0 !border-x !border-slate-200 dark:!border-gray-700 !rounded-none' : ''}`.trim()}
           aria-haspopup="dialog"
           aria-expanded={isOpen}
         >
