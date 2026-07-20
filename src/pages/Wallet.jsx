@@ -115,7 +115,6 @@ const AdjustBalanceModal = ({ onClose, onUpdate }) => {
       title="Adjust Wallet Balance"
       icon={WalletIcon}
       closeText="Cancel"
-      size="3xl"
       footer={
         <button
           type="submit"
@@ -556,7 +555,7 @@ export default function Wallet() {
       key: 'transaction_id',
       label: 'TXN ID',
       render: (row) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center truncate max-w-[150px] gap-2">
           <div className={`w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0 ${row.type === 'cr' ? 'from-emerald-500 to-teal-600' : 'from-rose-500 to-red-600'}`}>
             {row.type === 'cr' ? <ArrowDownRight size={13} className="text-white" /> : <ArrowUpRight size={13} className="text-white" />}
           </div>
@@ -571,7 +570,7 @@ export default function Wallet() {
       key: 'user',
       label: 'User',
       render: (row) => (
-        <div>
+        <div className="flex items-center truncate max-w-[150px] gap-2">
           <p className="text-sm text-gray-700 dark:text-gray-200 whitespace-nowrap font-medium">@{row.username}</p>
           <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
             {row.user_type}

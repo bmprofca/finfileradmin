@@ -128,9 +128,27 @@ const UpdateStatusModal = ({ withdrawal, onClose, onUpdate }) => {
     }
   };
 
+  const formId = 'update-status-form';
+
   return (
-    <Modal isOpen={true} onClose={onClose} title="Update Withdrawal Status" icon={RefreshCw}>
-      <form onSubmit={handleSubmit} className="p-5 space-y-4">
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="Update Withdrawal Status"
+      icon={RefreshCw}
+      closeText="Cancel"
+      footer={
+        <button
+          type="submit"
+          form={formId}
+          disabled={saving}
+          className="px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+        >
+          {saving ? 'Updating...' : 'Update Status'}
+        </button>
+      }
+    >
+      <form id={formId} onSubmit={handleSubmit} className="p-5 space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
           <SelectField
@@ -152,22 +170,6 @@ const UpdateStatusModal = ({ withdrawal, onClose, onUpdate }) => {
             rows="3"
             placeholder="E.g., Payment sent via NEFT"
           ></textarea>
-        </div>
-        <div className="flex justify-end gap-3 mt-6">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-          >
-            {saving ? 'Updating...' : 'Update Status'}
-          </button>
         </div>
       </form>
     </Modal>
@@ -420,12 +422,12 @@ export default function Withdrawals() {
       key: 'withdrawal_id',
       label: 'Request ID',
       render: (row) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
             <Banknote size={13} className="text-white" />
           </div>
-          <div>
-            <p className="font-mono font-semibold text-gray-800 dark:text-gray-100 text-sm whitespace-nowrap">{row.withdrawal_id}</p>
+          <div className="min-w-0">
+            <p className="font-mono font-semibold text-gray-800 dark:text-gray-100 text-sm truncate max-w-[150px]" title={row.withdrawal_id}>{row.withdrawal_id}</p>
           </div>
         </div>
       ),
@@ -434,8 +436,8 @@ export default function Withdrawals() {
       key: 'user',
       label: 'User',
       render: (row) => (
-        <div>
-          <p className="text-sm text-gray-700 dark:text-gray-200 whitespace-nowrap font-medium">@{row.username}</p>
+        <div className="flex items-center gap-2 truncate max-w-[150px]">
+          <p className="text-sm text-gray-700 dark:text-gray-200 font-medium truncate max-w-[150px]" title={`@${row.username}`}>@{row.username}</p>
           <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
             {row.user_type}
           </span>
@@ -600,20 +602,25 @@ export default function Withdrawals() {
                 rows={withdrawals}
                 rowKey="withdrawal_id"
                 onRowClick={(row) => handleView(row)}
-                getActions={(row) => [
-                  {
-                    label: 'View Details',
-                    icon: <Eye size={12} />,
-                    onClick: () => handleView(row),
-                    className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300'
-                  },
-                  {
-                    label: 'Update Status',
-                    icon: <RefreshCw size={12} />,
-                    onClick: () => handleUpdateClick(row),
-                    className: 'text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/30 dark:text-amber-400 dark:hover:text-amber-300'
-                  },
-                ]}
+                getActions={(row) => {
+                  const actions = [
+                    {
+                      label: 'View Details',
+                      icon: <Eye size={12} />,
+                      onClick: () => handleView(row),
+                      className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300'
+                    }
+                  ];
+                  if (row.status === 'pending') {
+                    actions.push({
+                      label: 'Update Status',
+                      icon: <RefreshCw size={12} />,
+                      onClick: () => handleUpdateClick(row),
+                      className: 'text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/30 dark:text-amber-400 dark:hover:text-amber-300'
+                    });
+                  }
+                  return actions;
+                }}
                 accent="blue"
               />
             </motion.div>
