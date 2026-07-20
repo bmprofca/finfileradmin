@@ -68,7 +68,7 @@ const FilterSelect = ({ options, value, onChange, placeholder, icon: Icon }) => 
   );
 };
 
-// ─── Adjust Balance Modal ──────────────────────────────────────────────────────
+// ─── Adjust Balance Modal (header button — user search) ───────────────────────
 const AdjustBalanceModal = ({ onClose, onUpdate }) => {
   const [username, setUsername] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
@@ -165,6 +165,114 @@ const AdjustBalanceModal = ({ onClose, onUpdate }) => {
               </div>
             </div>
           )}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Action</label>
+          <SelectField
+            value={{ value: action, label: action === 'add' ? 'Add Balance' : 'Remove Balance' }}
+            onChange={(selected) => setAction(selected ? selected.value : 'add')}
+            options={[
+              { value: 'add', label: 'Add Balance' },
+              { value: 'remove', label: 'Remove Balance' }
+            ]}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount</label>
+          <input
+            type="text"
+            inputMode="decimal"
+            required
+            value={amount}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (v === '' || /^\d*\.?\d*$/.test(v)) setAmount(v);
+            }}
+            placeholder="0.00"
+            className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all dark:text-white"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Remark</label>
+          <textarea
+            value={remark}
+            onChange={(e) => setRemark(e.target.value)}
+            className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all dark:text-white"
+            rows="3"
+            placeholder="E.g., Correction for overpayment"
+          ></textarea>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
+// ─── Quick Adjust Modal (three-dot row action — user pre-set) ─────────────────
+const QuickAdjustModal = ({ user, onClose, onUpdate }) => {
+  const [action, setAction] = useState('add');
+  const [amount, setAmount] = useState('');
+  const [remark, setRemark] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!amount) {
+      toast.error('Amount is required');
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await apiCall('/api/admin/transactions/adjust-balance', 'PUT', {
+        username: user.username,
+        action,
+        amount: Number(amount),
+        remark
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message || 'Balance adjusted successfully');
+        onUpdate();
+        onClose();
+      } else {
+        toast.error(data.message || 'Failed to adjust balance');
+      }
+    } catch (err) {
+      toast.error('Error adjusting balance');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const formId = 'quick-adjust-form';
+
+  return (
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="Adjust Wallet Balance"
+      icon={WalletIcon}
+      closeText="Cancel"
+      footer={
+        <button
+          type="submit"
+          form={formId}
+          disabled={saving}
+          className="px-5 py-2.5 text-sm font-semibold text-white bg-violet-600 rounded-lg hover:bg-violet-700 disabled:opacity-50 transition-colors"
+        >
+          {saving ? 'Saving...' : 'Adjust Balance'}
+        </button>
+      }
+    >
+      <form id={formId} onSubmit={handleSubmit} className="p-5 space-y-4">
+        {/* Locked user display */}
+        <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="w-9 h-9 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center text-violet-600 dark:text-violet-400 font-bold text-sm shrink-0">
+            {user.username.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">@{user.username}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user.user_type}</p>
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Action</label>
@@ -320,6 +428,8 @@ export default function Wallet() {
   const [selectedTransactionId, setSelectedTransactionId] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
+  const [isQuickAdjustModalOpen, setIsQuickAdjustModalOpen] = useState(false);
+  const [adjustForUser, setAdjustForUser] = useState(null);
 
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const handleLimitChange = (limit) => { setItemsPerPage(limit); setCurrentPage(1); };
@@ -422,6 +532,11 @@ export default function Wallet() {
   const handleView = (transaction) => {
     setSelectedTransactionId(transaction.transaction_id);
     setIsViewModalOpen(true);
+  };
+
+  const handleAdjustForUser = (row) => {
+    setAdjustForUser({ username: row.username, user_type: row.user_type });
+    setIsQuickAdjustModalOpen(true);
   };
 
   const clearAllFilters = () => {
@@ -663,6 +778,12 @@ export default function Wallet() {
                     icon: <Eye size={12} />,
                     onClick: () => handleView(row),
                     className: 'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-violet-400 dark:hover:text-violet-300'
+                  },
+                  {
+                    label: 'Adjust Balance',
+                    icon: <WalletIcon size={12} />,
+                    onClick: () => handleAdjustForUser(row),
+                    className: 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 dark:text-emerald-400 dark:hover:text-emerald-300'
                   }
                 ]}
                 accent="violet"
@@ -693,12 +814,23 @@ export default function Wallet() {
         )}
       </AnimatePresence>
 
-      {/* Adjust Balance Modal */}
+      {/* Adjust Balance Modal (header button) */}
       <AnimatePresence>
         {isAdjustModalOpen && (
           <AdjustBalanceModal
             onClose={() => setIsAdjustModalOpen(false)}
-            onUpdate={() => fetchLedger({ force: true })}
+            onUpdate={handleRefresh}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Quick Adjust Modal (three-dot row action) */}
+      <AnimatePresence>
+        {isQuickAdjustModalOpen && adjustForUser && (
+          <QuickAdjustModal
+            user={adjustForUser}
+            onClose={() => { setIsQuickAdjustModalOpen(false); setAdjustForUser(null); }}
+            onUpdate={handleRefresh}
           />
         )}
       </AnimatePresence>
