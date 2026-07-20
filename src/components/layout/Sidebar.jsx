@@ -12,7 +12,9 @@ import {
   ShieldCheck,
   ChartBar,
   Settings,
-  Calculator
+  Calculator,
+  Banknote,
+  Wallet
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { usePermissions } from "../../contexts/PermissionsContext";
@@ -93,6 +95,18 @@ const Sidebar = ({
       icon: IndianRupee,
       label: "Payments",
       path: "/payments",
+      modules: ["payment"],
+    },
+    {
+      icon: Banknote,
+      label: "Withdrawals",
+      path: "/withdrawals",
+      modules: ["payment"],
+    },
+    {
+      icon: Wallet,
+      label: "Wallet",
+      path: "/wallet",
       modules: ["payment"],
     },
     {

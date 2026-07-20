@@ -35,6 +35,8 @@ import Blogs from "./pages/Blogs";
 import AccessManagement from "./pages/AccessManagement";
 import ReportsHub from "./pages/ReportsHub";
 import CAServiceFees from "./pages/CAServiceFees";
+import Withdrawals from "./pages/Withdrawals";
+import Wallet from "./pages/Wallet";
 
 function App() {
   return (
@@ -91,6 +93,8 @@ function App() {
                     <Route path="services" element={<PermissionRoute modules="service"><Services /></PermissionRoute>} />
                     <Route path="firms" element={<PermissionRoute modules="firm"><Firms /></PermissionRoute>} />
                     <Route path="payments" element={<PermissionRoute modules="payment"><Payments /></PermissionRoute>} />
+                    <Route path="withdrawals" element={<PermissionRoute modules="payment"><Withdrawals /></PermissionRoute>} />
+                    <Route path="wallet" element={<PermissionRoute modules="payment"><Wallet /></PermissionRoute>} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="blogs" element={<PermissionRoute modules="blog"><Blogs /></PermissionRoute>} />
                     <Route path="permissions" element={<PermissionRoute modules={['permissions','permission_package']}><AccessManagement /></PermissionRoute>} />
