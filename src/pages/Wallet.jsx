@@ -85,7 +85,7 @@ const AdjustBalanceModal = ({ onClose, onUpdate }) => {
     }
     setSaving(true);
     try {
-      const res = await apiCall('/api/admin/transactions/adjust-balance', 'PUT', {
+      const res = await apiCall('/api/admin/transactions/adjust-balance', 'POST', {
         username,
         action,
         amount: Number(amount),
@@ -221,7 +221,7 @@ const QuickAdjustModal = ({ user, onClose, onUpdate }) => {
     }
     setSaving(true);
     try {
-      const res = await apiCall('/api/admin/transactions/adjust-balance', 'PUT', {
+      const res = await apiCall('/api/admin/transactions/adjust-balance', 'POST', {
         username: user.username,
         action,
         amount: Number(amount),
@@ -571,7 +571,7 @@ export default function Wallet() {
       label: 'User',
       render: (row) => (
         <div className="flex items-center truncate max-w-[150px] gap-2">
-          <p className="text-sm text-gray-700 dark:text-gray-200 whitespace-nowrap font-medium">@{row.username}</p>
+          <p className="text-sm text-gray-700 dark:text-gray-200 whitespace-nowrap font-medium">{row.full_name}</p>
           <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
             {row.user_type}
           </span>

@@ -437,7 +437,7 @@ export default function Withdrawals() {
       label: 'User',
       render: (row) => (
         <div className="flex items-center gap-2 truncate max-w-[150px]">
-          <p className="text-sm text-gray-700 dark:text-gray-200 font-medium truncate max-w-[150px]" title={`@${row.username}`}>@{row.username}</p>
+          <p className="text-sm text-gray-700 dark:text-gray-200 font-medium truncate max-w-[150px]" title={`@${row.full_name}`}>{row.full_name}</p>
           <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
             {row.user_type}
           </span>
