@@ -25,7 +25,7 @@ const modalVariants = {
   },
 };
 
-const Modal = ({ isOpen, onClose, title, icon: Icon, children, onConfirm, confirmText = 'Confirm', footer, size = 'md', className = '', contentClassName = 'p-4', closeText = 'Close' }) => {
+const Modal = ({ isOpen, onClose, title, icon: Icon, children, onConfirm, confirmText = 'Confirm', footer, size = 'md', className = '', contentClassName = 'p-4', closeText = 'Close', hideCloseButton = false }) => {
   const sizeClasses = {
     sm: 'max-w-md max-h-[50vh]',
     md: 'max-w-lg max-h-[60vh]',
@@ -85,23 +85,30 @@ const Modal = ({ isOpen, onClose, title, icon: Icon, children, onConfirm, confir
               {children}
             </div>
 
-            {/* Fixed Footer - Always shows Close on right */}
+            {/* Fixed Footer - Always shows Close on right unless hidden */}
             <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-gray-200 dark:border-gray-700 shrink-0 bg-gray-50/80 dark:bg-gray-800/50 rounded-b-lg">
-              <div className="flex items-center gap-3">
-                {footer || (onConfirm && (
-                  <Button variant="primary" onClick={onConfirm}>
-                    {confirmText}
-                  </Button>
-                ))}
+              <div className="flex items-center gap-3 w-full justify-end">
+                {footer || (
+                  <>
+                    {onConfirm && (
+                      <Button variant="primary" onClick={onConfirm}>
+                        {confirmText}
+                      </Button>
+                    )}
+                    {!hideCloseButton && (
+                      <button
+                        onClick={onClose}
+                        className="px-5 py-2.5 rounded-lg border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all shrink-0"
+                      >
+                        {closeText}
+                      </button>
+                    )}
+                  </>
+                )}
               </div>
-              <button
-                onClick={onClose}
-                className="px-5 py-2.5 rounded-lg border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all shrink-0"
-              >
-                {closeText}
-              </button>
             </div>
           </motion.div>
+
         </motion.div>
       )}
     </AnimatePresence>

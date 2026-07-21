@@ -14,7 +14,8 @@ import {
   Settings,
   Calculator,
   Banknote,
-  Wallet
+  Wallet,
+  Package
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { usePermissions } from "../../contexts/PermissionsContext";
@@ -83,6 +84,12 @@ const Sidebar = ({
       icon: ConciergeBell,
       label: "Services",
       path: "/services",
+      modules: ["service"],
+    },
+    {
+      icon: Package,
+      label: "Custom Price Packages",
+      path: "/custom-price-packages",
       modules: ["service"],
     },
     {

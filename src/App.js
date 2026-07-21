@@ -37,6 +37,8 @@ import ReportsHub from "./pages/ReportsHub";
 import CAServiceFees from "./pages/CAServiceFees";
 import Withdrawals from "./pages/Withdrawals";
 import Wallet from "./pages/Wallet";
+import CustomPricePackages from "./pages/CustomPricePackages";
+import CustomPricePackageDetails from "./pages/CustomPricePackageDetails";
 
 function App() {
   return (
@@ -91,6 +93,8 @@ function App() {
                     <Route path="orders/:orderId/:tab" element={<PermissionRoute modules="order"><OrderProfile /></PermissionRoute>} />
                     <Route path="documents/:orderId" element={<Documents />} />
                     <Route path="services" element={<PermissionRoute modules="service"><Services /></PermissionRoute>} />
+                    <Route path="custom-price-packages" element={<PermissionRoute modules="service"><CustomPricePackages /></PermissionRoute>} />
+                    <Route path="custom-price-packages/:id" element={<PermissionRoute modules="service"><CustomPricePackageDetails /></PermissionRoute>} />
                     <Route path="firms" element={<PermissionRoute modules="firm"><Firms /></PermissionRoute>} />
                     <Route path="payments" element={<PermissionRoute modules="payment"><Payments /></PermissionRoute>} />
                     <Route path="withdrawals" element={<PermissionRoute modules="payment"><Withdrawals /></PermissionRoute>} />
