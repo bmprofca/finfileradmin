@@ -82,7 +82,7 @@ export const PermissionsProvider = ({ children }) => {
         if (res.status === 401) {
           localStorage.removeItem('user_data');
           setAuthorized(false);
-          navigate('/login', { replace: true });
+          window.location.href = '/login';
           return;
         }
 
