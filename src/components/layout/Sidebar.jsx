@@ -15,7 +15,8 @@ import {
   Calculator,
   Banknote,
   Wallet,
-  Package
+  Package,
+  Gift
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { usePermissions } from "../../contexts/PermissionsContext";
@@ -91,6 +92,16 @@ const Sidebar = ({
       label: "Custom Price Packages",
       path: "/custom-price-packages",
       modules: ["service"],
+    },
+    {
+      icon: Gift,
+      label: "Refer Offers",
+      path: "/refer-offers",
+    },
+    {
+      icon: Users,
+      label: "Referrals",
+      path: "/referrals"
     },
     {
       icon: BrickWall,

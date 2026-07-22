@@ -39,6 +39,8 @@ import Withdrawals from "./pages/Withdrawals";
 import Wallet from "./pages/Wallet";
 import CustomPricePackages from "./pages/CustomPricePackages";
 import CustomPricePackageDetails from "./pages/CustomPricePackageDetails";
+import ReferOffers from "./pages/ReferOffers";
+import Referrals from "./pages/Referrals";
 
 function App() {
   return (
@@ -95,6 +97,8 @@ function App() {
                     <Route path="services" element={<PermissionRoute modules="service"><Services /></PermissionRoute>} />
                     <Route path="custom-price-packages" element={<PermissionRoute modules="service"><CustomPricePackages /></PermissionRoute>} />
                     <Route path="custom-price-packages/:id" element={<PermissionRoute modules="service"><CustomPricePackageDetails /></PermissionRoute>} />
+                    <Route path="refer-offers" element={<ReferOffers />}/>
+                    <Route path="referrals" element={<Referrals />} />
                     <Route path="firms" element={<PermissionRoute modules="firm"><Firms /></PermissionRoute>} />
                     <Route path="payments" element={<PermissionRoute modules="payment"><Payments /></PermissionRoute>} />
                     <Route path="withdrawals" element={<PermissionRoute modules="payment"><Withdrawals /></PermissionRoute>} />
