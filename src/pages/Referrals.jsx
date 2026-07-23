@@ -233,7 +233,7 @@ const ReferralFormModal = ({ referral, onClose, onSubmit, isSubmitting }) => {
         referee_bonus_type, referee_bonus_amount,
       } = form;
       onSubmit({
-        referrer_username, referred_username, refer_offer_id: Number(refer_offer_id) || 0,
+        referrer_username, referred_username, refer_offer_id: refer_offer_id || null,
         referral_code_used, offer_name_snapshot, referrer_bonus_type,
         referrer_bonus_amount: Number(referrer_bonus_amount) || 0,
         referee_bonus_type, referee_bonus_amount: Number(referee_bonus_amount) || 0,
@@ -241,7 +241,7 @@ const ReferralFormModal = ({ referral, onClose, onSubmit, isSubmitting }) => {
     } else {
       onSubmit({
         ...form,
-        refer_offer_id: Number(form.refer_offer_id) || 0,
+        refer_offer_id: form.refer_offer_id || null,
         referrer_bonus_amount: Number(form.referrer_bonus_amount) || 0,
         referee_bonus_amount: Number(form.referee_bonus_amount) || 0,
       });
@@ -329,11 +329,11 @@ const ReferralFormModal = ({ referral, onClose, onSubmit, isSubmitting }) => {
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className={labelClass}>Offer ID</label>
+            <label className={labelClass}>Offer</label>
             <AsyncSelectField
               fetchUrl="/api/admin/refer-offers/list"
               labelKey={(offer) => `${offer.offer_name} (${offer.offer_code})`}
-              valueKey="id"
+              valueKey="refer_offer_id"
               value={form.refer_offer_id}
               onChange={(val, selected) => {
                 update('refer_offer_id', val || '');
@@ -347,7 +347,7 @@ const ReferralFormModal = ({ referral, onClose, onSubmit, isSubmitting }) => {
                   update('referee_bonus_amount', selected.referee_bonus_value || 0);
                 }
               }}
-              placeholder="Search offer..."
+              placeholder="Choose offer..."
             />
             {offerObj && (
               <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-[11px] text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-gray-700">
