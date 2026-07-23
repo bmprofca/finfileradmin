@@ -11,6 +11,7 @@ import PaginationComponent from '../components/common/PaginationComponent';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 import SelectField from '../components/common/SelectField';
+import AsyncSelectField from '../components/common/AsyncSelectField';
 import { PageContentSkeleton } from '../components/SkeletonComponent';
 import { apiCall } from '../utils/apiCall';
 
@@ -213,6 +214,10 @@ const ReferralFormModal = ({ referral, onClose, onSubmit, isSubmitting }) => {
     status: referral?.status || 'pending',
   });
 
+  const [referrerObj, setReferrerObj] = useState(referral?.referrer || null);
+  const [referredObj, setReferredObj] = useState(referral?.referred || null);
+  const [offerObj, setOfferObj] = useState(null);
+
   const update = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleSubmit = () => {
@@ -273,11 +278,47 @@ const ReferralFormModal = ({ referral, onClose, onSubmit, isSubmitting }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className={labelClass}>Referrer Username *</label>
-            <input className={inputClass} value={form.referrer_username} onChange={(e) => update('referrer_username', e.target.value)} placeholder="e.g. john_doe" />
+            <AsyncSelectField
+              fetchUrl="/api/admin/clients/list"
+              dataKey="clients"
+              labelKey={(client) => `${client.full_name || fullName(client)} (${client.username})`}
+              valueKey="username"
+              value={form.referrer_username}
+              onChange={(val, selected) => {
+                update('referrer_username', val || '');
+                setReferrerObj(selected || null);
+              }}
+              placeholder="Search referrer..."
+            />
+            {referrerObj && (
+              <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-[11px] text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-gray-700">
+                <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">{referrerObj.full_name || fullName(referrerObj)}</div>
+                <div>Email: {referrerObj.email || 'N/A'}</div>
+                <div>Mobile: {referrerObj.mobile || 'N/A'}</div>
+              </div>
+            )}
           </div>
           <div>
             <label className={labelClass}>Referred Username *</label>
-            <input className={inputClass} value={form.referred_username} onChange={(e) => update('referred_username', e.target.value)} placeholder="e.g. jane_smith" />
+            <AsyncSelectField
+              fetchUrl="/api/admin/clients/list"
+              dataKey="clients"
+              labelKey={(client) => `${client.full_name || fullName(client)} (${client.username})`}
+              valueKey="username"
+              value={form.referred_username}
+              onChange={(val, selected) => {
+                update('referred_username', val || '');
+                setReferredObj(selected || null);
+              }}
+              placeholder="Search referred user..."
+            />
+            {referredObj && (
+              <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-[11px] text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-gray-700">
+                <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">{referredObj.full_name || fullName(referredObj)}</div>
+                <div>Email: {referredObj.email || 'N/A'}</div>
+                <div>Mobile: {referredObj.mobile || 'N/A'}</div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -289,7 +330,32 @@ const ReferralFormModal = ({ referral, onClose, onSubmit, isSubmitting }) => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label className={labelClass}>Offer ID</label>
-            <input type="number" className={inputClass} value={form.refer_offer_id} onChange={(e) => update('refer_offer_id', e.target.value)} placeholder="1" />
+            <AsyncSelectField
+              fetchUrl="/api/admin/refer-offers/list"
+              labelKey={(offer) => `${offer.offer_name} (${offer.offer_code})`}
+              valueKey="id"
+              value={form.refer_offer_id}
+              onChange={(val, selected) => {
+                update('refer_offer_id', val || '');
+                setOfferObj(selected || null);
+                if (selected) {
+                  update('referral_code_used', selected.offer_code || '');
+                  update('offer_name_snapshot', selected.offer_name || '');
+                  update('referrer_bonus_type', selected.referrer_bonus_type || 'fixed');
+                  update('referrer_bonus_amount', selected.referrer_bonus_value || 0);
+                  update('referee_bonus_type', selected.referee_bonus_type || 'fixed');
+                  update('referee_bonus_amount', selected.referee_bonus_value || 0);
+                }
+              }}
+              placeholder="Search offer..."
+            />
+            {offerObj && (
+              <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-[11px] text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-gray-700">
+                <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">{offerObj.offer_name}</div>
+                <div>Referrer Bonus: {offerObj.referrer_bonus_value} ({offerObj.referrer_bonus_type})</div>
+                <div>Referee Bonus: {offerObj.referee_bonus_value} ({offerObj.referee_bonus_type})</div>
+              </div>
+            )}
           </div>
           <div>
             <label className={labelClass}>Referral Code Used</label>

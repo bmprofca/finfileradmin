@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Gift, Plus, CheckCircle, XCircle,
-  Search, X, Edit, Trash2, Calendar
+  Search, X, Edit, Trash2, Calendar, Eye
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ManagementHub from '../components/common/ManagementHub';
@@ -68,6 +68,81 @@ const formatDateForInput = (value) => {
     const tzoffset = d.getTimezoneOffset() * 60000; // offset in milliseconds
     const localISOTime = (new Date(d.getTime() - tzoffset)).toISOString().slice(0, 16);
     return localISOTime;
+};
+
+// ─── View Offer Modal ────────────────────────────────────────────────────────
+
+const ViewOfferModal = ({ offer, onClose, onEdit }) => {
+  const formatBonus = (type, value) => {
+      if (type === 'percentage') return `${value}%`;
+      return `₹${value}`;
+  };
+
+  return (
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="Offer Details"
+      icon={Gift}
+      size="2xl"
+      contentClassName="p-5 space-y-5"
+      footer={
+        <button onClick={() => onEdit(offer)} className="px-5 py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-all flex items-center gap-2">
+          <Edit size={16} /> Edit Offer
+        </button>
+      }
+    >
+      <div className="flex items-start justify-between pb-4 border-b border-gray-100 dark:border-gray-700">
+        <div>
+          <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{offer.offer_name}</h3>
+          <div className="mt-1.5 inline-block text-sm text-emerald-700 dark:text-emerald-400 font-mono font-bold bg-emerald-50 dark:bg-emerald-900/30 px-2.5 py-1 rounded-md border border-emerald-100 dark:border-emerald-800/50">
+            {offer.offer_code}
+          </div>
+        </div>
+        <StatusBadge status={offer.status} />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Referrer Bonus</p>
+          <p className="text-lg font-bold text-gray-800 dark:text-gray-100">{formatBonus(offer.referrer_bonus_type, offer.referrer_bonus_value)}</p>
+        </div>
+        <div className="p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Referee Bonus</p>
+          <p className="text-lg font-bold text-gray-800 dark:text-gray-100">{formatBonus(offer.referee_bonus_type, offer.referee_bonus_value)}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+        <div className="flex flex-col gap-1">
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Max Bonus Amount</span>
+          <span className="text-gray-800 dark:text-gray-200 font-medium">{offer.max_bonus_amount ? `₹${offer.max_bonus_amount}` : 'N/A'}</span>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Min Order Amount</span>
+          <span className="text-gray-800 dark:text-gray-200 font-medium">{offer.min_order_amount ? `₹${offer.min_order_amount}` : 'N/A'}</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm pt-4 border-t border-gray-100 dark:border-gray-700">
+        <div className="flex flex-col gap-1">
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Effective From</span>
+          <span className="text-gray-800 dark:text-gray-200 font-medium">{formatDateTime(offer.effective_from)}</span>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Effective To</span>
+          <span className="text-gray-800 dark:text-gray-200 font-medium">{offer.effective_to ? formatDateTime(offer.effective_to) : 'No Expiry'}</span>
+        </div>
+      </div>
+
+      {offer.description && (
+        <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
+          <span className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Description</span>
+          <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{offer.description}</p>
+        </div>
+      )}
+    </Modal>
+  );
 };
 
 // ─── Form Modal ───────────────────────────────────────────────────────────────
@@ -248,6 +323,8 @@ export default function ReferOffers() {
   const [statusFilter, setStatusFilter] = useState('all');
 
   // Modals
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedOffer, setSelectedOffer] = useState(null);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingOffer, setEditingOffer] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -318,7 +395,8 @@ export default function ReferOffers() {
 
   // ─── Handlers ───────────────────────────────────────────────────────────────
 
-  const handleEdit = (offer) => { setEditingOffer(offer); setIsFormModalOpen(true); };
+  const handleView = (offer) => { setSelectedOffer(offer); setIsViewModalOpen(true); };
+  const handleEdit = (offer) => { setEditingOffer(offer); setIsFormModalOpen(true); setIsViewModalOpen(false); };
   const handleCreateNew = () => { setEditingOffer(null); setIsFormModalOpen(true); };
   const handleRefresh = () => fetchOffers({ silent: true });
   const handleLimitChange = (limit) => { setItemsPerPage(limit); setCurrentPage(1); };
@@ -497,7 +575,9 @@ export default function ReferOffers() {
               columns={tableColumns}
               rows={offers}
               rowKey="refer_offer_id"
+              onRowClick={(row) => handleView(row)}
               getActions={(row) => [
+                { label: 'View Details', icon: <Eye size={12} />, onClick: () => handleView(row), className: 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 dark:text-green-400 dark:hover:text-green-300' },
                 { label: 'Edit Offer', icon: <Edit size={12} />, onClick: () => handleEdit(row), className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:hover:text-blue-300' },
                 { label: 'Delete', icon: <Trash2 size={12} />, onClick: () => handleDeleteClick(row.refer_offer_id), className: 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400 dark:hover:text-red-300' }
               ]}
@@ -517,6 +597,17 @@ export default function ReferOffers() {
           />
         )}
       </div>
+
+      {/* View Modal */}
+      <AnimatePresence>
+        {isViewModalOpen && selectedOffer && (
+          <ViewOfferModal
+            offer={selectedOffer}
+            onClose={() => { setIsViewModalOpen(false); setSelectedOffer(null); }}
+            onEdit={handleEdit}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Create / Edit Modal */}
       <AnimatePresence>
