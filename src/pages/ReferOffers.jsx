@@ -336,6 +336,7 @@ export default function ReferOffers() {
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [totalOffers, setTotalOffers] = useState(0);
   
+  const lastFetchRef = useRef(null);
   const activeFetchRef = useRef(null);
 
   // Debounce search input — 400ms
@@ -354,7 +355,7 @@ export default function ReferOffers() {
 
   // ─── Fetch ──────────────────────────────────────────────────────────────────
 
-  const fetchOffers = useCallback(async ({ silent = false } = {}) => {
+  const fetchOffers = useCallback(async ({ silent = false, force = false } = {}) => {
     const params = new URLSearchParams({
       page_no: currentPage,
       limit: itemsPerPage,
@@ -367,6 +368,7 @@ export default function ReferOffers() {
       setRefreshing(false);
       return;
     }
+    if (!force && lastFetchRef.current === requestKey) return;
 
     activeFetchRef.current = requestKey;
     silent ? setRefreshing(true) : setLoading(true);
@@ -377,6 +379,7 @@ export default function ReferOffers() {
       if (json.success) {
         setOffers(json.data || []);
         setTotalOffers(json.pagination?.total || 0);
+        lastFetchRef.current = requestKey;
       } else {
         toast.error(json.message || 'Failed to fetch refer offers.');
       }
@@ -398,7 +401,7 @@ export default function ReferOffers() {
   const handleView = (offer) => { setSelectedOffer(offer); setIsViewModalOpen(true); };
   const handleEdit = (offer) => { setEditingOffer(offer); setIsFormModalOpen(true); setIsViewModalOpen(false); };
   const handleCreateNew = () => { setEditingOffer(null); setIsFormModalOpen(true); };
-  const handleRefresh = () => fetchOffers({ silent: true });
+  const handleRefresh = () => fetchOffers({ silent: true, force: true });
   const handleLimitChange = (limit) => { setItemsPerPage(limit); setCurrentPage(1); };
 
   const handleDeleteClick = (id) => {
@@ -413,7 +416,7 @@ export default function ReferOffers() {
           const json = await response.json();
           if (json.success) {
               toast.success('Offer deleted successfully');
-              fetchOffers({ silent: true });
+              fetchOffers({ silent: true, force: true });
           } else {
               toast.error(json.message || 'Failed to delete offer');
           }
@@ -438,7 +441,7 @@ export default function ReferOffers() {
       if (json.success) {
         toast.success(isEdit ? 'Offer updated successfully' : 'Offer created successfully');
         setIsFormModalOpen(false);
-        fetchOffers({ silent: true });
+        fetchOffers({ silent: true, force: true });
       } else {
         toast.error(json.message || 'Operation failed.');
       }
