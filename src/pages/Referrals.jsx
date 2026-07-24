@@ -18,15 +18,13 @@ import { apiCall } from '../utils/apiCall';
 // ─── Enums (matching DB) ───────────────────────────────────────────────────────
 
 const STATUS_OPTIONS = [
-  { value: 'pending', label: 'Pending' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'rejected', label: 'Rejected' },
+  { value: true, label: 'Active' },
+  { value: false, label: 'Inactive' },
 ];
 
 const BONUS_STATUS_OPTIONS = [
-  { value: 'pending', label: 'Pending' },
-  { value: 'credited', label: 'Credited' },
-  { value: 'cancelled', label: 'Cancelled' },
+  { value: true, label: 'Active' },
+  { value: false, label: 'Inactive' },
 ];
 
 const BONUS_TYPE_OPTIONS = [
@@ -51,29 +49,27 @@ const formatDate = (d) => {
 };
 
 const StatusBadge = ({ status }) => {
-  const map = {
-    pending: { icon: Clock, cls: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800/50' },
-    completed: { icon: CheckCircle, cls: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50' },
-    rejected: { icon: XCircle, cls: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/50' },
-  };
-  const conf = map[status] || map.pending;
+  const isTrue = status === true || status === 'true' || status === 1 || status === '1';
+  const conf = isTrue
+    ? { icon: CheckCircle, cls: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50', label: 'Active' }
+    : { icon: Clock, cls: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800/50', label: 'Inactive' };
   const Icon = conf.icon;
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border capitalize ${conf.cls}`}>
-      <Icon size={10} /> {status || 'pending'}
+      <Icon size={10} /> {conf.label}
     </span>
   );
 };
 
 const BonusStatusBadge = ({ status }) => {
-  const map = {
-    pending: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800/50',
-    credited: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50',
-    cancelled: 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700',
-  };
+  const isTrue = status === true || status === 'true' || status === 1 || status === '1';
+  const cls = isTrue
+    ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50'
+    : 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700';
+  const label = isTrue ? 'Active' : 'Inactive';
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold border capitalize whitespace-nowrap ${map[status] || map.pending}`}>
-      {status || 'pending'}
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold border capitalize whitespace-nowrap ${cls}`}>
+      {label}
     </span>
   );
 };
@@ -209,9 +205,9 @@ const ReferralFormModal = ({ referral, onClose, onSubmit, isSubmitting }) => {
     referrer_bonus_amount: referral?.referrer_bonus_amount ?? '',
     referee_bonus_type: referral?.referee_bonus_type || 'fixed',
     referee_bonus_amount: referral?.referee_bonus_amount ?? '',
-    referrer_bonus_status: referral?.referrer_bonus_status || 'pending',
-    referee_bonus_status: referral?.referee_bonus_status || 'pending',
-    status: referral?.status || 'pending',
+    referrer_bonus_status: referral?.referrer_bonus_status === 1 || referral?.referrer_bonus_status === '1' || referral?.referrer_bonus_status === true || referral?.referrer_bonus_status === 'true',
+    referee_bonus_status: referral?.referee_bonus_status === 1 || referral?.referee_bonus_status === '1' || referral?.referee_bonus_status === true || referral?.referee_bonus_status === 'true',
+    status: referral?.status === 1 || referral?.status === '1' || referral?.status === true || referral?.status === 'true',
   });
 
   const [referrerObj, setReferrerObj] = useState(referral?.referrer || null);
@@ -393,7 +389,7 @@ const ReferralFormModal = ({ referral, onClose, onSubmit, isSubmitting }) => {
                 <label className={labelClass}>Bonus Status</label>
                 <SelectField
                   value={BONUS_STATUS_OPTIONS.find((o) => o.value === form.referrer_bonus_status)}
-                  onChange={(s) => update('referrer_bonus_status', s?.value || 'pending')}
+                  onChange={(s) => update('referrer_bonus_status', s ? s.value : false)}
                   options={BONUS_STATUS_OPTIONS}
                   styles={filterSelectStyles}
                 />
@@ -421,7 +417,7 @@ const ReferralFormModal = ({ referral, onClose, onSubmit, isSubmitting }) => {
                 <label className={labelClass}>Bonus Status</label>
                 <SelectField
                   value={BONUS_STATUS_OPTIONS.find((o) => o.value === form.referee_bonus_status)}
-                  onChange={(s) => update('referee_bonus_status', s?.value || 'pending')}
+                  onChange={(s) => update('referee_bonus_status', s ? s.value : false)}
                   options={BONUS_STATUS_OPTIONS}
                   styles={filterSelectStyles}
                 />
@@ -436,7 +432,7 @@ const ReferralFormModal = ({ referral, onClose, onSubmit, isSubmitting }) => {
           <label className={labelClass}>Overall Status</label>
           <SelectField
             value={STATUS_OPTIONS.find((o) => o.value === form.status)}
-            onChange={(s) => update('status', s?.value || 'pending')}
+            onChange={(s) => update('status', s ? s.value : false)}
             options={STATUS_OPTIONS}
             styles={filterSelectStyles}
           />
@@ -455,9 +451,9 @@ const ReferralFormModal = ({ referral, onClose, onSubmit, isSubmitting }) => {
 // ─── Update Status Modal ────────────────────────────────────────────────────────
 
 const UpdateStatusModal = ({ referral, onClose, onSubmit, isSubmitting }) => {
-  const [status, setStatus] = useState(referral.status || 'pending');
-  const [referrerBonusStatus, setReferrerBonusStatus] = useState(referral.referrer_bonus_status || 'pending');
-  const [refereeBonusStatus, setRefereeBonusStatus] = useState(referral.referee_bonus_status || 'pending');
+  const [status, setStatus] = useState(referral.status === 1 || referral.status === '1' || referral.status === true || referral.status === 'true');
+  const [referrerBonusStatus, setReferrerBonusStatus] = useState(referral.referrer_bonus_status === 1 || referral.referrer_bonus_status === '1' || referral.referrer_bonus_status === true || referral.referrer_bonus_status === 'true');
+  const [refereeBonusStatus, setRefereeBonusStatus] = useState(referral.referee_bonus_status === 1 || referral.referee_bonus_status === '1' || referral.referee_bonus_status === true || referral.referee_bonus_status === 'true');
 
   return (
     <Modal
@@ -487,15 +483,15 @@ const UpdateStatusModal = ({ referral, onClose, onSubmit, isSubmitting }) => {
       </div>
       <div>
         <label className={labelClass}>Overall Status</label>
-        <SelectField value={STATUS_OPTIONS.find((o) => o.value === status)} onChange={(s) => setStatus(s?.value || 'pending')} options={STATUS_OPTIONS} styles={filterSelectStyles} />
+        <SelectField value={STATUS_OPTIONS.find((o) => o.value === status)} onChange={(s) => setStatus(s ? s.value : false)} options={STATUS_OPTIONS} styles={filterSelectStyles} />
       </div>
       <div>
         <label className={labelClass}>Referrer Bonus Status</label>
-        <SelectField value={BONUS_STATUS_OPTIONS.find((o) => o.value === referrerBonusStatus)} onChange={(s) => setReferrerBonusStatus(s?.value || 'pending')} options={BONUS_STATUS_OPTIONS} styles={filterSelectStyles} />
+        <SelectField value={BONUS_STATUS_OPTIONS.find((o) => o.value === referrerBonusStatus)} onChange={(s) => setReferrerBonusStatus(s ? s.value : false)} options={BONUS_STATUS_OPTIONS} styles={filterSelectStyles} />
       </div>
       <div>
         <label className={labelClass}>Referee Bonus Status</label>
-        <SelectField value={BONUS_STATUS_OPTIONS.find((o) => o.value === refereeBonusStatus)} onChange={(s) => setRefereeBonusStatus(s?.value || 'pending')} options={BONUS_STATUS_OPTIONS} styles={filterSelectStyles} />
+        <SelectField value={BONUS_STATUS_OPTIONS.find((o) => o.value === refereeBonusStatus)} onChange={(s) => setRefereeBonusStatus(s ? s.value : false)} options={BONUS_STATUS_OPTIONS} styles={filterSelectStyles} />
       </div>
     </Modal>
   );
@@ -537,7 +533,7 @@ const DeleteConfirmModal = ({ referral, onClose, onConfirm, isSubmitting }) => (
 // ─── Active Filter Pills ──────────────────────────────────────────────────────
 
 const ActiveFilters = ({ searchTerm, statusFilter, referrerBonusFilter, refereeBonusFilter, onClearSearch, onClearStatus, onClearReferrerBonus, onClearRefereeBonus, onClearAll }) => {
-  const hasFilters = searchTerm || statusFilter || referrerBonusFilter || refereeBonusFilter;
+  const hasFilters = searchTerm || statusFilter !== '' || referrerBonusFilter !== '' || refereeBonusFilter !== '';
   if (!hasFilters) return null;
 
   return (
@@ -549,21 +545,21 @@ const ActiveFilters = ({ searchTerm, statusFilter, referrerBonusFilter, refereeB
           <button onClick={onClearSearch} className="ml-0.5 hover:text-indigo-900 dark:hover:text-indigo-200"><X size={11} /></button>
         </span>
       )}
-      {statusFilter && (
+      {statusFilter !== '' && (
         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 text-xs font-medium text-blue-700 dark:text-blue-400 capitalize">
-          Status: {statusFilter}
+          Status: {statusFilter ? 'Active' : 'Inactive'}
           <button onClick={onClearStatus} className="ml-0.5 hover:text-blue-900 dark:hover:text-blue-200"><X size={11} /></button>
         </span>
       )}
-      {referrerBonusFilter && (
+      {referrerBonusFilter !== '' && (
         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800/50 text-xs font-medium text-purple-700 dark:text-purple-400 capitalize">
-          Referrer Bonus: {referrerBonusFilter}
+          Referrer Bonus: {referrerBonusFilter ? 'Active' : 'Inactive'}
           <button onClick={onClearReferrerBonus} className="ml-0.5 hover:text-purple-900 dark:hover:text-purple-200"><X size={11} /></button>
         </span>
       )}
-      {refereeBonusFilter && (
+      {refereeBonusFilter !== '' && (
         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800/50 text-xs font-medium text-teal-700 dark:text-teal-400 capitalize">
-          Referee Bonus: {refereeBonusFilter}
+          Referee Bonus: {refereeBonusFilter ? 'Active' : 'Inactive'}
           <button onClick={onClearRefereeBonus} className="ml-0.5 hover:text-teal-900 dark:hover:text-teal-200"><X size={11} /></button>
         </span>
       )}
@@ -626,9 +622,9 @@ export default function Referrals() {
       limit: itemsPerPage,
     });
     if (debouncedSearch) params.set('search', debouncedSearch);
-    if (statusFilter) params.set('status', statusFilter);
-    if (referrerBonusFilter) params.set('referrer_bonus_status', referrerBonusFilter);
-    if (refereeBonusFilter) params.set('referee_bonus_status', refereeBonusFilter);
+    if (statusFilter !== '') params.set('status', statusFilter);
+    if (referrerBonusFilter !== '') params.set('referrer_bonus_status', referrerBonusFilter);
+    if (refereeBonusFilter !== '') params.set('referee_bonus_status', refereeBonusFilter);
 
     const requestKey = params.toString();
     if (activeFetchRef.current === requestKey) {
@@ -740,7 +736,7 @@ export default function Referrals() {
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = debouncedSearch || statusFilter || referrerBonusFilter || refereeBonusFilter;
+  const hasActiveFilters = debouncedSearch || statusFilter !== '' || referrerBonusFilter !== '' || refereeBonusFilter !== '';
 
   // ─── Table Columns ───────────────────────────────────────────────────────────
 
@@ -846,7 +842,7 @@ export default function Referrals() {
               <div className="min-w-[160px] w-full md:w-auto">
                 <SelectField
                   value={STATUS_OPTIONS.find((option) => option.value === statusFilter) || null}
-                  onChange={(selected) => setStatusFilter(selected?.value || '')}
+                  onChange={(selected) => setStatusFilter(selected ? selected.value : '')}
                   options={STATUS_OPTIONS}
                   placeholder="All Status"
                   isClearable
@@ -858,7 +854,7 @@ export default function Referrals() {
               <div className="min-w-[190px] w-full md:w-auto">
                 <SelectField
                   value={BONUS_STATUS_OPTIONS.find((option) => option.value === referrerBonusFilter) || null}
-                  onChange={(selected) => setReferrerBonusFilter(selected?.value || '')}
+                  onChange={(selected) => setReferrerBonusFilter(selected ? selected.value : '')}
                   options={BONUS_STATUS_OPTIONS}
                   placeholder="Referrer Bonus"
                   isClearable
@@ -870,7 +866,7 @@ export default function Referrals() {
               <div className="min-w-[190px] w-full md:w-auto">
                 <SelectField
                   value={BONUS_STATUS_OPTIONS.find((option) => option.value === refereeBonusFilter) || null}
-                  onChange={(selected) => setRefereeBonusFilter(selected?.value || '')}
+                  onChange={(selected) => setRefereeBonusFilter(selected ? selected.value : '')}
                   options={BONUS_STATUS_OPTIONS}
                   placeholder="Referee Bonus"
                   isClearable
